@@ -6,7 +6,7 @@ import { dbAdmin } from './_firebaseAdmin.js';
  * 
  * Verifies a license key against the Firestore 'licenses' collection using Firebase Admin SDK.
  * Handles device registration, lastSeenAt updates, and enforces maxDevices limits.
- * Includes CORS headers for Adobe CEP extension access.
+ * Includes explicit step-by-step diagnostic logging.
  */
 export default async function handler(req, res) {
   // CORS Headers to allow requests from Adobe CEP extension sandbox
@@ -34,19 +34,25 @@ export default async function handler(req, res) {
     const deviceId = (body.deviceId || '').trim();
     const deviceName = (body.deviceName || '').trim();
 
+    console.log("==========================================");
+    console.log("📥 [Backend /api/verify-license] Received Request");
+    console.log("Received Request Body:", JSON.stringify(body, null, 2));
+    console.log(`Step 1 - Received License Key: "${licenseKey}"`);
+
     if (!licenseKey) {
+      console.warn("❌ Verification aborted: License key is missing.");
       return res.status(400).json({
         success: false,
         error: 'License key is required.'
       });
     }
 
-    // Query Firestore collection 'licenses' using doc ID (which is the licenseKey string)
+    console.log(`Step 2 - Querying Firestore collection 'licenses' for document ID: "${licenseKey}"...`);
     const docRef = dbAdmin.collection('licenses').doc(licenseKey);
     const snapshot = await docRef.get();
 
     if (!snapshot.exists) {
-      console.warn(`⚠️ Verification attempt failed: Key "${licenseKey}" not found in Firestore.`);
+      console.warn(`Step 3 - Query Result: 0 documents found matching "${licenseKey}".`);
       return res.status(404).json({
         success: false,
         error: 'Invalid license key. Please check your key and try again.'
@@ -54,11 +60,15 @@ export default async function handler(req, res) {
     }
 
     const licenseData = snapshot.data() || {};
+    console.log(`Step 3 - Query Result: 1 document found matching "${licenseKey}".`);
+    console.log("Step 4 - Matched Document Data:", JSON.stringify(licenseData, null, 2));
+
     const status = licenseData.status || 'active';
+    console.log(`Step 5 - License Status: "${status}"`);
 
     // Check if the license status is active
     if (status !== 'active') {
-      console.warn(`⚠️ Verification attempt failed: Key "${licenseKey}" is ${status}.`);
+      console.warn(`❌ Step 5 Failed: Key "${licenseKey}" has status "${status}".`);
       return res.status(403).json({
         success: false,
         error: `This license key has been ${status}.`
@@ -69,9 +79,12 @@ export default async function handler(req, res) {
     const devices = licenseData.devices || {};
     const nowIso = new Date().toISOString();
 
+    console.log(`Step 6 - Device Validation (Device ID: "${deviceId || 'N/A'}", Name: "${deviceName || 'N/A'}")`);
+    console.log(`Current Registered Devices Count: ${Object.keys(devices).length} / Max Allowed: ${maxDevices}`);
+
     if (deviceId) {
       if (devices[deviceId]) {
-        // Device is already registered -> update lastSeenAt
+        console.log(`✅ Device "${deviceId}" is already registered. Updating lastSeenAt.`);
         devices[deviceId].lastSeenAt = nowIso;
         if (deviceName && !devices[deviceId].deviceName) {
           devices[deviceId].deviceName = deviceName;
@@ -81,17 +94,15 @@ export default async function handler(req, res) {
           activatedDevices: Object.keys(devices).length
         });
       } else {
-        // New device attempting registration -> check limit
         const currentRegisteredCount = Object.keys(devices).length;
         if (currentRegisteredCount >= maxDevices) {
-          console.warn(`⚠️ Device limit reached for key ${licenseKey}: ${currentRegisteredCount}/${maxDevices} active.`);
+          console.warn(`❌ Step 6 Failed: Device limit reached (${currentRegisteredCount}/${maxDevices}).`);
           return res.status(403).json({
             success: false,
             error: `Device limit reached. This license key is already active on ${currentRegisteredCount} of ${maxDevices} allowed devices.`
           });
         }
 
-        // Under limit -> register new device
         devices[deviceId] = {
           deviceId: deviceId,
           deviceName: deviceName || 'Unknown Machine',
@@ -104,16 +115,12 @@ export default async function handler(req, res) {
           activatedDevices: Object.keys(devices).length
         });
 
-        console.log(`📱 Registered new device "${deviceName || deviceId}" for key: ${licenseKey}`);
+        console.log(`✅ Registered new device "${deviceName || deviceId}" for key: ${licenseKey}`);
       }
     }
 
     const finalActivatedCount = Object.keys(devices).length;
-
-    console.log(`✅ License verified successfully: ${licenseKey} (Devices: ${finalActivatedCount}/${maxDevices})`);
-
-    // Return structured license metadata
-    return res.status(200).json({
+    const responsePayload = {
       success: true,
       message: 'License verified successfully.',
       license: {
@@ -127,7 +134,12 @@ export default async function handler(req, res) {
         maxDevices: maxDevices,
         activatedDevices: finalActivatedCount
       }
-    });
+    };
+
+    console.log("Step 7 - Final Response Payload:", JSON.stringify(responsePayload, null, 2));
+    console.log("==========================================");
+
+    return res.status(200).json(responsePayload);
 
   } catch (err) {
     console.error("❌ Error verifying license key:", err);

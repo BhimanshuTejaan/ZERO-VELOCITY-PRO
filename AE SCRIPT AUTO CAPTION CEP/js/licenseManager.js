@@ -97,6 +97,20 @@
       deviceName = window.ZeroVelocityDeviceHelper.getDeviceName();
     }
 
+    var payload = {
+      licenseKey: licenseKey,
+      deviceId: deviceId,
+      deviceName: deviceName
+    };
+
+    console.log("==========================================");
+    console.log("🚀 [Plugin License Manager] Sending Request");
+    console.log("URL:", endpoint);
+    console.log("Method: POST");
+    console.log("Headers: Content-Type: application/json;charset=UTF-8");
+    console.log("Body Payload:", JSON.stringify(payload, null, 2));
+    console.log("==========================================");
+
     var xhr = new XMLHttpRequest();
     xhr.open("POST", endpoint, true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -105,6 +119,7 @@
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
             var data = JSON.parse(xhr.responseText);
+            console.log("📥 [Plugin License Manager] Received Response:", JSON.stringify(data, null, 2));
             if (data.success) {
               callback(null, data);
             } else {
@@ -116,6 +131,7 @@
         } else {
           try {
             var errData = JSON.parse(xhr.responseText);
+            console.warn("⚠️ [Plugin License Manager] Server Error Response (HTTP " + xhr.status + "):", JSON.stringify(errData, null, 2));
             callback(errData.error || "Verification failed (HTTP " + xhr.status + ").");
           } catch (_errHttp) {
             callback("Failed to connect to verification server (HTTP " + xhr.status + ").");
@@ -126,11 +142,7 @@
     xhr.onerror = function () {
       callback("Network error: Unable to reach verification server. Please check connection.");
     };
-    xhr.send(JSON.stringify({
-      licenseKey: licenseKey,
-      deviceId: deviceId,
-      deviceName: deviceName
-    }));
+    xhr.send(JSON.stringify(payload));
   }
 
   function activate(licenseKey, isAutomaticCheck) {
