@@ -16,26 +16,44 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey }
     setLoading(true);
 
     const fetchLicenses = async () => {
+      console.log("==========================================");
+      console.log("🔒 Authenticated Firebase UID:", currentUser?.uid);
+      console.log("📧 Authenticated Email:", currentUser?.email);
+      console.log("🔍 Executing Query:", `licenses collection WHERE firebaseUid == "${currentUser?.uid}"`);
+
       try {
         const db = getFirestore();
         const licensesRef = collection(db, 'licenses');
         
-        // Query by firebaseUid
+        // Primary query by firebaseUid
         let q = query(licensesRef, where('firebaseUid', '==', currentUser.uid));
         let querySnapshot = await getDocs(q);
 
+        console.log("📄 Documents Returned (by UID):", querySnapshot.size);
+
         let list = [];
         querySnapshot.forEach(doc => {
-          list.push(doc.data());
+          const data = doc.data();
+          console.log(`✅ Accepted Document [${doc.id}]:`, data);
+          list.push(data);
         });
 
         // Fallback query by email if no UID match found
         if (list.length === 0 && currentUser.email) {
+          console.log("🔍 Fallback Query Executing:", `licenses collection WHERE email == "${currentUser.email}"`);
           const qEmail = query(licensesRef, where('email', '==', currentUser.email));
           const snapEmail = await getDocs(qEmail);
+          console.log("📄 Fallback Documents Returned (by Email):", snapEmail.size);
+          
           snapEmail.forEach(doc => {
-            list.push(doc.data());
+            const data = doc.data();
+            console.log(`✅ Accepted Fallback Document [${doc.id}]:`, data);
+            list.push(data);
           });
+        }
+
+        if (list.length === 0) {
+          console.warn("⚠️ Zero documents accepted into list. Triggering empty state UI.");
         }
 
         // Sort most recent first
@@ -45,9 +63,11 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey }
           setLicenses(list);
         }
       } catch (err) {
-        console.error("❌ Error fetching licenses from Firestore:", err);
+        console.error("❌ Firestore Read Error:", err.code, err.message);
+        console.error("❌ Exception Stack:", err);
       } finally {
         if (isMounted) setLoading(false);
+        console.log("==========================================");
       }
     };
 
@@ -99,7 +119,7 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey }
             <span className="party-icon">🎉</span>
             <div className="banner-text">
               <strong>Payment Verified!</strong>
-              <span>Your Zero Velocity license has been issued and stored in Firestore.</span>
+              <span>Your license has been activated successfully. It has been securely saved to your account.</span>
             </div>
           </div>
         )}
