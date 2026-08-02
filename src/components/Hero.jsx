@@ -1,0 +1,67 @@
+import React from 'react';
+import './Hero.css';
+
+export default function Hero() {
+  return (
+    <section className="hero animate-fade-in">
+      <div className="container hero-grid">
+        <div className="hero-content">
+          <div className="launch-badge">
+            <span className="badge-dot"></span>
+            Founder's Launch
+          </div>
+          
+          <h1 className="hero-title">
+            Professional Captions, <br />
+            <span className="text-gradient-accent">Zero Velocity.</span>
+          </h1>
+          
+          <p className="hero-subtitle">
+            The ultimate After Effects plugin for creating perfectly timed, stunning captions with zero friction. Build faster, create better.
+          </p>
+          
+          <div className="hero-pricing-widget">
+            <div className="price-tag-inline">
+              <span className="price-current">₹99</span>
+              <span className="price-crossed">₹499</span>
+            </div>
+            <p className="price-terms-inline">Founder Launch Price. Lifetime access.</p>
+          </div>
+          
+          <div className="version-live-badge">
+            <span className="pulse-dot"></span>
+            Now Shipping: Version 1.0
+          </div>
+
+          <div className="hero-cta">
+            <button className="btn btn-primary btn-large">Buy Now</button>
+            <button className="btn btn-secondary btn-large">Watch Demo</button>
+          </div>
+          
+          <a href="#roadmap" className="roadmap-value-badge">
+            <div className="rv-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"></path>
+              </svg>
+            </div>
+            <div className="rv-text">
+              <span className="rv-title">All Version 1.x Updates Included &rarr;</span>
+              <span className="rv-subtitle">Buy once today. Explore upcoming features.</span>
+            </div>
+          </a>
+        </div>
+        
+        <div className="hero-visual">
+          <div className="iframe-container glass-panel">
+            <iframe 
+              src="/cep/index.html" 
+              title="Zero Velocity Preview" 
+              className="cep-iframe"
+            />
+          </div>
+          <div className="glow-bg-hero"></div>
+        </div>
+      </div>
+    </section>
+  );
+}
