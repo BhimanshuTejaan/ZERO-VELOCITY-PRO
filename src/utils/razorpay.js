@@ -25,8 +25,9 @@ export const loadRazorpayScript = () => {
 
 /**
  * Opens the Razorpay Checkout popup for testing payment.
- * Prefills user name & email from Firebase if available.
- * On success, invokes /api/verify-payment to verify signature and generate license in Firestore.
+ * 1. Creates an Order ID on server via /api/create-order.
+ * 2. Launches Razorpay Checkout modal attached to the created order.
+ * 3. On success, verifies signature & stores license via /api/verify-payment.
  */
 export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError }) => {
   const isLoaded = await loadRazorpayScript();
@@ -36,10 +37,34 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
     return;
   }
 
+  // Step 1: Create Order ID on backend to fix unanchored/international card restrictions
+  let orderData = null;
+  try {
+    const amountInPaise = PRODUCT_PRICE_INR * 100;
+    const orderRes = await fetch('/api/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: amountInPaise })
+    });
+
+    const resJson = await orderRes.json();
+    if (!resJson.success || !resJson.order) {
+      throw new Error(resJson.error || "Could not create Razorpay order");
+    }
+    orderData = resJson.order;
+  } catch (orderErr) {
+    console.error("❌ Order Creation Error:", orderErr);
+    alert(`Payment initialization failed: ${orderErr.message}`);
+    if (onError) onError(orderErr);
+    return;
+  }
+
+  // Step 2: Configure Checkout with official order_id
   const options = {
     key: RAZORPAY_KEY_ID,
-    amount: PRODUCT_PRICE_INR * 100, // Dynamic amount in paise (100 paise = ₹1)
-    currency: "INR",
+    amount: orderData.amount, // from server order
+    currency: orderData.currency, // INR
+    order_id: orderData.id, // Official Razorpay Order ID
     name: "Zero Velocity",
     description: "Zero Velocity Version 1.0 (Founder Launch)",
     image: "/cep/assets/zero-velocity-logo.png",
@@ -53,14 +78,14 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
     handler: async function (response) {
       console.log("✅ Razorpay Payment Success Response:", response);
 
-      // Call backend Vercel API to verify signature and store license in Firestore
+      // Step 3: Verify HMAC signature and store license in Firestore
       try {
         const verifyRes = await fetch('/api/verify-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_order_id: response.razorpay_order_id || "",
+            razorpay_order_id: response.razorpay_order_id || orderData.id,
             razorpay_signature: response.razorpay_signature || "",
             firebaseUid: currentUser?.uid || null,
             email: currentUser?.email || null
