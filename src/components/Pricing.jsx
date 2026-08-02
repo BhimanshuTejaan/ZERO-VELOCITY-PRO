@@ -1,7 +1,15 @@
 import React from 'react';
 import './Pricing.css';
+import { useAuth } from '../AuthContext';
+import { initiateRazorpayCheckout } from '../utils/razorpay';
 
 export default function Pricing() {
+  const { currentUser } = useAuth();
+
+  const handleBuyNow = () => {
+    initiateRazorpayCheckout({ currentUser });
+  };
+
   return (
     <section className="pricing section-padding">
       <div className="container">
@@ -45,7 +53,7 @@ export default function Pricing() {
             </li>
           </ul>
           
-          <button className="btn btn-primary btn-full">Buy Now</button>
+          <button className="btn btn-primary btn-full" onClick={handleBuyNow}>Buy Now</button>
         </div>
       </div>
     </section>

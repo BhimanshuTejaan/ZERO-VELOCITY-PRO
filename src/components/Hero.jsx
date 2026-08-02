@@ -1,7 +1,15 @@
 import React from 'react';
 import './Hero.css';
+import { useAuth } from '../AuthContext';
+import { initiateRazorpayCheckout } from '../utils/razorpay';
 
 export default function Hero() {
+  const { currentUser } = useAuth();
+
+  const handleBuyNow = () => {
+    initiateRazorpayCheckout({ currentUser });
+  };
+
   return (
     <section className="hero animate-fade-in">
       <div className="container hero-grid">
@@ -34,7 +42,7 @@ export default function Hero() {
           </div>
 
           <div className="hero-cta">
-            <button className="btn btn-primary btn-large">Buy Now</button>
+            <button className="btn btn-primary btn-large" onClick={handleBuyNow}>Buy Now</button>
             <button className="btn btn-secondary btn-large">Watch Demo</button>
           </div>
           
