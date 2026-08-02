@@ -2,6 +2,10 @@
 // Replace this with your Razorpay Test Key ID if needed
 export const RAZORPAY_KEY_ID = "rzp_test_TKtvS0LyeIrNkb";
 
+// TEMPORARY DEVELOPMENT / TESTING AMOUNT (in INR)
+// Set to 1 for quick testing. Change PRODUCT_PRICE_INR back to 99 to switch to the real launch price.
+export const PRODUCT_PRICE_INR = 1;
+
 /**
  * Dynamically loads the Razorpay Checkout SDK script if not already present.
  */
@@ -20,7 +24,7 @@ export const loadRazorpayScript = () => {
 };
 
 /**
- * Opens the Razorpay Checkout popup for ₹99 test payment.
+ * Opens the Razorpay Checkout popup for testing payment.
  * Prefills user name & email from Firebase if available.
  */
 export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError }) => {
@@ -33,7 +37,7 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
 
   const options = {
     key: RAZORPAY_KEY_ID,
-    amount: 9900, // ₹99 in paise (99 * 100)
+    amount: PRODUCT_PRICE_INR * 100, // Dynamic amount in paise (100 paise = ₹1)
     currency: "INR",
     name: "Zero Velocity",
     description: "Zero Velocity Version 1.0 (Founder Launch)",
