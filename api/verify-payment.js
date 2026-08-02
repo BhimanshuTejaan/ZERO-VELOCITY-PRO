@@ -1,15 +1,41 @@
 import crypto from 'crypto';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
+
+// Firebase Web SDK Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCNwynSR3VRE3pL4CgD3M4FOzcXLVu7dtY",
+  authDomain: "zero-velocity-captions.firebaseapp.com",
+  projectId: "zero-velocity-captions",
+  storageBucket: "zero-velocity-captions.firebasestorage.app",
+  messagingSenderId: "300602651964",
+  appId: "1:300602651964:web:1b7553933902da3029da39"
+};
+
+// Initialize Firebase & Firestore
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
 
 /**
- * Vercel Serverless Function: Razorpay Payment Signature Verification
+ * Generates a cryptographically secure random license key in format:
+ * ZV-XXXX-XXXX-XXXX-XXXX
+ */
+function generateLicenseKey() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const getChunk = (len) => {
+    const bytes = crypto.randomBytes(len);
+    let res = '';
+    for (let i = 0; i < len; i++) {
+      res += chars[bytes[i] % chars.length];
+    }
+    return res;
+  };
+  return `ZV-${getChunk(4)}-${getChunk(4)}-${getChunk(4)}-${getChunk(4)}`;
+}
+
+/**
+ * Vercel Serverless Function: Razorpay Signature Verification & License Storage
  * Endpoint: POST /api/verify-payment
- * 
- * Expected JSON Body:
- * {
- *   "razorpay_payment_id": "pay_...",
- *   "razorpay_order_id": "order_...",
- *   "razorpay_signature": "..."
- * }
  */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -18,9 +44,15 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = body;
+    const { 
+      razorpay_payment_id, 
+      razorpay_order_id, 
+      razorpay_signature,
+      firebaseUid,
+      email
+    } = body;
 
-    // Validate required fields
+    // Validate required payment parameters
     if (!razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({ 
         success: false, 
@@ -37,7 +69,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Razorpay signature formula: order_id + "|" + payment_id (or payment_id if order_id is omitted)
+    // Formula: order_id + "|" + payment_id (or payment_id if order_id is omitted)
     const payloadToSign = razorpay_order_id 
       ? `${razorpay_order_id}|${razorpay_payment_id}` 
       : `${razorpay_payment_id}`;
@@ -54,23 +86,47 @@ export default async function handler(req, res) {
       Buffer.from(razorpay_signature, 'utf-8')
     );
 
-    if (isSignatureValid) {
-      console.log(`✅ Payment verified successfully: ${razorpay_payment_id}`);
-      return res.status(200).json({
-        success: true
-      });
-    } else {
+    if (!isSignatureValid) {
       console.warn(`⚠️ Signature verification failed for payment: ${razorpay_payment_id}`);
       return res.status(400).json({
         success: false,
         error: 'Invalid payment signature.'
       });
     }
+
+    console.log(`✅ Payment signature verified successfully: ${razorpay_payment_id}`);
+
+    // Generate unique license key
+    const licenseKey = generateLicenseKey();
+    const purchaseDate = new Date().toISOString();
+
+    const licenseDocument = {
+      licenseKey,
+      firebaseUid: firebaseUid || null,
+      email: email || null,
+      razorpayPaymentId: razorpay_payment_id,
+      razorpayOrderId: razorpay_order_id || null,
+      purchaseDate,
+      status: "active"
+    };
+
+    // Store document in Firestore collection 'licenses' with document ID = licenseKey
+    const licenseDocRef = doc(db, 'licenses', licenseKey);
+    await setDoc(licenseDocRef, licenseDocument);
+
+    console.log(`🎉 License ${licenseKey} created & saved to Firestore for user: ${email || firebaseUid}`);
+
+    // Return required success payload
+    return res.status(200).json({
+      success: true,
+      licenseKey: licenseKey
+    });
+
   } catch (err) {
-    console.error("❌ Error verifying payment signature:", err);
+    console.error("❌ Error during payment verification & license generation:", err);
     return res.status(500).json({
       success: false,
-      error: 'Internal server error while processing payment verification.'
+      error: 'Internal server error processing payment verification and license storage.'
     });
   }
 }
