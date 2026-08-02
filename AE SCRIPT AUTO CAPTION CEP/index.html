@@ -129,6 +129,36 @@
         </div>
         <div id="captionBlockList" class="caption-list"></div>
       </section>
+
+      <!-- License Activation Screen Modal -->
+      <div id="licenseOverlay" class="license-overlay hidden">
+        <div class="license-card">
+          <div class="license-brand">
+            <img class="license-logo" src="./assets/zero-velocity-logo.png" alt="Zero Velocity Logo">
+            <h2>Activate Zero Velocity</h2>
+            <p class="license-subtitle">Enter your license key to unlock plugin features.</p>
+          </div>
+
+          <div class="license-form">
+            <div class="input-group">
+              <label for="licenseKeyInput">License Key</label>
+              <input 
+                id="licenseKeyInput" 
+                type="text" 
+                placeholder="ZV-XXXX-XXXX-XXXX-XXXX" 
+                autocomplete="off" 
+                spellcheck="false"
+              />
+            </div>
+
+            <div id="licenseStatusMsg" class="license-status-msg"></div>
+
+            <button id="activateLicenseBtn" class="activate-button" type="button">
+              Activate License
+            </button>
+          </div>
+        </div>
+      </div>
     </main>
 
     <script src="./lib/CSInterface.js"></script>
@@ -141,6 +171,9 @@
     <script src="./js/wordSelection.js"></script>
     <script src="./js/aeBridge.js"></script>
     <script src="./js/actionController.js"></script>
+    <script src="./js/config.js"></script>
+    <script src="./js/deviceHelper.js"></script>
+    <script src="./js/licenseManager.js"></script>
     <script src="./js/main.js"></script>
   </body>
 </html>

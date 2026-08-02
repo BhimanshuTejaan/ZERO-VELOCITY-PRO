@@ -97,6 +97,10 @@
   bindWorkspaces();
   bindInstagramLink();
 
+  if (window.ZeroVelocityLicenseManager) {
+    window.ZeroVelocityLicenseManager.init();
+  }
+
   if (window.__adobe_cep__ && window.ZeroVelocityAeBridge) {
     window.ZeroVelocityAeBridge.ping(function (result) {
       if (!result.ok) {
