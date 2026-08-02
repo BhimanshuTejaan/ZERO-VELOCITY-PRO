@@ -1,20 +1,5 @@
 import crypto from 'crypto';
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
-
-// Firebase Web SDK Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCNwynSR3VRE3pL4CgD3M4FOzcXLVu7dtY",
-  authDomain: "zero-velocity-captions.firebaseapp.com",
-  projectId: "zero-velocity-captions",
-  storageBucket: "zero-velocity-captions.firebasestorage.app",
-  messagingSenderId: "300602651964",
-  appId: "1:300602651964:web:1b7553933902da3029da39"
-};
-
-// Initialize Firebase & Firestore
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app);
+import { dbAdmin } from './_firebaseAdmin.js';
 
 /**
  * Generates a cryptographically secure random license key in format:
@@ -34,7 +19,7 @@ function generateLicenseKey() {
 }
 
 /**
- * Vercel Serverless Function: Razorpay Signature Verification & License Storage
+ * Vercel Serverless Function: Razorpay Signature Verification & Admin License Storage
  * Endpoint: POST /api/verify-payment
  */
 export default async function handler(req, res) {
@@ -110,11 +95,10 @@ export default async function handler(req, res) {
       status: "active"
     };
 
-    // Store document in Firestore collection 'licenses' with document ID = licenseKey
-    const licenseDocRef = doc(db, 'licenses', licenseKey);
-    await setDoc(licenseDocRef, licenseDocument);
+    // Store document in Firestore collection 'licenses' using Firebase Admin SDK (bypasses security rules)
+    await dbAdmin.collection('licenses').doc(licenseKey).set(licenseDocument);
 
-    console.log(`🎉 License ${licenseKey} created & saved to Firestore for user: ${email || firebaseUid}`);
+    console.log(`🎉 License ${licenseKey} created & saved via Firebase Admin SDK for user: ${email || firebaseUid}`);
 
     // Return required success payload
     return res.status(200).json({
