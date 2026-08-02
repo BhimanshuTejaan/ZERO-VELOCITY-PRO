@@ -26,6 +26,7 @@ export const loadRazorpayScript = () => {
 /**
  * Opens the Razorpay Checkout popup for testing payment.
  * Prefills user name & email from Firebase if available.
+ * On success, invokes /api/verify-payment to verify signature and generate license in Firestore.
  */
 export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError }) => {
   const isLoaded = await loadRazorpayScript();
@@ -49,10 +50,39 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
     theme: {
       color: "#3b82f6"
     },
-    handler: function (response) {
+    handler: async function (response) {
       console.log("✅ Razorpay Payment Success Response:", response);
-      alert(`🎉 Payment Successful!\nPayment ID: ${response.razorpay_payment_id}`);
-      if (onSuccess) onSuccess(response);
+
+      // Call backend Vercel API to verify signature and store license in Firestore
+      try {
+        const verifyRes = await fetch('/api/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id || "",
+            razorpay_signature: response.razorpay_signature || "",
+            firebaseUid: currentUser?.uid || null,
+            email: currentUser?.email || null
+          })
+        });
+
+        const data = await verifyRes.json();
+
+        if (data.success) {
+          console.log("🎉 License Created & Stored in Firestore:", data.licenseKey);
+          alert(`🎉 Payment Verified!\nYour License Key: ${data.licenseKey}`);
+          if (onSuccess) onSuccess({ ...response, licenseKey: data.licenseKey });
+        } else {
+          console.error("⚠️ Payment verification failed:", data.error);
+          alert(`⚠️ Payment Verification Failed: ${data.error || "Verification error"}`);
+          if (onError) onError(new Error(data.error));
+        }
+      } catch (verifyErr) {
+        console.error("❌ Error contacting verification API:", verifyErr);
+        alert("Payment completed, but verification endpoint failed to respond.");
+        if (onError) onError(verifyErr);
+      }
     },
     modal: {
       ondismiss: function () {
