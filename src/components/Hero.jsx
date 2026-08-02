@@ -1,13 +1,13 @@
 import React from 'react';
 import './Hero.css';
 import { useAuth } from '../AuthContext';
-import { initiateRazorpayCheckout } from '../utils/razorpay';
+import { executePurchaseFlow } from '../utils/purchaseFlow';
 
 export default function Hero() {
-  const { currentUser } = useAuth();
+  const { currentUser, loginWithGoogle } = useAuth();
 
   const handleBuyNow = () => {
-    initiateRazorpayCheckout({ currentUser });
+    executePurchaseFlow({ currentUser, loginWithGoogle });
   };
 
   return (

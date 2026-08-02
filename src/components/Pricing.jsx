@@ -1,13 +1,13 @@
 import React from 'react';
 import './Pricing.css';
 import { useAuth } from '../AuthContext';
-import { initiateRazorpayCheckout } from '../utils/razorpay';
+import { executePurchaseFlow } from '../utils/purchaseFlow';
 
 export default function Pricing() {
-  const { currentUser } = useAuth();
+  const { currentUser, loginWithGoogle } = useAuth();
 
   const handleBuyNow = () => {
-    initiateRazorpayCheckout({ currentUser });
+    executePurchaseFlow({ currentUser, loginWithGoogle });
   };
 
   return (
