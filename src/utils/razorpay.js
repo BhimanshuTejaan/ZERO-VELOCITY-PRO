@@ -96,7 +96,12 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
 
         if (data.success) {
           console.log("🎉 License Created & Stored in Firestore:", data.licenseKey);
-          alert(`🎉 Payment Verified!\nYour License Key: ${data.licenseKey}`);
+          
+          // Dispatch global custom event so LicenseModal pops open automatically
+          window.dispatchEvent(new CustomEvent('zero-velocity-license-issued', {
+            detail: { licenseKey: data.licenseKey }
+          }));
+
           if (onSuccess) onSuccess({ ...response, licenseKey: data.licenseKey });
         } else {
           console.error("⚠️ Payment verification failed:", data.error);
