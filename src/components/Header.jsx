@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './Header.css';
 import { useAuth } from '../AuthContext';
 import LicenseModal from './LicenseModal';
+import ProcessingOverlay from './ProcessingOverlay';
 
 export default function Header() {
   const { currentUser, loginWithGoogle, logout } = useAuth();
@@ -145,6 +146,9 @@ export default function Header() {
           )}
         </div>
       </header>
+
+      {/* Full-Screen Payment Processing Overlay */}
+      <ProcessingOverlay />
 
       {/* Modern License Modal */}
       <LicenseModal 

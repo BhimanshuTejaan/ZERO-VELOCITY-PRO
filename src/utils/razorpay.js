@@ -78,40 +78,69 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
     handler: async function (response) {
       console.log("✅ Razorpay Payment Success Response:", response);
 
+      // Trigger full-screen processing overlay immediately after Razorpay reports success
+      window.dispatchEvent(new CustomEvent('zero-velocity-payment-processing-start'));
+      const startTime = performance.now();
+
+      const verifyPayload = {
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_order_id: response.razorpay_order_id || orderData.id,
+        razorpay_signature: response.razorpay_signature || "",
+        firebaseUid: currentUser?.uid || null,
+        email: currentUser?.email || null,
+        customerName: currentUser?.displayName || null
+      };
+
       // Step 3: Verify HMAC signature and store license in Firestore
       try {
         const verifyRes = await fetch('/api/verify-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_order_id: response.razorpay_order_id || orderData.id,
-            razorpay_signature: response.razorpay_signature || "",
-            firebaseUid: currentUser?.uid || null,
-            email: currentUser?.email || null,
-            customerName: currentUser?.displayName || null
-          })
+          body: JSON.stringify(verifyPayload)
         });
 
         const data = await verifyRes.json();
+        const duration = Math.round(performance.now() - startTime);
 
         if (data.success) {
+          console.log(`⏱️ Payment Verification Processing Duration: ${duration} ms`);
           console.log("🎉 License Created & Stored in Firestore:", data.licenseKey);
           
-          // Dispatch global custom event so LicenseModal pops open automatically
+          // Notify overlay of success
+          window.dispatchEvent(new CustomEvent('zero-velocity-payment-processing-success', {
+            detail: { licenseKey: data.licenseKey, duration }
+          }));
+
+          // Automatically pop open the License Modal
           window.dispatchEvent(new CustomEvent('zero-velocity-license-issued', {
             detail: { licenseKey: data.licenseKey }
           }));
 
           if (onSuccess) onSuccess({ ...response, licenseKey: data.licenseKey });
         } else {
-          console.error("⚠️ Payment verification failed:", data.error);
-          alert(`⚠️ Payment Verification Failed: ${data.error || "Verification error"}`);
+          console.error(`⏱️ Payment Verification Failed after ${duration} ms:`, data.error);
+          
+          // Notify overlay of failure and attach retry payload
+          window.dispatchEvent(new CustomEvent('zero-velocity-payment-processing-error', {
+            detail: { 
+              error: data.error || "Payment signature verification failed.",
+              retryPayload: verifyPayload
+            }
+          }));
+
           if (onError) onError(new Error(data.error));
         }
       } catch (verifyErr) {
-        console.error("❌ Error contacting verification API:", verifyErr);
-        alert("Payment completed, but verification endpoint failed to respond.");
+        const duration = Math.round(performance.now() - startTime);
+        console.error(`⏱️ Error contacting verification API after ${duration} ms:`, verifyErr);
+        
+        window.dispatchEvent(new CustomEvent('zero-velocity-payment-processing-error', {
+          detail: { 
+            error: "Payment completed, but verification server failed to respond. Please click Retry.",
+            retryPayload: verifyPayload
+          }
+        }));
+
         if (onError) onError(verifyErr);
       }
     },
