@@ -1,0 +1,10 @@
+====================================================================
+ZERO VELOCITY - VIDEO TUTORIAL PLACEHOLDER
+====================================================================
+
+Place your official 'Installation Tutorial.mp4' video file here.
+
+Customers can view this video to see a complete walkthrough of:
+1. Installing ZXP Installer
+2. Dragging ZeroVelocity-v1.0.0.zxp into After Effects
+3. Entering your license key and generating your first caption composition.
