@@ -1,12 +1,32 @@
+import crypto from 'crypto';
 import { dbAdmin } from './_firebaseAdmin.js';
+
+/**
+ * Generates a signed offline validation token.
+ */
+function generateOfflineToken(licenseKey, deviceId, gracePeriodDays) {
+  const secret = process.env.LICENSE_TOKEN_SECRET || 'zv_offline_grace_secret_key_2026';
+  const issuedAt = new Date().toISOString();
+  const period = typeof gracePeriodDays === 'number' ? gracePeriodDays : 7;
+  const rawPayload = `${licenseKey}:${deviceId}:${issuedAt}:${period}`;
+  const signature = crypto.createHmac('sha256', secret).update(rawPayload).digest('hex');
+  
+  return {
+    licenseKey: licenseKey,
+    deviceId: deviceId,
+    issuedAt: issuedAt,
+    gracePeriodDays: period,
+    signature: signature
+  };
+}
 
 /**
  * Vercel Serverless Function: License Key & Device Verification
  * Endpoint: POST /api/verify-license
  * 
  * Verifies a license key against the Firestore 'licenses' collection using Firebase Admin SDK.
- * Handles device registration, lastSeenAt updates, and enforces maxDevices limits.
- * Includes explicit step-by-step diagnostic logging.
+ * Generates a signed offlineToken for offline grace period validation.
+ * Includes CORS headers for Adobe CEP extension access.
  */
 export default async function handler(req, res) {
   // CORS Headers to allow requests from Adobe CEP extension sandbox
@@ -37,7 +57,6 @@ export default async function handler(req, res) {
     console.log("==========================================");
     console.log("📥 [Backend /api/verify-license] Received Request");
     console.log("Received Request Body:", JSON.stringify(body, null, 2));
-    console.log(`Step 1 - Received License Key: "${licenseKey}"`);
 
     if (!licenseKey) {
       console.warn("❌ Verification aborted: License key is missing.");
@@ -47,7 +66,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`Step 2 - Querying Firestore collection 'licenses' for document ID: "${licenseKey}"...`);
     const docRef = dbAdmin.collection('licenses').doc(licenseKey);
     const snapshot = await docRef.get();
 
@@ -60,15 +78,11 @@ export default async function handler(req, res) {
     }
 
     const licenseData = snapshot.data() || {};
-    console.log(`Step 3 - Query Result: 1 document found matching "${licenseKey}".`);
-    console.log("Step 4 - Matched Document Data:", JSON.stringify(licenseData, null, 2));
-
     const status = licenseData.status || 'active';
-    console.log(`Step 5 - License Status: "${status}"`);
 
     // Check if the license status is active
     if (status !== 'active') {
-      console.warn(`❌ Step 5 Failed: Key "${licenseKey}" has status "${status}".`);
+      console.warn(`❌ Key "${licenseKey}" has status "${status}".`);
       return res.status(403).json({
         success: false,
         error: `This license key has been ${status}.`
@@ -76,15 +90,12 @@ export default async function handler(req, res) {
     }
 
     const maxDevices = typeof licenseData.maxDevices === 'number' ? licenseData.maxDevices : 2;
+    const gracePeriodDays = typeof licenseData.gracePeriodDays === 'number' ? licenseData.gracePeriodDays : 7;
     const devices = licenseData.devices || {};
     const nowIso = new Date().toISOString();
 
-    console.log(`Step 6 - Device Validation (Device ID: "${deviceId || 'N/A'}", Name: "${deviceName || 'N/A'}")`);
-    console.log(`Current Registered Devices Count: ${Object.keys(devices).length} / Max Allowed: ${maxDevices}`);
-
     if (deviceId) {
       if (devices[deviceId]) {
-        console.log(`✅ Device "${deviceId}" is already registered. Updating lastSeenAt.`);
         devices[deviceId].lastSeenAt = nowIso;
         if (deviceName && !devices[deviceId].deviceName) {
           devices[deviceId].deviceName = deviceName;
@@ -96,7 +107,7 @@ export default async function handler(req, res) {
       } else {
         const currentRegisteredCount = Object.keys(devices).length;
         if (currentRegisteredCount >= maxDevices) {
-          console.warn(`❌ Step 6 Failed: Device limit reached (${currentRegisteredCount}/${maxDevices}).`);
+          console.warn(`❌ Device limit reached (${currentRegisteredCount}/${maxDevices}).`);
           return res.status(403).json({
             success: false,
             error: `Device limit reached. This license key is already active on ${currentRegisteredCount} of ${maxDevices} allowed devices.`
@@ -120,6 +131,8 @@ export default async function handler(req, res) {
     }
 
     const finalActivatedCount = Object.keys(devices).length;
+    const offlineToken = generateOfflineToken(licenseKey, deviceId, gracePeriodDays);
+
     const responsePayload = {
       success: true,
       message: 'License verified successfully.',
@@ -132,8 +145,10 @@ export default async function handler(req, res) {
         email: licenseData.email || null,
         firebaseUid: licenseData.firebaseUid || null,
         maxDevices: maxDevices,
-        activatedDevices: finalActivatedCount
-      }
+        activatedDevices: finalActivatedCount,
+        gracePeriodDays: gracePeriodDays
+      },
+      offlineToken: offlineToken
     };
 
     console.log("Step 7 - Final Response Payload:", JSON.stringify(responsePayload, null, 2));
