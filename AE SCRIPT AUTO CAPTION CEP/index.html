@@ -159,6 +159,63 @@
           </div>
         </div>
       </div>
+
+      <!-- Professional License Activation Success Modal -->
+      <div id="licenseSuccessOverlay" class="license-overlay hidden">
+        <div class="license-card success-card">
+          <div class="success-icon-badge">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+
+          <div class="license-brand">
+            <h2>License Activated</h2>
+            <p class="license-subtitle">Your copy of Zero Velocity has been activated successfully.</p>
+          </div>
+
+          <div class="success-details-list">
+            <div class="detail-row">
+              <span class="detail-label">Product</span>
+              <span id="successProduct" class="detail-value">Zero Velocity Caption Designer</span>
+            </div>
+
+            <div class="detail-row key-row">
+              <span class="detail-label">License Key</span>
+              <div class="key-copy-group">
+                <span id="successLicenseKey" class="detail-value key-text">ZV-XXXX-XXXX-XXXX</span>
+                <button id="copyLicenseKeyBtn" class="copy-key-btn" type="button" title="Copy License Key">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  <span id="copyKeyText">Copy</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Version</span>
+              <span id="successVersion" class="detail-value">1.0.0</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Purchase Date</span>
+              <span id="successPurchaseDate" class="detail-value">Active</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Device Name</span>
+              <span id="successDeviceName" class="detail-value">Computer</span>
+            </div>
+          </div>
+
+          <button id="continueToPluginBtn" class="activate-button continue-button" type="button">
+            Continue to Plugin
+          </button>
+        </div>
+      </div>
     </main>
 
     <script src="./lib/CSInterface.js"></script>

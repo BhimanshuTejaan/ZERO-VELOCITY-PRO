@@ -109,18 +109,104 @@
       overlay.classList.remove("unlocking");
       overlay.classList.remove("hidden");
     }
+    var successOverlay = document.getElementById("licenseSuccessOverlay");
+    if (successOverlay) {
+      successOverlay.classList.add("hidden");
+    }
   }
 
   function hideOverlay() {
     var overlay = document.getElementById("licenseOverlay");
-    if (!overlay) return;
-    if (overlay.classList.contains("hidden")) return;
+    if (overlay && !overlay.classList.contains("hidden")) {
+      overlay.classList.add("unlocking");
+      setTimeout(function () {
+        overlay.classList.add("hidden");
+        overlay.classList.remove("unlocking");
+      }, 350);
+    }
+    var successOverlay = document.getElementById("licenseSuccessOverlay");
+    if (successOverlay && !successOverlay.classList.contains("hidden")) {
+      successOverlay.classList.add("unlocking");
+      setTimeout(function () {
+        successOverlay.classList.add("hidden");
+        successOverlay.classList.remove("unlocking");
+      }, 350);
+    }
+  }
 
-    overlay.classList.add("unlocking");
-    setTimeout(function () {
-      overlay.classList.add("hidden");
-      overlay.classList.remove("unlocking");
-    }, 350);
+  /**
+   * Displays the premium License Activation Success Modal
+   */
+  function showSuccessModal(licenseInfo, callbackOnClose) {
+    var overlay = document.getElementById("licenseSuccessOverlay");
+    if (!overlay) {
+      if (typeof callbackOnClose === "function") callbackOnClose();
+      return;
+    }
+
+    var prodEl = document.getElementById("successProduct");
+    var keyEl = document.getElementById("successLicenseKey");
+    var verEl = document.getElementById("successVersion");
+    var dateEl = document.getElementById("successPurchaseDate");
+    var devEl = document.getElementById("successDeviceName");
+
+    if (prodEl) prodEl.textContent = licenseInfo.product || "Zero Velocity Caption Designer";
+    if (keyEl) keyEl.textContent = licenseInfo.licenseKey || "ZV-ACTIVE";
+    if (verEl) verEl.textContent = licenseInfo.version || "1.0.0";
+    if (dateEl) {
+      if (licenseInfo.purchaseDate) {
+        try {
+          var d = new Date(licenseInfo.purchaseDate);
+          dateEl.textContent = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        } catch (_errD) {
+          dateEl.textContent = "Active";
+        }
+      } else {
+        dateEl.textContent = "Active";
+      }
+    }
+    if (devEl) {
+      devEl.textContent = (window.ZeroVelocityDeviceHelper && window.ZeroVelocityDeviceHelper.getDeviceName()) || "Computer";
+    }
+
+    // Hide input activation overlay
+    var inputOverlay = document.getElementById("licenseOverlay");
+    if (inputOverlay) {
+      inputOverlay.classList.add("hidden");
+    }
+
+    // Show success overlay smoothly
+    overlay.classList.remove("unlocking");
+    overlay.classList.remove("hidden");
+
+    var continueBtn = document.getElementById("continueToPluginBtn");
+    var copyBtn = document.getElementById("copyLicenseKeyBtn");
+
+    if (copyBtn) {
+      copyBtn.onclick = function () {
+        var keyToCopy = licenseInfo.licenseKey || (keyEl && keyEl.textContent) || "";
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+          navigator.clipboard.writeText(keyToCopy).then(function () {
+            var copyText = document.getElementById("copyKeyText");
+            if (copyText) {
+              copyText.textContent = "Copied!";
+              setTimeout(function () { copyText.textContent = "Copy"; }, 2000);
+            }
+          });
+        }
+      };
+    }
+
+    if (continueBtn) {
+      continueBtn.onclick = function () {
+        overlay.classList.add("unlocking");
+        setTimeout(function () {
+          overlay.classList.add("hidden");
+          overlay.classList.remove("unlocking");
+          if (typeof callbackOnClose === "function") callbackOnClose();
+        }, 350);
+      };
+    }
   }
 
   function setStatus(msg, isError) {
@@ -264,12 +350,20 @@
       if (data && data.offlineToken) {
         saveOfflineToken(data.offlineToken);
       }
-      setStatus("License verified! Unlocking plugin...", false);
       dispatchActivationEvent(licenseInfo);
 
-      setTimeout(function () {
-        hideOverlay();
-      }, 400);
+      if (isAutomaticCheck) {
+        // Automatic startup check -> seamless unlock
+        setStatus("License verified! Unlocking plugin...", false);
+        setTimeout(function () {
+          hideOverlay();
+        }, 400);
+      } else {
+        // Manual user activation -> display professional Success Modal
+        showSuccessModal(licenseInfo, function () {
+          hideOverlay();
+        });
+      }
     });
   }
 
@@ -305,6 +399,7 @@
     activate: activate,
     showOverlay: showOverlay,
     hideOverlay: hideOverlay,
+    showSuccessModal: showSuccessModal,
     validateOfflineToken: validateOfflineToken
   };
 }());
