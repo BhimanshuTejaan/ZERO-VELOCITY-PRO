@@ -11,9 +11,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'Method not allowed. Use POST.' });
   }
 
-  // RAZORPAY_KEY_ID must be set as a Vercel environment variable.
-  // For live mode: rzp_live_XXXXXXXXXXXX
-  // For test mode: rzp_test_XXXXXXXXXXXX
+  // RAZORPAY_KEY_ID must be set as a Vercel environment variable (rzp_live_XXXXXXXXXXXX).
+  // RAZORPAY_KEY_SECRET must be set as a Vercel environment variable.
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 

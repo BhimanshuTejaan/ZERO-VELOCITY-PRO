@@ -1,22 +1,20 @@
 // ─────────────────────────────────────────────────────────
-// Zero Velocity – Razorpay Production Configuration
+// Zero Velocity – Razorpay LIVE MODE Configuration
 // ─────────────────────────────────────────────────────────
 
-// Live Key ID – sourced from Razorpay Dashboard → Settings → API Keys → Live Mode
-// TODO: Replace "rzp_test_TKtvS0LyeIrNkb" with your rzp_live_XXXXXXXXXXXX key
-// and update the RAZORPAY_KEY_ID Vercel env variable to the live key secret.
-export const RAZORPAY_KEY_ID = "rzp_test_TKtvS0LyeIrNkb"; // ← REPLACE with rzp_live_...
+// Live Key ID (public – safe to embed in client bundle)
+// Live Key Secret is stored exclusively in Vercel environment variables (RAZORPAY_KEY_SECRET)
+export const RAZORPAY_KEY_ID = "rzp_live_TLJvEN6IoOE3pq";
 
 // Launch price: ₹99 (9900 paise)
 export const PRODUCT_PRICE_INR = 99;
 
 // ─────────────────────────────────────────────────────────
 // Customer Download URL
-// After uploading customer-package/Zero_Velocity_v1.0.0.zip to Firebase Storage,
-// replace the placeholder below with the real public download URL.
-// Example: "https://firebasestorage.googleapis.com/v0/b/YOUR_PROJECT.appspot.com/o/..."
+// Set CUSTOMER_DOWNLOAD_URL as a Vercel environment variable,
+// OR paste the Firebase Storage public URL directly below.
 // ─────────────────────────────────────────────────────────
-export const CUSTOMER_DOWNLOAD_URL = ""; // ← PASTE Firebase Storage URL here after upload
+export const CUSTOMER_DOWNLOAD_URL = ""; // ← PASTE Firebase Storage URL here
 
 /**
  * Dynamically loads the Razorpay Checkout SDK script if not already present.
