@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { dbAdmin } from './_firebaseAdmin.js';
+import { sendLicenseConfirmationEmail } from './_email.js';
 
 /**
  * Generates a cryptographically secure random license key in format:
@@ -19,7 +20,7 @@ function generateLicenseKey() {
 }
 
 /**
- * Vercel Serverless Function: Razorpay Signature Verification & Admin License Storage
+ * Vercel Serverless Function: Razorpay Signature Verification, License Storage & Email Confirmation
  * Endpoint: POST /api/verify-payment
  */
 export default async function handler(req, res) {
@@ -34,7 +35,8 @@ export default async function handler(req, res) {
       razorpay_order_id, 
       razorpay_signature,
       firebaseUid,
-      email
+      email,
+      customerName
     } = body;
 
     // Validate required payment parameters
@@ -100,7 +102,22 @@ export default async function handler(req, res) {
 
     console.log(`🎉 License ${licenseKey} created & saved via Firebase Admin SDK for user: ${email || firebaseUid}`);
 
-    // Return required success payload
+    // Attempt sending confirmation email asynchronously (isolated so email failures NEVER break purchase success)
+    try {
+      if (email) {
+        await sendLicenseConfirmationEmail({
+          recipientEmail: email,
+          customerName: customerName || null,
+          licenseKey,
+          purchaseDate,
+          razorpayPaymentId: razorpay_payment_id
+        });
+      }
+    } catch (emailErr) {
+      console.error("❌ Isolated error during email dispatch attempt:", emailErr);
+    }
+
+    // Return required success payload to customer
     return res.status(200).json({
       success: true,
       licenseKey: licenseKey

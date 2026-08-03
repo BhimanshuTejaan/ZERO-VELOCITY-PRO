@@ -88,7 +88,8 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
             razorpay_order_id: response.razorpay_order_id || orderData.id,
             razorpay_signature: response.razorpay_signature || "",
             firebaseUid: currentUser?.uid || null,
-            email: currentUser?.email || null
+            email: currentUser?.email || null,
+            customerName: currentUser?.displayName || null
           })
         });
 
