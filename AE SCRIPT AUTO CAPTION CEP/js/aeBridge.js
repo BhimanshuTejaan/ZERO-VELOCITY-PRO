@@ -26,10 +26,14 @@
   }
 
   function ensureHostLoaded(csInterface, callback) {
-    var hostPath = getExtensionRootPath() + "\\jsx\\host.jsx";
+    var basePath = getExtensionRootPath() + "\\jsx\\";
     var script = "var __zvHostLoadResult = " + quoteForExtendScript("") + ";" +
       "try {" +
-      "$.evalFile(new File(" + quoteForExtendScript(hostPath) + "));" +
+      "var fBin = new File(" + quoteForExtendScript(basePath + "host.jsxbin") + ");" +
+      "var fJsx = new File(" + quoteForExtendScript(basePath + "host.jsx") + ");" +
+      "if (fBin.exists) { $.evalFile(fBin); }" +
+      "else if (fJsx.exists) { $.evalFile(fJsx); }" +
+      "else { throw new Error('Host script file not found.'); }" +
       "__zvHostLoadResult = ($.global.ZeroVelocityHost && $.global.ZeroVelocityHost.generateFromSrt && $.global.ZeroVelocityHost.applyBlock) ? " +
       quoteForExtendScript("READY") + " : " + quoteForExtendScript("HOST_NOT_READY") + ";" +
       "} catch (e) {__zvHostLoadResult = " + quoteForExtendScript("HOST_LOAD_ERROR: ") + " + e.message;}" +
@@ -52,7 +56,7 @@
 
     ensureHostLoaded(csInterface, function (ready, message) {
       if (!ready) {
-        callback({ ok: false, message: "host.jsx was not loaded: " + message });
+        callback({ ok: false, message: "host script was not loaded: " + message });
         return;
       }
 
