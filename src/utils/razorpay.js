@@ -1,10 +1,22 @@
-// Razorpay Test Mode Configuration
-// Replace this with your Razorpay Test Key ID if needed
-export const RAZORPAY_KEY_ID = "rzp_test_TKtvS0LyeIrNkb";
+// ─────────────────────────────────────────────────────────
+// Zero Velocity – Razorpay Production Configuration
+// ─────────────────────────────────────────────────────────
 
-// TEMPORARY DEVELOPMENT / TESTING AMOUNT (in INR)
-// Set to 1 for quick testing. Change PRODUCT_PRICE_INR back to 99 to switch to the real launch price.
-export const PRODUCT_PRICE_INR = 1;
+// Live Key ID – sourced from Razorpay Dashboard → Settings → API Keys → Live Mode
+// TODO: Replace "rzp_test_TKtvS0LyeIrNkb" with your rzp_live_XXXXXXXXXXXX key
+// and update the RAZORPAY_KEY_ID Vercel env variable to the live key secret.
+export const RAZORPAY_KEY_ID = "rzp_test_TKtvS0LyeIrNkb"; // ← REPLACE with rzp_live_...
+
+// Launch price: ₹99 (9900 paise)
+export const PRODUCT_PRICE_INR = 99;
+
+// ─────────────────────────────────────────────────────────
+// Customer Download URL
+// After uploading customer-package/Zero_Velocity_v1.0.0.zip to Firebase Storage,
+// replace the placeholder below with the real public download URL.
+// Example: "https://firebasestorage.googleapis.com/v0/b/YOUR_PROJECT.appspot.com/o/..."
+// ─────────────────────────────────────────────────────────
+export const CUSTOMER_DOWNLOAD_URL = ""; // ← PASTE Firebase Storage URL here after upload
 
 /**
  * Dynamically loads the Razorpay Checkout SDK script if not already present.
@@ -24,10 +36,11 @@ export const loadRazorpayScript = () => {
 };
 
 /**
- * Opens the Razorpay Checkout popup for testing payment.
+ * Opens the Razorpay Checkout popup (production).
  * 1. Creates an Order ID on server via /api/create-order.
  * 2. Launches Razorpay Checkout modal attached to the created order.
- * 3. On success, verifies signature & stores license via /api/verify-payment.
+ * 3. On success, verifies HMAC signature & stores license via /api/verify-payment.
+ * 4. Dispatches zero-velocity-license-issued event with licenseKey + downloadUrl.
  */
 export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError }) => {
   const isLoaded = await loadRazorpayScript();
@@ -111,9 +124,12 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
             detail: { licenseKey: data.licenseKey, duration }
           }));
 
-          // Automatically pop open the License Modal
+          // Automatically pop open the License Modal with download URL
           window.dispatchEvent(new CustomEvent('zero-velocity-license-issued', {
-            detail: { licenseKey: data.licenseKey }
+            detail: {
+              licenseKey: data.licenseKey,
+              downloadUrl: CUSTOMER_DOWNLOAD_URL || null
+            }
           }));
 
           if (onSuccess) onSuccess({ ...response, licenseKey: data.licenseKey });

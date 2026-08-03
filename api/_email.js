@@ -8,9 +8,10 @@ function generateEmailTemplate({
   licenseKey,
   purchaseDate,
   razorpayPaymentId,
+  downloadUrl,
   productName = "Zero Velocity Version 1.0 (Founder Launch)",
   pluginVersion = "v1.0.0",
-  supportEmail = "support@zerovelocity.com"
+  supportEmail = "bhimanshutejaan@gmail.com"
 }) {
   const formattedDate = purchaseDate 
     ? new Date(purchaseDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
@@ -230,14 +231,29 @@ function generateEmailTemplate({
           ` : ''}
         </table>
 
-        <!-- Download & Installation Instructions Placeholder -->
+        <!-- Download & Installation Instructions -->
         <div class="instructions-section">
           <div class="instructions-title">📥 Download & Installation Guide</div>
+          ${downloadUrl ? `
+          <p style="font-size:14px;color:#94a3b8;margin:0 0 16px;">
+            Click the button below to download your Zero Velocity package:
+          </p>
+          <div style="text-align:center;margin-bottom:20px;">
+            <a href="${downloadUrl}" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#ffffff;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;">
+              ⬇️ Download Zero Velocity v1.0
+            </a>
+          </div>
+          ` : `
+          <p style="font-size:14px;color:#94a3b8;margin:0 0 16px;">
+            Visit the Zero Velocity website, sign in with your Google account, and click
+            <strong style="color:#f1f5f9;">Downloads</strong> in your profile menu to download your package.
+          </p>
+          `}
           <ol class="instructions-list">
-            <li>Download the CEP extension package from your Zero Velocity account dashboard.</li>
-            <li>Extract the <code>com.zerovelocity.captions</code> folder into your Adobe CEP extensions directory.</li>
-            <li>Launch Premiere Pro or After Effects and open <strong>Window ➔ Extensions ➔ Zero Velocity Captions</strong>.</li>
-            <li>Enter your License Key (<code>${licenseKey}</code>) when prompted to activate the plugin.</li>
+            <li>Download and install the free <strong>ZXP Installer</strong> from <a href="https://aescripts.com/learn/zxp-installer/" style="color:#3b82f6;">aescripts.com/learn/zxp-installer/</a></li>
+            <li>Open ZXP Installer and drag <code>ZeroVelocity-v1.0.0.zxp</code> onto it</li>
+            <li>Restart After Effects, then open <strong>Window → Extensions → Zero Velocity</strong></li>
+            <li>Enter your License Key (<code>${licenseKey}</code>) when prompted</li>
           </ol>
         </div>
       </div>
@@ -262,7 +278,8 @@ export async function sendLicenseConfirmationEmail({
   customerName,
   licenseKey,
   purchaseDate,
-  razorpayPaymentId
+  razorpayPaymentId,
+  downloadUrl
 }) {
   if (!recipientEmail) {
     console.warn("⚠️ No recipient email provided for confirmation email.");
@@ -292,7 +309,8 @@ export async function sendLicenseConfirmationEmail({
       customerName,
       licenseKey,
       purchaseDate,
-      razorpayPaymentId
+      razorpayPaymentId,
+      downloadUrl: downloadUrl || null
     });
 
     const mailOptions = {

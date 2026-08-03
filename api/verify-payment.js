@@ -110,7 +110,8 @@ export default async function handler(req, res) {
           customerName: customerName || null,
           licenseKey,
           purchaseDate,
-          razorpayPaymentId: razorpay_payment_id
+          razorpayPaymentId: razorpay_payment_id,
+          downloadUrl: process.env.CUSTOMER_DOWNLOAD_URL || null
         });
       }
     } catch (emailErr) {
