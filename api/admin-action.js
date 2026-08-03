@@ -1,7 +1,25 @@
+import crypto from 'crypto';
 import { dbAdmin } from './_firebaseAdmin.js';
 
 // STRICT SINGLE ADMINISTRATOR ALLOWLIST
 const SOLE_ADMIN_EMAIL = 'bhimanshutejaan@gmail.com';
+
+/**
+ * Generates a cryptographically secure random license key in format:
+ * ZV-XXXX-XXXX-XXXX-XXXX
+ */
+function generateKey() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const getChunk = (len) => {
+    const bytes = crypto.randomBytes(len);
+    let res = '';
+    for (let i = 0; i < len; i++) {
+      res += chars[bytes[i] % chars.length];
+    }
+    return res;
+  };
+  return `ZV-${getChunk(4)}-${getChunk(4)}-${getChunk(4)}-${getChunk(4)}`;
+}
 
 /**
  * Vercel Serverless Function: Admin Dashboard Actions & Data Queries
@@ -52,6 +70,42 @@ export default async function handler(req, res) {
       });
     }
 
+    // 2. Generate Manual License Action (Admin Tool)
+    if (action === 'generate_manual_license') {
+      const { customerName, email, licenseType, maxDevices, notes } = body;
+
+      const newLicenseKey = generateKey();
+      const nowIso = new Date().toISOString();
+
+      const newDoc = {
+        licenseKey: newLicenseKey,
+        customerName: customerName || null,
+        email: email || null,
+        firebaseUid: null,
+        razorpayPaymentId: "ADMIN_GENERATED",
+        razorpayOrderId: null,
+        source: "admin",
+        licenseType: licenseType || "Lifetime",
+        maxDevices: parseInt(maxDevices || '3', 10),
+        notes: notes || null,
+        purchaseDate: nowIso,
+        status: "active",
+        registeredDevices: [],
+        activityLog: [
+          { action: `License Generated via Admin Tools (${licenseType || 'Lifetime'})`, date: nowIso, by: normalizedEmail }
+        ]
+      };
+
+      await dbAdmin.collection('licenses').doc(newLicenseKey).set(newDoc);
+      console.log(`✨ Admin ${normalizedEmail} manually generated license ${newLicenseKey} (${licenseType || 'Lifetime'})`);
+
+      return res.status(200).json({
+        success: true,
+        licenseKey: newLicenseKey,
+        license: newDoc
+      });
+    }
+
     // Require licenseKey for document modifications
     if (!licenseKey) {
       return res.status(400).json({ success: false, error: 'Missing required parameter: licenseKey.' });
@@ -68,7 +122,7 @@ export default async function handler(req, res) {
     const now = new Date().toISOString();
     const existingLog = Array.isArray(currentData.activityLog) ? currentData.activityLog : [];
 
-    // 2. Enable License Action
+    // 3. Enable License Action
     if (action === 'enable_license') {
       const updatedLog = [
         ...existingLog,
@@ -89,7 +143,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 3. Disable License Action
+    // 4. Disable License Action
     if (action === 'disable_license') {
       const updatedLog = [
         ...existingLog,
@@ -110,7 +164,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 4. Reset Devices Action
+    // 5. Reset Devices Action
     if (action === 'reset_devices') {
       const updatedLog = [
         ...existingLog,
@@ -130,7 +184,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 5. Delete Test License Action
+    // 6. Delete Test License Action
     if (action === 'delete_license') {
       await docRef.delete();
       console.log(`🗑️ Admin ${normalizedEmail} deleted license ${licenseKey}`);

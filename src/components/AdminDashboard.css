@@ -645,3 +645,225 @@
   justify-content: center;
   gap: 0.75rem;
 }
+
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.2rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 0.35rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover { color: #ffffff; }
+
+.tab-btn.active {
+  background: rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Source Badges */
+.source-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.source-badge.razorpay {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.source-badge.admin {
+  background: rgba(168, 85, 247, 0.18);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #c084fc;
+}
+
+.name-subtext {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* Generator Tab */
+.generator-tab-container {
+  padding: 1.75rem;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.generator-card {
+  width: 100%;
+  max-width: 680px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.generator-header h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0 0 0.4rem 0;
+  color: #ffffff;
+}
+
+.generator-header p {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.generator-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.form-row-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.generate-submit-btn {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
+/* Generated Key Modal Popup */
+.new-key-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 2500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.new-key-modal {
+  width: 100%;
+  max-width: 480px;
+  background: #0a0f1c;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 25px rgba(59, 130, 246, 0.25);
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.modal-icon { font-size: 2.5rem; }
+
+.new-key-modal h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0;
+  color: #ffffff;
+}
+
+.new-key-modal p {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.generated-key-box {
+  width: 100%;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px dashed rgba(59, 130, 246, 0.4);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  margin: 0.5rem 0;
+}
+
+.generated-key-box code {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #60a5fa;
+  letter-spacing: 0.06em;
+}
+
+.copy-key-btn {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 0.85rem;
+}
+
+.modal-footer-actions {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.modal-footer-actions button { flex: 1; }

@@ -8,12 +8,24 @@ export default function AdminDashboard({ isOpen, onClose }) {
   const { currentUser } = useAuth();
   const [licenses, setLicenses] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('directory'); // 'directory' | 'generator'
+
+  // Directory state
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [copiedField, setCopiedField] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Manual Generator Form State
+  const [genName, setGenName] = useState('');
+  const [genEmail, setGenEmail] = useState('');
+  const [genType, setGenType] = useState('Lifetime');
+  const [genMaxDevices, setGenMaxDevices] = useState('3');
+  const [genNotes, setGenNotes] = useState('');
+  const [genLoading, setGenLoading] = useState(false);
+  const [newlyGeneratedKey, setNewlyGeneratedKey] = useState(null);
 
   const isSoleAdmin = currentUser?.email?.toLowerCase() === SOLE_ADMIN_EMAIL;
 
@@ -39,8 +51,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
           if (updated) setSelectedCustomer(updated);
         }
       } else {
-        console.error("❌ Admin API Error (HTTP 403/Forbidden):", data.error);
-        alert(`Access Denied: ${data.error || 'HTTP 403 Forbidden'}`);
+        console.error("❌ Admin API Error:", data.error);
       }
     } catch (err) {
       console.error("❌ Error contacting admin API:", err);
@@ -108,6 +119,45 @@ export default function AdminDashboard({ isOpen, onClose }) {
     }
   };
 
+  // Handle Manual License Generation Submission
+  const handleGenerateLicenseSubmit = async (e) => {
+    e.preventDefault();
+    if (!isSoleAdmin) return;
+
+    setGenLoading(true);
+    try {
+      const res = await fetch('/api/admin-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate_manual_license',
+          adminEmail: currentUser.email,
+          customerName: genName,
+          email: genEmail,
+          licenseType: genType,
+          maxDevices: genMaxDevices,
+          notes: genNotes
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setNewlyGeneratedKey(data.licenseKey);
+        setGenName('');
+        setGenEmail('');
+        setGenNotes('');
+        await fetchAdminData();
+      } else {
+        alert(`Failed to generate license: ${data.error || 'Unknown error'}`);
+      }
+    } catch (err) {
+      console.error("❌ Error generating manual license:", err);
+      alert("Network error generating license.");
+    } finally {
+      setGenLoading(false);
+    }
+  };
+
   const copyToClipboard = (text, fieldName) => {
     navigator.clipboard.writeText(text);
     setCopiedField(fieldName);
@@ -160,6 +210,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
   const filteredLicenses = licenses.filter(lic => {
     const matchesSearch = 
       (lic.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (lic.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (lic.licenseKey || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (lic.firebaseUid || '').toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -167,6 +218,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
     const status = lic.status || 'active';
     const deviceCount = lic.registeredDevices?.length || 0;
+    const maxDev = lic.maxDevices || 3;
 
     switch (activeFilter) {
       case 'active':
@@ -174,7 +226,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
       case 'disabled':
         return status === 'disabled';
       case 'limit_reached':
-        return deviceCount >= 3;
+        return deviceCount >= maxDev;
       case 'today':
         return isToday(lic.purchaseDate);
       case 'this_week':
@@ -195,9 +247,23 @@ export default function AdminDashboard({ isOpen, onClose }) {
             <h2>Zero Velocity Console</h2>
           </div>
           <div className="admin-header-actions">
+            <div className="tab-navigation">
+              <button 
+                className={`tab-btn ${activeTab === 'directory' ? 'active' : ''}`}
+                onClick={() => setActiveTab('directory')}
+              >
+                📁 Customer Directory
+              </button>
+              <button 
+                className={`tab-btn ${activeTab === 'generator' ? 'active' : ''}`}
+                onClick={() => setActiveTab('generator')}
+              >
+                ✨ Admin Tools (License Generator)
+              </button>
+            </div>
             <button className="btn btn-secondary btn-sm refresh-btn" onClick={fetchAdminData} disabled={loading}>
               <svg className={loading ? 'spin' : ''} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-              <span>Refresh Data</span>
+              <span>Refresh</span>
             </button>
             <button className="admin-close-btn" onClick={onClose} aria-label="Close">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -237,100 +303,218 @@ export default function AdminDashboard({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Search & Filter Bar */}
-        <div className="controls-bar">
-          <div className="search-box">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input 
-              type="text" 
-              placeholder="Search by email or license key..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-            {searchTerm && (
-              <button className="clear-search-btn" onClick={() => setSearchTerm('')}>×</button>
-            )}
-          </div>
+        {/* TAB 1: Customer Directory View */}
+        {activeTab === 'directory' && (
+          <>
+            {/* Search & Filter Bar */}
+            <div className="controls-bar">
+              <div className="search-box">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input 
+                  type="text" 
+                  placeholder="Search by email, name, or license key..." 
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <button className="clear-search-btn" onClick={() => setSearchTerm('')}>×</button>
+                )}
+              </div>
 
-          <div className="filter-pills">
-            <button className={`filter-pill ${activeFilter === 'all' ? 'active' : ''}`} onClick={() => setActiveFilter('all')}>All ({licenses.length})</button>
-            <button className={`filter-pill ${activeFilter === 'active' ? 'active' : ''}`} onClick={() => setActiveFilter('active')}>Active ({activeLicenses})</button>
-            <button className={`filter-pill ${activeFilter === 'disabled' ? 'active' : ''}`} onClick={() => setActiveFilter('disabled')}>Disabled ({disabledLicenses})</button>
-            <button className={`filter-pill ${activeFilter === 'limit_reached' ? 'active' : ''}`} onClick={() => setActiveFilter('limit_reached')}>Limit Reached</button>
-            <button className={`filter-pill ${activeFilter === 'today' ? 'active' : ''}`} onClick={() => setActiveFilter('today')}>Today ({todaysSales})</button>
-            <button className={`filter-pill ${activeFilter === 'this_week' ? 'active' : ''}`} onClick={() => setActiveFilter('this_week')}>This Week</button>
-          </div>
-        </div>
+              <div className="filter-pills">
+                <button className={`filter-pill ${activeFilter === 'all' ? 'active' : ''}`} onClick={() => setActiveFilter('all')}>All ({licenses.length})</button>
+                <button className={`filter-pill ${activeFilter === 'active' ? 'active' : ''}`} onClick={() => setActiveFilter('active')}>Active ({activeLicenses})</button>
+                <button className={`filter-pill ${activeFilter === 'disabled' ? 'active' : ''}`} onClick={() => setActiveFilter('disabled')}>Disabled ({disabledLicenses})</button>
+                <button className={`filter-pill ${activeFilter === 'limit_reached' ? 'active' : ''}`} onClick={() => setActiveFilter('limit_reached')}>Limit Reached</button>
+                <button className={`filter-pill ${activeFilter === 'today' ? 'active' : ''}`} onClick={() => setActiveFilter('today')}>Today ({todaysSales})</button>
+                <button className={`filter-pill ${activeFilter === 'this_week' ? 'active' : ''}`} onClick={() => setActiveFilter('this_week')}>This Week</button>
+              </div>
+            </div>
 
-        {/* Customer Table */}
-        <div className="table-container">
-          {loading ? (
-            <div className="admin-loading-state">
-              <div className="spinner"></div>
-              <span>Loading customer records from Firestore...</span>
-            </div>
-          ) : filteredLicenses.length === 0 ? (
-            <div className="admin-empty-state">
-              <p>No licenses found matching your criteria.</p>
-            </div>
-          ) : (
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Customer Email</th>
-                  <th>License Key</th>
-                  <th>Status</th>
-                  <th>Purchase Date</th>
-                  <th>Plugin Version</th>
-                  <th>Devices</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredLicenses.map(lic => {
-                  const status = lic.status || 'active';
-                  const deviceCount = lic.registeredDevices?.length || 0;
-                  return (
-                    <tr key={lic.id || lic.licenseKey} className={selectedCustomer?.licenseKey === lic.licenseKey ? 'selected-row' : ''}>
-                      <td>
-                        <div className="customer-email-cell">
-                          <span className="email-text">{lic.email || 'N/A'}</span>
-                          {lic.firebaseUid && <span className="uid-subtext">UID: {lic.firebaseUid.substring(0, 10)}...</span>}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="key-cell">
-                          <code className="monospace">{lic.licenseKey}</code>
-                          <button className="icon-copy-btn" title="Copy Key" onClick={() => copyToClipboard(lic.licenseKey, `table-${lic.licenseKey}`)}>
-                            {copiedField === `table-${lic.licenseKey}` ? '✓' : '📋'}
-                          </button>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`status-badge-sm ${status === 'active' ? 'active' : 'disabled'}`}>
-                          <span className="dot"></span>
-                          {status}
-                        </span>
-                      </td>
-                      <td className="date-cell">{formatDate(lic.purchaseDate)}</td>
-                      <td><span className="version-tag">v1.0.0</span></td>
-                      <td>
-                        <span className={`device-tag ${deviceCount >= 3 ? 'limit' : ''}`}>
-                          {deviceCount}/3 Devices
-                        </span>
-                      </td>
-                      <td>
-                        <button className="btn btn-secondary btn-xs view-details-btn" onClick={() => setSelectedCustomer(lic)}>
-                          Inspect Details
-                        </button>
-                      </td>
+            {/* Customer Table */}
+            <div className="table-container">
+              {loading ? (
+                <div className="admin-loading-state">
+                  <div className="spinner"></div>
+                  <span>Loading customer records from Firestore...</span>
+                </div>
+              ) : filteredLicenses.length === 0 ? (
+                <div className="admin-empty-state">
+                  <p>No licenses found matching your criteria.</p>
+                </div>
+              ) : (
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Customer</th>
+                      <th>Source</th>
+                      <th>License Key</th>
+                      <th>Status</th>
+                      <th>Purchase Date</th>
+                      <th>Devices</th>
+                      <th>Action</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
+                  </thead>
+                  <tbody>
+                    {filteredLicenses.map(lic => {
+                      const status = lic.status || 'active';
+                      const deviceCount = lic.registeredDevices?.length || 0;
+                      const maxDev = lic.maxDevices || 3;
+                      const isManualAdmin = lic.source === 'admin' || lic.razorpayPaymentId === 'ADMIN_GENERATED';
+
+                      return (
+                        <tr key={lic.id || lic.licenseKey} className={selectedCustomer?.licenseKey === lic.licenseKey ? 'selected-row' : ''}>
+                          <td>
+                            <div className="customer-email-cell">
+                              <span className="email-text">{lic.email || lic.customerName || 'N/A'}</span>
+                              {lic.customerName && lic.email && <span className="name-subtext">{lic.customerName}</span>}
+                              {lic.firebaseUid && <span className="uid-subtext">UID: {lic.firebaseUid.substring(0, 10)}...</span>}
+                            </div>
+                          </td>
+                          <td>
+                            <span className={`source-badge ${isManualAdmin ? 'admin' : 'razorpay'}`}>
+                              {isManualAdmin ? 'Admin' : 'Razorpay'}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="key-cell">
+                              <code className="monospace">{lic.licenseKey}</code>
+                              <button className="icon-copy-btn" title="Copy Key" onClick={() => copyToClipboard(lic.licenseKey, `table-${lic.licenseKey}`)}>
+                                {copiedField === `table-${lic.licenseKey}` ? '✓' : '📋'}
+                              </button>
+                            </div>
+                          </td>
+                          <td>
+                            <span className={`status-badge-sm ${status === 'active' ? 'active' : 'disabled'}`}>
+                              <span className="dot"></span>
+                              {status}
+                            </span>
+                          </td>
+                          <td className="date-cell">{formatDate(lic.purchaseDate)}</td>
+                          <td>
+                            <span className={`device-tag ${deviceCount >= maxDev ? 'limit' : ''}`}>
+                              {deviceCount}/{maxDev} Devices
+                            </span>
+                          </td>
+                          <td>
+                            <button className="btn btn-secondary btn-xs view-details-btn" onClick={() => setSelectedCustomer(lic)}>
+                              Inspect Details
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* TAB 2: Admin Tools (Manual License Generator) */}
+        {activeTab === 'generator' && (
+          <div className="generator-tab-container">
+            <div className="generator-card glass-panel">
+              <div className="generator-header">
+                <h3>✨ Manual License Generator</h3>
+                <p>Create custom, active Zero Velocity license keys for lifetime accounts, reviewers, beta testers, and giveaways.</p>
+              </div>
+
+              <form onSubmit={handleGenerateLicenseSubmit} className="generator-form">
+                <div className="form-row-two">
+                  <div className="form-group">
+                    <label>Customer Name (Optional)</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. John Doe"
+                      value={genName}
+                      onChange={e => setGenName(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Customer Email (Optional)</label>
+                    <input 
+                      type="email" 
+                      placeholder="e.g. customer@example.com"
+                      value={genEmail}
+                      onChange={e => setGenEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row-two">
+                  <div className="form-group">
+                    <label>License Type</label>
+                    <select value={genType} onChange={e => setGenType(e.target.value)}>
+                      <option value="Lifetime">Lifetime Account</option>
+                      <option value="Beta Tester">Beta Tester</option>
+                      <option value="Reviewer">Reviewer / Creator</option>
+                      <option value="Giveaway">Giveaway Winner</option>
+                      <option value="Internal">Internal / Testing</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Max Allowed Devices</label>
+                    <select value={genMaxDevices} onChange={e => setGenMaxDevices(e.target.value)}>
+                      <option value="1">1 Device</option>
+                      <option value="2">2 Devices</option>
+                      <option value="3">3 Devices (Standard)</option>
+                      <option value="5">5 Devices (Pro / Team)</option>
+                      <option value="10">10 Devices (Enterprise)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Notes / Justification (Optional)</label>
+                  <textarea 
+                    rows="2" 
+                    placeholder="e.g. Granted key for YouTube reviewer video sponsorship"
+                    value={genNotes}
+                    onChange={e => setGenNotes(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-actions">
+                  <button type="submit" className="btn btn-primary generate-submit-btn" disabled={genLoading}>
+                    {genLoading ? 'Generating License...' : '✨ Generate Active License Key'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Generated Key Success Popup */}
+        {newlyGeneratedKey && (
+          <div className="new-key-modal-backdrop" onClick={() => setNewlyGeneratedKey(null)}>
+            <div className="new-key-modal glass-panel animate-scale-up" onClick={e => e.stopPropagation()}>
+              <div className="modal-icon">🎉</div>
+              <h3>License Generated Successfully!</h3>
+              <p>The manual license is active immediately and ready for device registration.</p>
+
+              <div className="generated-key-box">
+                <code className="monospace">{newlyGeneratedKey}</code>
+                <button 
+                  className={`btn btn-primary copy-key-btn ${copiedField === 'new-key' ? 'copied' : ''}`}
+                  onClick={() => copyToClipboard(newlyGeneratedKey, 'new-key')}
+                >
+                  {copiedField === 'new-key' ? '✓ Copied!' : 'Copy License Key'}
+                </button>
+              </div>
+
+              <div className="modal-footer-actions">
+                <button className="btn btn-secondary" onClick={() => { setNewlyGeneratedKey(null); setActiveTab('directory'); }}>
+                  View in Customer Directory
+                </button>
+                <button className="btn btn-secondary" onClick={() => setNewlyGeneratedKey(null)}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Customer Details Panel / Drawer */}
         {selectedCustomer && (
@@ -345,12 +529,20 @@ export default function AdminDashboard({ isOpen, onClose }) {
                 {/* Status Banner */}
                 <div className={`drawer-status-banner ${selectedCustomer.status === 'disabled' ? 'disabled' : 'active'}`}>
                   <span className="status-title">Status: {(selectedCustomer.status || 'active').toUpperCase()}</span>
-                  <span className="status-sub">Offline Grace Period: 30 Days</span>
+                  <span className="status-sub">
+                    Source: {selectedCustomer.source === 'admin' ? 'Admin Generated' : 'Razorpay Purchase'}
+                  </span>
                 </div>
 
                 {/* Primary Data Grid */}
                 <div className="drawer-section">
                   <h4>Account Metadata</h4>
+                  {selectedCustomer.customerName && (
+                    <div className="data-row">
+                      <span className="label">Customer Name:</span>
+                      <span className="value">{selectedCustomer.customerName}</span>
+                    </div>
+                  )}
                   <div className="data-row">
                     <span className="label">Customer Email:</span>
                     <span className="value selectable">{selectedCustomer.email || 'N/A'}</span>
@@ -370,19 +562,29 @@ export default function AdminDashboard({ isOpen, onClose }) {
                     </button>
                   </div>
                   <div className="data-row">
-                    <span className="label">Razorpay Payment ID:</span>
+                    <span className="label">License Type:</span>
+                    <span className="value">{selectedCustomer.licenseType || 'Lifetime'}</span>
+                  </div>
+                  <div className="data-row">
+                    <span className="label">Source / Ref ID:</span>
                     <span className="value monospace">{selectedCustomer.razorpayPaymentId || 'N/A'}</span>
                   </div>
                   <div className="data-row">
-                    <span className="label">Purchase Date:</span>
+                    <span className="label">Purchase / Creation Date:</span>
                     <span className="value">{formatDate(selectedCustomer.purchaseDate)}</span>
                   </div>
+                  {selectedCustomer.notes && (
+                    <div className="data-row">
+                      <span className="label">Admin Notes:</span>
+                      <span className="value italic">{selectedCustomer.notes}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Registered Devices */}
                 <div className="drawer-section">
                   <div className="section-title-row">
-                    <h4>Registered Devices ({(selectedCustomer.registeredDevices || []).length}/3)</h4>
+                    <h4>Registered Devices ({(selectedCustomer.registeredDevices || []).length}/{selectedCustomer.maxDevices || 3})</h4>
                     {(selectedCustomer.registeredDevices || []).length > 0 && (
                       <button 
                         className="btn btn-warning btn-xs" 
@@ -473,7 +675,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
                     <div className="timeline-item">
                       <span className="timeline-dot blue"></span>
                       <div className="timeline-content">
-                        <strong>License Purchased</strong>
+                        <strong>License Created ({selectedCustomer.source === 'admin' ? 'Admin' : 'Razorpay'})</strong>
                         <span>{formatDate(selectedCustomer.purchaseDate)}</span>
                       </div>
                     </div>
