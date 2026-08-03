@@ -128,6 +128,25 @@
     });
   }
 
+  function bindBuyLicenseLink() {
+    var btn = document.getElementById("buyLicenseLink");
+    if (!btn) {
+      return;
+    }
+    // Use production website URL from config, fallback to hardcoded production domain
+    var url = (window.ZeroVelocityConfig && window.ZeroVelocityConfig.backendUrl)
+      ? window.ZeroVelocityConfig.backendUrl
+      : "https://zero-velocity-eta.vercel.app";
+
+    btn.addEventListener("click", function () {
+      if (window.cep && window.cep.util && window.cep.util.openURLInDefaultBrowser) {
+        window.cep.util.openURLInDefaultBrowser(url);
+        return;
+      }
+      window.open(url, "_blank");
+    });
+  }
+
   function mountWorkspace() {
     if (isWorkspaceMounted) {
       return;
@@ -261,6 +280,7 @@
   }
 
   bindInstagramLink();
+  bindBuyLicenseLink();
 
   // Listen for transparent 'zv:activated' event to mount workspace DOM dynamically
   window.addEventListener("zv:activated", function () {

@@ -10,11 +10,10 @@ export const RAZORPAY_KEY_ID = "rzp_live_TLJvEN6IoOE3pq";
 export const PRODUCT_PRICE_INR = 99;
 
 // ─────────────────────────────────────────────────────────
-// Customer Download URL
-// Set CUSTOMER_DOWNLOAD_URL as a Vercel environment variable,
-// OR paste the Firebase Storage public URL directly below.
+// Customer Download URL – Zero_Velocity_v1.0.0.zip
+// Direct download via Google Drive (bypasses virus-scan interstitial)
 // ─────────────────────────────────────────────────────────
-export const CUSTOMER_DOWNLOAD_URL = ""; // ← PASTE Firebase Storage URL here
+export const CUSTOMER_DOWNLOAD_URL = "https://drive.usercontent.google.com/download?id=1bfIEiHzo4gaj0LU88pbY_oHfeiCV59Ch&export=download&confirm=t";
 
 /**
  * Dynamically loads the Razorpay Checkout SDK script if not already present.

@@ -795,6 +795,37 @@ input[type="range"] {
   transform: none;
 }
 
+/* Buy License CTA – secondary action below Activate button */
+.buy-license-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.buy-license-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.35);
+  user-select: none;
+}
+
+.buy-license-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(47, 124, 255, 0.75);
+  cursor: pointer;
+  transition: color 0.15s;
+  letter-spacing: 0.01em;
+}
+
+.buy-license-link:hover {
+  color: #2f7cff;
+}
+
 /* Success License Card Styling */
 .license-card.success-card {
   border-color: rgba(81, 207, 102, 0.4);
