@@ -1,6 +1,19 @@
 (function () {
   "use strict";
 
+  function checkLicense(actionName) {
+    if (window.ZeroVelocityLicenseManager && typeof window.ZeroVelocityLicenseManager.isAuthorized === "function") {
+      if (!window.ZeroVelocityLicenseManager.isAuthorized()) {
+        console.warn("🔒 Blocked unauthorized action:", actionName);
+        if (typeof window.ZeroVelocityLicenseManager.showOverlay === "function") {
+          window.ZeroVelocityLicenseManager.showOverlay();
+        }
+        return false;
+      }
+    }
+    return true;
+  }
+
   function bind(options) {
     var chipRoot = options.chipRoot;
     var modeRoot = options.modeRoot;
@@ -8,6 +21,9 @@
 
     if (modeRoot) {
       modeRoot.addEventListener("click", function (event) {
+        if (!checkLicense("switch styling modes")) {
+          return;
+        }
         var button = event.target;
         if (!button || !button.getAttribute("data-mode")) {
           return;
@@ -18,6 +34,9 @@
 
     if (chipRoot) {
       chipRoot.addEventListener("click", function (event) {
+        if (!checkLicense("edit word styles")) {
+          return;
+        }
         var button = event.target;
         if (!button || !button.getAttribute("data-word-id")) {
           return;

@@ -14,6 +14,22 @@
     }, 1000);
   }
 
+  function checkLicense(onStatus, actionName) {
+    if (window.ZeroVelocityLicenseManager && typeof window.ZeroVelocityLicenseManager.isAuthorized === "function") {
+      if (!window.ZeroVelocityLicenseManager.isAuthorized()) {
+        console.warn("🔒 Blocked unauthorized action:", actionName);
+        if (typeof onStatus === "function") {
+          onStatus("License verification required to " + actionName + ".");
+        }
+        if (typeof window.ZeroVelocityLicenseManager.showOverlay === "function") {
+          window.ZeroVelocityLicenseManager.showOverlay();
+        }
+        return false;
+      }
+    }
+    return true;
+  }
+
   function bind(options) {
     var generateButton = options.generateButton;
     var applyButtons = options.applyButtons || [options.applyButton];
@@ -28,6 +44,10 @@
       }
       button.setAttribute("data-label", button.textContent);
       button.addEventListener("click", function () {
+        if (!checkLicense(onStatus, "apply changes to After Effects")) {
+          return;
+        }
+
         if (onStatus) {
           onStatus("Applying selected caption changes...");
         }
@@ -43,6 +63,10 @@
     if (generateButton) {
       generateButton.setAttribute("data-label", generateButton.textContent);
       generateButton.addEventListener("click", function () {
+        if (!checkLicense(onStatus, "generate captions in After Effects")) {
+          return;
+        }
+
         if (onStatus) {
           onStatus("Generating captions in After Effects...");
         }

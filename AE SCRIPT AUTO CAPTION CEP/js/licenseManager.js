@@ -7,6 +7,32 @@
   // Ed25519 Public Key (Public verification key embedded in client)
   var ED25519_PUBLIC_KEY = "8f906e546a99bccf5e25f6a268e1c9cd013a8e53ef34ea98a0a7810b05c46b27";
 
+  // Lightweight session authorization flag (In-memory, 0 network overhead)
+  var isSessionAuthorized = false;
+
+  /**
+   * Returns whether the current runtime session is cryptographically authorized.
+   */
+  function isAuthorized() {
+    return isSessionAuthorized === true;
+  }
+
+  /**
+   * Reusable authorization gate helper. Executes callback only if session is valid.
+   */
+  function requireAuthorization(actionCallback, errorMsg) {
+    if (isAuthorized()) {
+      if (typeof actionCallback === "function") {
+        return actionCallback();
+      }
+      return true;
+    }
+    console.warn("🔒 [License Gate] Unauthorized action attempt blocked:", errorMsg || "License required.");
+    showOverlay();
+    setStatus(errorMsg || "License verification required to perform this action.", true);
+    return false;
+  }
+
   /**
    * Fetch backend endpoint URL from central window.ZeroVelocityConfig
    */
@@ -36,6 +62,7 @@
   }
 
   function removeStoredActivation() {
+    isSessionAuthorized = false;
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(OFFLINE_TOKEN_KEY);
   }
@@ -46,6 +73,7 @@
   function validateOfflineToken(callback) {
     var rawToken = localStorage.getItem(OFFLINE_TOKEN_KEY);
     if (!rawToken) {
+      isSessionAuthorized = false;
       callback({ valid: false, reason: "No offline validation token found." });
       return;
     }
@@ -53,12 +81,14 @@
     try {
       var token = JSON.parse(rawToken);
       if (!token || !token.licenseKey || !token.issuedAt || !token.signature) {
+        isSessionAuthorized = false;
         callback({ valid: false, reason: "Corrupted offline token structure." });
         return;
       }
 
       var currentDeviceId = window.ZeroVelocityDeviceHelper ? window.ZeroVelocityDeviceHelper.getDeviceId() : "";
       if (token.deviceId && currentDeviceId && token.deviceId !== currentDeviceId) {
+        isSessionAuthorized = false;
         callback({ valid: false, reason: "Offline token belongs to a different computer." });
         return;
       }
@@ -70,12 +100,14 @@
       var nowTime = Date.now();
 
       if (nowTime < issuedTime) {
+        isSessionAuthorized = false;
         callback({ valid: false, reason: "System clock manipulation detected." });
         return;
       }
 
       var elapsedDays = (nowTime - issuedTime) / (1000 * 60 * 60 * 24);
       if (elapsedDays > period) {
+        isSessionAuthorized = false;
         callback({
           valid: false,
           expired: true,
@@ -88,17 +120,21 @@
       if (window.ZeroVelocityEd25519 && typeof window.ZeroVelocityEd25519.verify === "function") {
         window.ZeroVelocityEd25519.verify(ED25519_PUBLIC_KEY, rawPayload, token.signature, function (isValid) {
           if (isValid) {
+            isSessionAuthorized = true;
             callback({ valid: true, token: token });
           } else {
+            isSessionAuthorized = false;
             console.warn("❌ Ed25519 signature verification failed (tampered token).");
             callback({ valid: false, reason: "Offline token signature verification failed (tampered token)." });
           }
         });
       } else {
+        isSessionAuthorized = false;
         console.warn("⚠️ Ed25519 verifier unavailable.");
         callback({ valid: false, reason: "Offline verification module unavailable." });
       }
     } catch (_errToken) {
+      isSessionAuthorized = false;
       callback({ valid: false, reason: "Failed to parse offline token." });
     }
   }
@@ -274,14 +310,18 @@
             var data = JSON.parse(xhr.responseText);
             console.log("📥 [Plugin License Manager] Received Response:", JSON.stringify(data, null, 2));
             if (data.success) {
+              isSessionAuthorized = true;
               callback(null, data);
             } else {
+              isSessionAuthorized = false;
               callback({ isServerError: true, error: data.error || "License verification failed." });
             }
           } catch (_errParse) {
+            isSessionAuthorized = false;
             callback({ isServerError: true, error: "Invalid server response format." });
           }
         } else {
+          isSessionAuthorized = false;
           try {
             var errData = JSON.parse(xhr.responseText);
             console.warn("⚠️ [Plugin License Manager] Server Error Response (HTTP " + xhr.status + "):", JSON.stringify(errData, null, 2));
@@ -317,6 +357,7 @@
           // Network Error / Offline Mode -> Validate Offline Token Grace Period asynchronously via Ed25519
           validateOfflineToken(function (offlineCheck) {
             if (offlineCheck.valid) {
+              isSessionAuthorized = true;
               console.log("🟢 [Offline Grace Period] Valid Ed25519 token signature verified. Unlocking plugin offline.");
               setStatus("Offline Mode - License Verified", false);
               dispatchActivationEvent(offlineCheck.token);
@@ -324,6 +365,7 @@
                 hideOverlay();
               }, 400);
             } else {
+              isSessionAuthorized = false;
               console.warn("❌ [Offline Grace Period] Fail:", offlineCheck.reason);
               if (offlineCheck.expired) {
                 setStatus("Offline grace period expired. Please connect to the internet to verify your license.", true);
@@ -345,6 +387,7 @@
       }
 
       // Online Backend Verification Success
+      isSessionAuthorized = true;
       var licenseInfo = (data && data.license) || { licenseKey: cleanKey, status: "active" };
       saveActivationLocally(licenseInfo.licenseKey || cleanKey);
       if (data && data.offlineToken) {
@@ -400,6 +443,8 @@
     showOverlay: showOverlay,
     hideOverlay: hideOverlay,
     showSuccessModal: showSuccessModal,
-    validateOfflineToken: validateOfflineToken
+    validateOfflineToken: validateOfflineToken,
+    isAuthorized: isAuthorized,
+    requireAuthorization: requireAuthorization
   };
 }());
