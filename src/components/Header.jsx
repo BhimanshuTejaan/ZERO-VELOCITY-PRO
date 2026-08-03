@@ -3,11 +3,16 @@ import './Header.css';
 import { useAuth } from '../AuthContext';
 import LicenseModal from './LicenseModal';
 import ProcessingOverlay from './ProcessingOverlay';
+import AdminDashboard from './AdminDashboard';
+
+// Authorized Admin Emails
+const ADMIN_EMAILS = ['bhimanshutejaan@gmail.com'];
 
 export default function Header() {
   const { currentUser, loginWithGoogle, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
+  const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
   const [newlyCreatedKey, setNewlyCreatedKey] = useState(null);
   const [imgError, setImgError] = useState(false);
   const menuRef = useRef(null);
@@ -20,6 +25,7 @@ export default function Header() {
     }
   };
 
+  const isAdmin = currentUser?.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
   const firstName = currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'User';
   const firstInitial = firstName.charAt(0).toUpperCase();
 
@@ -71,6 +77,7 @@ export default function Header() {
                   <div className="profile-avatar-fallback">{firstInitial}</div>
                 )}
                 <span className="user-first-name">{firstName}</span>
+                {isAdmin && <span className="admin-pill-tag">ADMIN</span>}
                 <svg 
                   className={`dropdown-chevron ${isMenuOpen ? 'open' : ''}`} 
                   width="14" 
@@ -97,13 +104,31 @@ export default function Header() {
                   <div className="dropdown-divider"></div>
 
                   <div className="dropdown-section">
-                    <button className="dropdown-item disabled" disabled>
-                      <div className="item-left">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                        <span>Dashboard</span>
-                      </div>
-                      <span className="disabled-badge">Soon</span>
-                    </button>
+                    {/* Admin Dashboard Item */}
+                    {isAdmin ? (
+                      <button 
+                        className="dropdown-item admin-menu-item" 
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          setIsAdminDashboardOpen(true);
+                        }}
+                      >
+                        <div className="item-left">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                          <span>Admin Dashboard</span>
+                        </div>
+                        <span className="admin-badge-sm">Access</span>
+                      </button>
+                    ) : (
+                      <button className="dropdown-item disabled" disabled>
+                        <div className="item-left">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                          <span>Dashboard</span>
+                        </div>
+                        <span className="disabled-badge">Soon</span>
+                      </button>
+                    )}
+
                     <button className="dropdown-item disabled" disabled>
                       <div className="item-left">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -149,6 +174,12 @@ export default function Header() {
 
       {/* Full-Screen Payment Processing Overlay */}
       <ProcessingOverlay />
+
+      {/* Admin Dashboard */}
+      <AdminDashboard 
+        isOpen={isAdminDashboardOpen} 
+        onClose={() => setIsAdminDashboardOpen(false)} 
+      />
 
       {/* Modern License Modal */}
       <LicenseModal 

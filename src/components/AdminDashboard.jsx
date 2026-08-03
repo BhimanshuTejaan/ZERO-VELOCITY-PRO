@@ -1,0 +1,501 @@
+import React, { useState, useEffect } from 'react';
+import './AdminDashboard.css';
+import { useAuth } from '../AuthContext';
+
+export default function AdminDashboard({ isOpen, onClose }) {
+  const { currentUser } = useAuth();
+  const [licenses, setLicenses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [copiedField, setCopiedField] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const fetchAdminData = async () => {
+    if (!currentUser?.email) return;
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/admin-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'fetch_all_licenses',
+          adminEmail: currentUser.email
+        })
+      });
+
+      const data = await res.json();
+      if (data.success && Array.isArray(data.licenses)) {
+        setLicenses(data.licenses);
+        // Update selected customer if drawer is open
+        if (selectedCustomer) {
+          const updated = data.licenses.find(l => l.licenseKey === selectedCustomer.licenseKey);
+          if (updated) setSelectedCustomer(updated);
+        }
+      } else {
+        console.error("❌ Failed to fetch admin data:", data.error);
+      }
+    } catch (err) {
+      console.error("❌ Error contacting admin API:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchAdminData();
+    }
+  }, [isOpen, currentUser]);
+
+  if (!isOpen) return null;
+
+  // Handle Admin Action (Enable, Disable, Reset Devices, Delete)
+  const handleAdminAction = async (actionType, licenseKey) => {
+    if (!currentUser?.email || !licenseKey) return;
+    setActionLoading(true);
+
+    try {
+      const res = await fetch('/api/admin-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: actionType,
+          adminEmail: currentUser.email,
+          licenseKey: licenseKey
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (actionType === 'delete_license') {
+          setSelectedCustomer(null);
+          setShowDeleteConfirm(false);
+        }
+        await fetchAdminData();
+      } else {
+        alert(`Admin Action Error: ${data.error}`);
+      }
+    } catch (err) {
+      console.error(`❌ Admin action error (${actionType}):`, err);
+      alert(`Network error performing action.`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text, fieldName) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(fieldName);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  // Helper date functions
+  const isToday = (dateStr) => {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    const today = new Date();
+    return d.getDate() === today.getDate() &&
+      d.getMonth() === today.getMonth() &&
+      d.getFullYear() === today.getFullYear();
+  };
+
+  const isThisWeek = (dateStr) => {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    const today = new Date();
+    const diffDays = (today - d) / (1000 * 3600 * 24);
+    return diffDays >= 0 && diffDays <= 7;
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    try {
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // Compute Home Metrics
+  const totalCustomers = licenses.length;
+  const activeLicenses = licenses.filter(l => (l.status || 'active') === 'active').length;
+  const disabledLicenses = licenses.filter(l => l.status === 'disabled').length;
+  const totalRevenue = activeLicenses * 99; // Launch Price ₹99
+  const todaysSales = licenses.filter(l => isToday(l.purchaseDate)).length;
+  const todaysActivations = licenses.filter(l => isToday(l.activatedAt || l.purchaseDate)).length;
+  const totalDevices = licenses.reduce((acc, l) => acc + (l.registeredDevices?.length || 0), 0);
+
+  // Filter & Search Logic
+  const filteredLicenses = licenses.filter(lic => {
+    const matchesSearch = 
+      (lic.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (lic.licenseKey || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (lic.firebaseUid || '').toLowerCase().includes(searchTerm.toLowerCase());
+
+    if (!matchesSearch) return false;
+
+    const status = lic.status || 'active';
+    const deviceCount = lic.registeredDevices?.length || 0;
+
+    switch (activeFilter) {
+      case 'active':
+        return status === 'active';
+      case 'disabled':
+        return status === 'disabled';
+      case 'limit_reached':
+        return deviceCount >= 3;
+      case 'today':
+        return isToday(lic.purchaseDate);
+      case 'this_week':
+        return isThisWeek(lic.purchaseDate);
+      default:
+        return true;
+    }
+  });
+
+  return (
+    <div className="admin-overlay-backdrop animate-fade-in" onClick={onClose}>
+      <div className="admin-dashboard-container glass-panel" onClick={e => e.stopPropagation()}>
+        
+        {/* Top Header Bar */}
+        <div className="admin-header">
+          <div className="admin-header-title">
+            <div className="admin-badge">ADMIN DASHBOARD</div>
+            <h2>Zero Velocity Control Center</h2>
+          </div>
+          <div className="admin-header-actions">
+            <button className="btn btn-secondary btn-sm refresh-btn" onClick={fetchAdminData} disabled={loading}>
+              <svg className={loading ? 'spin' : ''} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              <span>Refresh Data</span>
+            </button>
+            <button className="admin-close-btn" onClick={onClose} aria-label="Close">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Dashboard Home Metrics Grid */}
+        <div className="metrics-grid">
+          <div className="metric-card">
+            <span className="metric-label">Total Customers</span>
+            <span className="metric-value">{totalCustomers}</span>
+          </div>
+          <div className="metric-card active-card">
+            <span className="metric-label">Active Licenses</span>
+            <span className="metric-value">{activeLicenses}</span>
+          </div>
+          <div className="metric-card disabled-card">
+            <span className="metric-label">Disabled Licenses</span>
+            <span className="metric-value">{disabledLicenses}</span>
+          </div>
+          <div className="metric-card revenue-card">
+            <span className="metric-label">Total Revenue</span>
+            <span className="metric-value">₹{totalRevenue.toLocaleString('en-IN')}</span>
+          </div>
+          <div className="metric-card">
+            <span className="metric-label">Today's Sales</span>
+            <span className="metric-value">{todaysSales}</span>
+          </div>
+          <div className="metric-card">
+            <span className="metric-label">Today's Activations</span>
+            <span className="metric-value">{todaysActivations}</span>
+          </div>
+          <div className="metric-card">
+            <span className="metric-label">Registered Devices</span>
+            <span className="metric-value">{totalDevices}</span>
+          </div>
+        </div>
+
+        {/* Search & Filter Bar */}
+        <div className="controls-bar">
+          <div className="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input 
+              type="text" 
+              placeholder="Search by email or license key..." 
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button className="clear-search-btn" onClick={() => setSearchTerm('')}>×</button>
+            )}
+          </div>
+
+          <div className="filter-pills">
+            <button className={`filter-pill ${activeFilter === 'all' ? 'active' : ''}`} onClick={() => setActiveFilter('all')}>All ({licenses.length})</button>
+            <button className={`filter-pill ${activeFilter === 'active' ? 'active' : ''}`} onClick={() => setActiveFilter('active')}>Active ({activeLicenses})</button>
+            <button className={`filter-pill ${activeFilter === 'disabled' ? 'active' : ''}`} onClick={() => setActiveFilter('disabled')}>Disabled ({disabledLicenses})</button>
+            <button className={`filter-pill ${activeFilter === 'limit_reached' ? 'active' : ''}`} onClick={() => setActiveFilter('limit_reached')}>Limit Reached</button>
+            <button className={`filter-pill ${activeFilter === 'today' ? 'active' : ''}`} onClick={() => setActiveFilter('today')}>Today ({todaysSales})</button>
+            <button className={`filter-pill ${activeFilter === 'this_week' ? 'active' : ''}`} onClick={() => setActiveFilter('this_week')}>This Week</button>
+          </div>
+        </div>
+
+        {/* Customer Table */}
+        <div className="table-container">
+          {loading ? (
+            <div className="admin-loading-state">
+              <div className="spinner"></div>
+              <span>Loading customer records from Firestore...</span>
+            </div>
+          ) : filteredLicenses.length === 0 ? (
+            <div className="admin-empty-state">
+              <p>No licenses found matching your criteria.</p>
+            </div>
+          ) : (
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Customer Email</th>
+                  <th>License Key</th>
+                  <th>Status</th>
+                  <th>Purchase Date</th>
+                  <th>Plugin Version</th>
+                  <th>Devices</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredLicenses.map(lic => {
+                  const status = lic.status || 'active';
+                  const deviceCount = lic.registeredDevices?.length || 0;
+                  return (
+                    <tr key={lic.id || lic.licenseKey} className={selectedCustomer?.licenseKey === lic.licenseKey ? 'selected-row' : ''}>
+                      <td>
+                        <div className="customer-email-cell">
+                          <span className="email-text">{lic.email || 'N/A'}</span>
+                          {lic.firebaseUid && <span className="uid-subtext">UID: {lic.firebaseUid.substring(0, 10)}...</span>}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="key-cell">
+                          <code className="monospace">{lic.licenseKey}</code>
+                          <button className="icon-copy-btn" title="Copy Key" onClick={() => copyToClipboard(lic.licenseKey, `table-${lic.licenseKey}`)}>
+                            {copiedField === `table-${lic.licenseKey}` ? '✓' : '📋'}
+                          </button>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`status-badge-sm ${status === 'active' ? 'active' : 'disabled'}`}>
+                          <span className="dot"></span>
+                          {status}
+                        </span>
+                      </td>
+                      <td className="date-cell">{formatDate(lic.purchaseDate)}</td>
+                      <td><span className="version-tag">v1.0.0</span></td>
+                      <td>
+                        <span className={`device-tag ${deviceCount >= 3 ? 'limit' : ''}`}>
+                          {deviceCount}/3 Devices
+                        </span>
+                      </td>
+                      <td>
+                        <button className="btn btn-secondary btn-xs view-details-btn" onClick={() => setSelectedCustomer(lic)}>
+                          Inspect Details
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Customer Details Panel / Drawer */}
+        {selectedCustomer && (
+          <div className="customer-drawer-backdrop" onClick={() => setSelectedCustomer(null)}>
+            <div className="customer-drawer glass-panel animate-slide-left" onClick={e => e.stopPropagation()}>
+              <div className="drawer-header">
+                <h3>Customer Details</h3>
+                <button className="drawer-close-btn" onClick={() => setSelectedCustomer(null)}>×</button>
+              </div>
+
+              <div className="drawer-body">
+                {/* Status Banner */}
+                <div className={`drawer-status-banner ${selectedCustomer.status === 'disabled' ? 'disabled' : 'active'}`}>
+                  <span className="status-title">Status: {(selectedCustomer.status || 'active').toUpperCase()}</span>
+                  <span className="status-sub">Offline Grace Period: 30 Days</span>
+                </div>
+
+                {/* Primary Data Grid */}
+                <div className="drawer-section">
+                  <h4>Account Metadata</h4>
+                  <div className="data-row">
+                    <span className="label">Customer Email:</span>
+                    <span className="value selectable">{selectedCustomer.email || 'N/A'}</span>
+                    <button className="btn-text-copy" onClick={() => copyToClipboard(selectedCustomer.email, 'drawer-email')}>
+                      {copiedField === 'drawer-email' ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                  <div className="data-row">
+                    <span className="label">Firebase UID:</span>
+                    <span className="value monospace selectable">{selectedCustomer.firebaseUid || 'N/A'}</span>
+                  </div>
+                  <div className="data-row">
+                    <span className="label">License Key:</span>
+                    <span className="value monospace highlight selectable">{selectedCustomer.licenseKey}</span>
+                    <button className="btn-text-copy" onClick={() => copyToClipboard(selectedCustomer.licenseKey, 'drawer-key')}>
+                      {copiedField === 'drawer-key' ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                  <div className="data-row">
+                    <span className="label">Razorpay Payment ID:</span>
+                    <span className="value monospace">{selectedCustomer.razorpayPaymentId || 'N/A'}</span>
+                  </div>
+                  <div className="data-row">
+                    <span className="label">Purchase Date:</span>
+                    <span className="value">{formatDate(selectedCustomer.purchaseDate)}</span>
+                  </div>
+                </div>
+
+                {/* Registered Devices */}
+                <div className="drawer-section">
+                  <div className="section-title-row">
+                    <h4>Registered Devices ({(selectedCustomer.registeredDevices || []).length}/3)</h4>
+                    {(selectedCustomer.registeredDevices || []).length > 0 && (
+                      <button 
+                        className="btn btn-warning btn-xs" 
+                        onClick={() => handleAdminAction('reset_devices', selectedCustomer.licenseKey)}
+                        disabled={actionLoading}
+                      >
+                        Reset Devices
+                      </button>
+                    )}
+                  </div>
+
+                  {(selectedCustomer.registeredDevices || []).length === 0 ? (
+                    <p className="empty-subtext">No devices activated yet.</p>
+                  ) : (
+                    <div className="devices-list">
+                      {selectedCustomer.registeredDevices.map((dev, i) => (
+                        <div className="device-card" key={dev.deviceId || i}>
+                          <div className="device-header">
+                            <span className="device-name">💻 {dev.deviceName || 'Desktop Computer'}</span>
+                            <span className="device-id-code">{dev.deviceId?.substring(0, 12)}...</span>
+                          </div>
+                          <div className="device-meta">
+                            <span>Activated: {formatDate(dev.activatedAt || dev.date)}</span>
+                            <span>Last Seen: {formatDate(dev.lastSeen || dev.activatedAt)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Admin Actions Panel */}
+                <div className="drawer-section admin-actions-box">
+                  <h4>Admin Actions</h4>
+                  <div className="action-buttons-grid">
+                    {selectedCustomer.status === 'disabled' ? (
+                      <button 
+                        className="btn btn-success btn-sm" 
+                        onClick={() => handleAdminAction('enable_license', selectedCustomer.licenseKey)}
+                        disabled={actionLoading}
+                      >
+                        Enable License
+                      </button>
+                    ) : (
+                      <button 
+                        className="btn btn-danger btn-sm" 
+                        onClick={() => handleAdminAction('disable_license', selectedCustomer.licenseKey)}
+                        disabled={actionLoading}
+                      >
+                        Disable License
+                      </button>
+                    )}
+
+                    <button 
+                      className="btn btn-secondary btn-sm" 
+                      onClick={() => handleAdminAction('reset_devices', selectedCustomer.licenseKey)}
+                      disabled={actionLoading}
+                    >
+                      Reset Registered Devices
+                    </button>
+
+                    <button 
+                      className="btn btn-secondary btn-sm" 
+                      onClick={() => copyToClipboard(selectedCustomer.licenseKey, 'btn-key')}
+                    >
+                      {copiedField === 'btn-key' ? 'Key Copied!' : 'Copy License Key'}
+                    </button>
+
+                    <button 
+                      className="btn btn-secondary btn-sm" 
+                      onClick={() => copyToClipboard(selectedCustomer.email, 'btn-email')}
+                    >
+                      {copiedField === 'btn-email' ? 'Email Copied!' : 'Copy Email'}
+                    </button>
+                  </div>
+
+                  <div className="delete-hazard-zone">
+                    <button className="btn btn-outline-danger btn-xs" onClick={() => setShowDeleteConfirm(true)}>
+                      🗑️ Delete Test License
+                    </button>
+                  </div>
+                </div>
+
+                {/* Activity Timeline */}
+                <div className="drawer-section">
+                  <h4>Activity Timeline</h4>
+                  <div className="activity-timeline">
+                    <div className="timeline-item">
+                      <span className="timeline-dot blue"></span>
+                      <div className="timeline-content">
+                        <strong>License Purchased</strong>
+                        <span>{formatDate(selectedCustomer.purchaseDate)}</span>
+                      </div>
+                    </div>
+
+                    {(selectedCustomer.activityLog || []).map((log, idx) => (
+                      <div className="timeline-item" key={idx}>
+                        <span className="timeline-dot green"></span>
+                        <div className="timeline-content">
+                          <strong>{log.action}</strong>
+                          <span>{formatDate(log.date)} {log.by ? `(by ${log.by})` : ''}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Confirmation Modal for Delete License */}
+        {showDeleteConfirm && selectedCustomer && (
+          <div className="confirm-modal-backdrop" onClick={() => setShowDeleteConfirm(false)}>
+            <div className="confirm-modal glass-panel" onClick={e => e.stopPropagation()}>
+              <h3>⚠️ Confirm Delete License</h3>
+              <p>Are you sure you want to permanently delete license <code>{selectedCustomer.licenseKey}</code>?</p>
+              <p className="warning-text">This action cannot be undone.</p>
+              <div className="confirm-actions">
+                <button className="btn btn-secondary" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+                <button 
+                  className="btn btn-danger" 
+                  onClick={() => handleAdminAction('delete_license', selectedCustomer.licenseKey)}
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? 'Deleting...' : 'Delete Permanently'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}

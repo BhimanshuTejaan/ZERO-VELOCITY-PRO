@@ -203,3 +203,29 @@
   background: rgba(239, 68, 68, 0.12);
   color: #f87171;
 }
+
+.admin-pill-tag {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 0.1rem 0.4rem;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+  border-radius: 4px;
+}
+
+.admin-badge-sm {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.4rem;
+  background: rgba(59, 130, 246, 0.2);
+  border-radius: 4px;
+  color: #60a5fa;
+  font-weight: 700;
+}
+
+.admin-menu-item:hover {
+  background: rgba(59, 130, 246, 0.12);
+}
