@@ -1,23 +1,37 @@
 import crypto from 'crypto';
 import { dbAdmin } from './_firebaseAdmin.js';
 
+// Default private key for backend signing (can be overridden by process.env.LICENSE_ED25519_PRIVATE_KEY)
+const DEFAULT_ED25519_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIHL05gsLNSv+z8zWx12ad99K0oLZiGlWkkjkTPs0UtZb
+-----END PRIVATE KEY-----`;
+
 /**
- * Generates a signed offline validation token.
+ * Generates an offline token signed with Ed25519 Asymmetric Private Key.
+ * The private key stays strictly on the backend server.
  */
 function generateOfflineToken(licenseKey, deviceId, gracePeriodDays) {
-  const secret = process.env.LICENSE_TOKEN_SECRET || 'zv_offline_grace_secret_key_2026';
-  const issuedAt = new Date().toISOString();
-  const period = typeof gracePeriodDays === 'number' ? gracePeriodDays : 7;
-  const rawPayload = `${licenseKey}:${deviceId}:${issuedAt}:${period}`;
-  const signature = crypto.createHmac('sha256', secret).update(rawPayload).digest('hex');
-  
-  return {
-    licenseKey: licenseKey,
-    deviceId: deviceId,
-    issuedAt: issuedAt,
-    gracePeriodDays: period,
-    signature: signature
-  };
+  try {
+    const pemKey = process.env.LICENSE_ED25519_PRIVATE_KEY || DEFAULT_ED25519_PRIVATE_KEY;
+    const privateKey = crypto.createPrivateKey({ key: pemKey, format: 'pem', type: 'pkcs8' });
+    
+    const issuedAt = new Date().toISOString();
+    const period = typeof gracePeriodDays === 'number' ? gracePeriodDays : 7;
+    const rawPayload = `${licenseKey}:${deviceId}:${issuedAt}:${period}`;
+    
+    const signature = crypto.sign(null, Buffer.from(rawPayload), privateKey).toString('hex');
+    
+    return {
+      licenseKey: licenseKey,
+      deviceId: deviceId,
+      issuedAt: issuedAt,
+      gracePeriodDays: period,
+      signature: signature
+    };
+  } catch (errKey) {
+    console.error("❌ Error generating Ed25519 signature:", errKey);
+    return null;
+  }
 }
 
 /**
@@ -25,7 +39,7 @@ function generateOfflineToken(licenseKey, deviceId, gracePeriodDays) {
  * Endpoint: POST /api/verify-license
  * 
  * Verifies a license key against the Firestore 'licenses' collection using Firebase Admin SDK.
- * Generates a signed offlineToken for offline grace period validation.
+ * Generates an Ed25519 signed offlineToken for asymmetric offline grace period validation.
  * Includes CORS headers for Adobe CEP extension access.
  */
 export default async function handler(req, res) {
