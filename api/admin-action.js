@@ -1,13 +1,15 @@
 import { dbAdmin } from './_firebaseAdmin.js';
 
-// Default list of authorized admin emails
-const ALLOWED_ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'bhimanshutejaan@gmail.com')
-  .split(',')
-  .map(e => e.trim().toLowerCase());
+// STRICT SINGLE ADMINISTRATOR ALLOWLIST
+const SOLE_ADMIN_EMAIL = 'bhimanshutejaan@gmail.com';
 
 /**
  * Vercel Serverless Function: Admin Dashboard Actions & Data Queries
  * Endpoint: POST /api/admin-action
+ * 
+ * Strict Security Policy:
+ * Only bhimanshutejaan@gmail.com is authorized to execute actions or retrieve admin data.
+ * All other emails/unauthenticated requests return HTTP 403 Forbidden immediately.
  */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -18,12 +20,13 @@ export default async function handler(req, res) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
     const { action, adminEmail, licenseKey } = body;
 
-    // Security Check: Verify admin email
-    if (!adminEmail || !ALLOWED_ADMIN_EMAILS.includes(adminEmail.toLowerCase())) {
-      console.warn(`🔒 Unauthorized Admin Access Attempt by: ${adminEmail}`);
+    // Strict Independent Backend Security Verification
+    const normalizedEmail = (adminEmail || '').trim().toLowerCase();
+    if (!normalizedEmail || normalizedEmail !== SOLE_ADMIN_EMAIL) {
+      console.warn(`🔒 HTTP 403 FORBIDDEN: Unauthorized Admin API attempt by: [${adminEmail || 'ANONYMOUS'}]`);
       return res.status(403).json({ 
         success: false, 
-        error: 'Access Denied: You do not have administrator permissions.' 
+        error: 'HTTP 403 Forbidden: You do not have administrator privileges.' 
       });
     }
 
@@ -69,7 +72,7 @@ export default async function handler(req, res) {
     if (action === 'enable_license') {
       const updatedLog = [
         ...existingLog,
-        { action: 'License Enabled', date: now, by: adminEmail }
+        { action: 'License Enabled', date: now, by: normalizedEmail }
       ];
 
       await docRef.update({
@@ -78,7 +81,7 @@ export default async function handler(req, res) {
         updatedAt: now
       });
 
-      console.log(`✅ Admin ${adminEmail} enabled license ${licenseKey}`);
+      console.log(`✅ Admin ${normalizedEmail} enabled license ${licenseKey}`);
       return res.status(200).json({
         success: true,
         message: `License ${licenseKey} has been enabled.`,
@@ -90,7 +93,7 @@ export default async function handler(req, res) {
     if (action === 'disable_license') {
       const updatedLog = [
         ...existingLog,
-        { action: 'License Disabled', date: now, by: adminEmail }
+        { action: 'License Disabled', date: now, by: normalizedEmail }
       ];
 
       await docRef.update({
@@ -99,7 +102,7 @@ export default async function handler(req, res) {
         updatedAt: now
       });
 
-      console.log(`✅ Admin ${adminEmail} disabled license ${licenseKey}`);
+      console.log(`✅ Admin ${normalizedEmail} disabled license ${licenseKey}`);
       return res.status(200).json({
         success: true,
         message: `License ${licenseKey} has been disabled.`,
@@ -111,7 +114,7 @@ export default async function handler(req, res) {
     if (action === 'reset_devices') {
       const updatedLog = [
         ...existingLog,
-        { action: 'Device Reset', date: now, by: adminEmail, previousDeviceCount: (currentData.registeredDevices || []).length }
+        { action: 'Device Reset', date: now, by: normalizedEmail, previousDeviceCount: (currentData.registeredDevices || []).length }
       ];
 
       await docRef.update({
@@ -120,7 +123,7 @@ export default async function handler(req, res) {
         updatedAt: now
       });
 
-      console.log(`✅ Admin ${adminEmail} reset devices for license ${licenseKey}`);
+      console.log(`✅ Admin ${normalizedEmail} reset devices for license ${licenseKey}`);
       return res.status(200).json({
         success: true,
         message: `Registered devices reset for ${licenseKey}.`
@@ -130,7 +133,7 @@ export default async function handler(req, res) {
     // 5. Delete Test License Action
     if (action === 'delete_license') {
       await docRef.delete();
-      console.log(`🗑️ Admin ${adminEmail} deleted license ${licenseKey}`);
+      console.log(`🗑️ Admin ${normalizedEmail} deleted license ${licenseKey}`);
       return res.status(200).json({
         success: true,
         message: `License ${licenseKey} has been permanently deleted.`

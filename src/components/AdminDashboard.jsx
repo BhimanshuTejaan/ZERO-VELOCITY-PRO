@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './AdminDashboard.css';
 import { useAuth } from '../AuthContext';
 
+const SOLE_ADMIN_EMAIL = 'bhimanshutejaan@gmail.com';
+
 export default function AdminDashboard({ isOpen, onClose }) {
   const { currentUser } = useAuth();
   const [licenses, setLicenses] = useState([]);
@@ -13,8 +15,10 @@ export default function AdminDashboard({ isOpen, onClose }) {
   const [actionLoading, setActionLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const isSoleAdmin = currentUser?.email?.toLowerCase() === SOLE_ADMIN_EMAIL;
+
   const fetchAdminData = async () => {
-    if (!currentUser?.email) return;
+    if (!isSoleAdmin) return;
     setLoading(true);
 
     try {
@@ -28,15 +32,15 @@ export default function AdminDashboard({ isOpen, onClose }) {
       });
 
       const data = await res.json();
-      if (data.success && Array.isArray(data.licenses)) {
+      if (res.ok && data.success && Array.isArray(data.licenses)) {
         setLicenses(data.licenses);
-        // Update selected customer if drawer is open
         if (selectedCustomer) {
           const updated = data.licenses.find(l => l.licenseKey === selectedCustomer.licenseKey);
           if (updated) setSelectedCustomer(updated);
         }
       } else {
-        console.error("❌ Failed to fetch admin data:", data.error);
+        console.error("❌ Admin API Error (HTTP 403/Forbidden):", data.error);
+        alert(`Access Denied: ${data.error || 'HTTP 403 Forbidden'}`);
       }
     } catch (err) {
       console.error("❌ Error contacting admin API:", err);
@@ -46,16 +50,33 @@ export default function AdminDashboard({ isOpen, onClose }) {
   };
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && isSoleAdmin) {
       fetchAdminData();
     }
   }, [isOpen, currentUser]);
 
   if (!isOpen) return null;
 
+  // Strict Frontend Security Gate
+  if (!isSoleAdmin) {
+    return (
+      <div className="admin-overlay-backdrop animate-fade-in" onClick={onClose}>
+        <div className="admin-dashboard-container glass-panel access-denied-box" onClick={e => e.stopPropagation()}>
+          <div className="error-icon-box">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          </div>
+          <h2>HTTP 403 Access Denied</h2>
+          <p>The Admin Dashboard is restricted exclusively to <code>bhimanshutejaan@gmail.com</code>.</p>
+          <p className="subtext">Your account ({currentUser?.email || 'Anonymous'}) does not have administrator privileges.</p>
+          <button className="btn btn-secondary" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    );
+  }
+
   // Handle Admin Action (Enable, Disable, Reset Devices, Delete)
   const handleAdminAction = async (actionType, licenseKey) => {
-    if (!currentUser?.email || !licenseKey) return;
+    if (!isSoleAdmin || !licenseKey) return;
     setActionLoading(true);
 
     try {
@@ -70,14 +91,14 @@ export default function AdminDashboard({ isOpen, onClose }) {
       });
 
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         if (actionType === 'delete_license') {
           setSelectedCustomer(null);
           setShowDeleteConfirm(false);
         }
         await fetchAdminData();
       } else {
-        alert(`Admin Action Error: ${data.error}`);
+        alert(`Admin Action Error: ${data.error || 'HTTP 403 Forbidden'}`);
       }
     } catch (err) {
       console.error(`❌ Admin action error (${actionType}):`, err);
@@ -170,8 +191,8 @@ export default function AdminDashboard({ isOpen, onClose }) {
         {/* Top Header Bar */}
         <div className="admin-header">
           <div className="admin-header-title">
-            <div className="admin-badge">ADMIN DASHBOARD</div>
-            <h2>Zero Velocity Control Center</h2>
+            <div className="admin-badge">ADMIN CONTROL CENTER</div>
+            <h2>Zero Velocity Console</h2>
           </div>
           <div className="admin-header-actions">
             <button className="btn btn-secondary btn-sm refresh-btn" onClick={fetchAdminData} disabled={loading}>

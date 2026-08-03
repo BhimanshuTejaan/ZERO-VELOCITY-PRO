@@ -5,8 +5,8 @@ import LicenseModal from './LicenseModal';
 import ProcessingOverlay from './ProcessingOverlay';
 import AdminDashboard from './AdminDashboard';
 
-// Authorized Admin Emails
-const ADMIN_EMAILS = ['bhimanshutejaan@gmail.com'];
+// STRICT SINGLE ADMINISTRATOR ALLOWLIST
+const SOLE_ADMIN_EMAIL = 'bhimanshutejaan@gmail.com';
 
 export default function Header() {
   const { currentUser, loginWithGoogle, logout } = useAuth();
@@ -25,9 +25,19 @@ export default function Header() {
     }
   };
 
-  const isAdmin = currentUser?.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
+  const isSoleAdmin = currentUser?.email?.toLowerCase() === SOLE_ADMIN_EMAIL;
   const firstName = currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'User';
   const firstInitial = firstName.charAt(0).toUpperCase();
+
+  // Auto-Redirect / Auto-Open Admin Dashboard when bhimanshutejaan@gmail.com signs in
+  useEffect(() => {
+    if (isSoleAdmin) {
+      console.log("⚡ Sole Administrator signed in. Auto-redirecting to Admin Control Center...");
+      setIsAdminDashboardOpen(true);
+    } else {
+      setIsAdminDashboardOpen(false);
+    }
+  }, [currentUser?.email]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -77,7 +87,7 @@ export default function Header() {
                   <div className="profile-avatar-fallback">{firstInitial}</div>
                 )}
                 <span className="user-first-name">{firstName}</span>
-                {isAdmin && <span className="admin-pill-tag">ADMIN</span>}
+                {isSoleAdmin && <span className="admin-pill-tag">ADMIN</span>}
                 <svg 
                   className={`dropdown-chevron ${isMenuOpen ? 'open' : ''}`} 
                   width="14" 
@@ -104,8 +114,8 @@ export default function Header() {
                   <div className="dropdown-divider"></div>
 
                   <div className="dropdown-section">
-                    {/* Admin Dashboard Item */}
-                    {isAdmin ? (
+                    {/* Admin Dashboard Item: Only rendered if email is bhimanshutejaan@gmail.com */}
+                    {isSoleAdmin ? (
                       <button 
                         className="dropdown-item admin-menu-item" 
                         onClick={() => {
