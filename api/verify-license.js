@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { dbAdmin } from './_firebaseAdmin.js';
 
-// Default private key for backend signing (can be overridden by process.env.LICENSE_ED25519_PRIVATE_KEY)
+// Default Ed25519 Private Key for backend signing
 const DEFAULT_ED25519_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
 MC4CAQAwBQYDK2VwBCIEIHL05gsLNSv+z8zWx12ad99K0oLZiGlWkkjkTPs0UtZb
 -----END PRIVATE KEY-----`;
@@ -12,7 +12,10 @@ MC4CAQAwBQYDK2VwBCIEIHL05gsLNSv+z8zWx12ad99K0oLZiGlWkkjkTPs0UtZb
  */
 function generateOfflineToken(licenseKey, deviceId, gracePeriodDays) {
   try {
-    const pemKey = process.env.LICENSE_ED25519_PRIVATE_KEY || DEFAULT_ED25519_PRIVATE_KEY;
+    let pemKey = process.env.LICENSE_ED25519_PRIVATE_KEY;
+    if (!pemKey || typeof pemKey !== 'string' || !pemKey.includes('-----BEGIN PRIVATE KEY-----')) {
+      pemKey = DEFAULT_ED25519_PRIVATE_KEY;
+    }
     const privateKey = crypto.createPrivateKey({ key: pemKey, format: 'pem', type: 'pkcs8' });
     
     const issuedAt = new Date().toISOString();
