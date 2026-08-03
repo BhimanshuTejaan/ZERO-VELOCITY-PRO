@@ -1,23 +1,29 @@
 import crypto from 'crypto';
 import { dbAdmin } from './_firebaseAdmin.js';
 
-// Default Ed25519 Private Key for backend signing
-const DEFAULT_ED25519_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
-MC4CAQAwBQYDK2VwBCIEIHL05gsLNSv+z8zWx12ad99K0oLZiGlWkkjkTPs0UtZb
------END PRIVATE KEY-----`;
+/**
+ * Retrieves the mandatory Ed25519 Private Key from process.env.LICENSE_ED25519_PRIVATE_KEY.
+ * No fallbacks or hardcoded secrets are allowed in production.
+ */
+function getMandatoryPrivateKey() {
+  const pemKey = process.env.LICENSE_ED25519_PRIVATE_KEY;
+  if (!pemKey || typeof pemKey !== 'string' || !pemKey.includes('-----BEGIN PRIVATE KEY-----')) {
+    console.error("❌ CRITICAL SERVER SECURITY ERROR: Mandatory LICENSE_ED25519_PRIVATE_KEY environment variable is missing or invalid.");
+    return null;
+  }
+  try {
+    return crypto.createPrivateKey({ key: pemKey, format: 'pem', type: 'pkcs8' });
+  } catch (errKey) {
+    console.error("❌ CRITICAL SERVER SECURITY ERROR: Failed to parse LICENSE_ED25519_PRIVATE_KEY:", errKey);
+    return null;
+  }
+}
 
 /**
  * Generates an offline token signed with Ed25519 Asymmetric Private Key.
- * The private key stays strictly on the backend server.
  */
-function generateOfflineToken(licenseKey, deviceId, gracePeriodDays) {
+function generateOfflineToken(privateKey, licenseKey, deviceId, gracePeriodDays) {
   try {
-    let pemKey = process.env.LICENSE_ED25519_PRIVATE_KEY;
-    if (!pemKey || typeof pemKey !== 'string' || !pemKey.includes('-----BEGIN PRIVATE KEY-----')) {
-      pemKey = DEFAULT_ED25519_PRIVATE_KEY;
-    }
-    const privateKey = crypto.createPrivateKey({ key: pemKey, format: 'pem', type: 'pkcs8' });
-    
     const issuedAt = new Date().toISOString();
     const period = typeof gracePeriodDays === 'number' ? gracePeriodDays : 7;
     const rawPayload = `${licenseKey}:${deviceId}:${issuedAt}:${period}`;
@@ -31,8 +37,8 @@ function generateOfflineToken(licenseKey, deviceId, gracePeriodDays) {
       gracePeriodDays: period,
       signature: signature
     };
-  } catch (errKey) {
-    console.error("❌ Error generating Ed25519 signature:", errKey);
+  } catch (errSign) {
+    console.error("❌ Error generating Ed25519 signature:", errSign);
     return null;
   }
 }
@@ -42,7 +48,7 @@ function generateOfflineToken(licenseKey, deviceId, gracePeriodDays) {
  * Endpoint: POST /api/verify-license
  * 
  * Verifies a license key against the Firestore 'licenses' collection using Firebase Admin SDK.
- * Generates an Ed25519 signed offlineToken for asymmetric offline grace period validation.
+ * Generates an Ed25519 signed offlineToken using mandatory LICENSE_ED25519_PRIVATE_KEY.
  * Includes CORS headers for Adobe CEP extension access.
  */
 export default async function handler(req, res) {
@@ -62,6 +68,15 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method not allowed. Use POST.' });
+  }
+
+  // Strictly enforce mandatory Ed25519 Private Key from environment variables
+  const privateKey = getMandatoryPrivateKey();
+  if (!privateKey) {
+    return res.status(500).json({
+      success: false,
+      error: 'Server security configuration error: Mandatory signing key is missing on backend.'
+    });
   }
 
   try {
@@ -148,7 +163,7 @@ export default async function handler(req, res) {
     }
 
     const finalActivatedCount = Object.keys(devices).length;
-    const offlineToken = generateOfflineToken(licenseKey, deviceId, gracePeriodDays);
+    const offlineToken = generateOfflineToken(privateKey, licenseKey, deviceId, gracePeriodDays);
 
     const responsePayload = {
       success: true,
