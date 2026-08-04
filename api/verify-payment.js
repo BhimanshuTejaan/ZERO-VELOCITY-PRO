@@ -113,7 +113,7 @@ export default async function handler(req, res) {
           licenseKey,
           purchaseDate,
           razorpayPaymentId: razorpay_payment_id,
-          downloadUrl: process.env.CUSTOMER_DOWNLOAD_URL || "https://drive.usercontent.google.com/download?id=1bfIEiHzo4gaj0LU88pbY_oHfeiCV59Ch&export=download&confirm=t"
+          downloadUrl: process.env.CUSTOMER_DOWNLOAD_URL || "https://drive.usercontent.google.com/download?id=1DxHIyrEM4BQxO5YSHvQt9a9lQWDSmXB8&export=download&confirm=t"
         });
       }
     } catch (emailErr) {
