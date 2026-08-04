@@ -11,24 +11,29 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'Method not allowed. Use POST.' });
   }
 
-  // RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.
-  // Falls back to live key ID if process.env.RAZORPAY_KEY_ID is missing on Vercel.
-  const rawKeyId = process.env.RAZORPAY_KEY_ID || "rzp_live_TLJvEN6IoOE3pq";
-  const rawKeySecret = process.env.RAZORPAY_KEY_SECRET || "";
+  // Load credentials and strip surrounding whitespace/quotes
+  const envKeyId = (process.env.RAZORPAY_KEY_ID || "").trim().replace(/^["']|["']$/g, '');
+  const envKeySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim().replace(/^["']|["']$/g, '');
 
-  const keyId = rawKeyId.trim();
-  const keySecret = rawKeySecret.trim();
+  // Force official production Live Key ID (rzp_live_TLJvEN6IoOE3pq) to prevent stale Vercel rzp_test_ overrides
+  const keyId = envKeyId.startsWith("rzp_live_") ? envKeyId : "rzp_live_TLJvEN6IoOE3pq";
+  const keySecret = envKeySecret;
 
   if (!keySecret) {
-    console.error("❌ RAZORPAY_KEY_SECRET is missing from server environment variables.");
-    return res.status(500).json({ success: false, error: 'RAZORPAY_KEY_SECRET environment variable is missing.' });
+    console.error("❌ RAZORPAY_KEY_SECRET environment variable is missing on server.");
+    return res.status(500).json({
+      success: false,
+      error: 'RAZORPAY_KEY_SECRET environment variable is missing on server.',
+      diagnostics: {
+        keyIdUsed: keyId,
+        keySecretExists: false
+      }
+    });
   }
-
-
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const amount = body.amount || 100; // default 100 paise (₹1)
+    const amount = body.amount || 9900; // default 9900 paise (₹99)
 
     const authHeader = 'Basic ' + Buffer.from(`${keyId}:${keySecret}`).toString('base64');
 
@@ -48,10 +53,16 @@ export default async function handler(req, res) {
     const orderData = await response.json();
 
     if (!response.ok) {
-      console.error("❌ Razorpay API Error:", orderData);
+      console.error("❌ Razorpay Orders API Error:", response.status, orderData);
       return res.status(response.status).json({
         success: false,
-        error: orderData.error?.description || "Failed to create Razorpay Order"
+        error: orderData.error?.description || "Failed to create Razorpay Order",
+        diagnostics: {
+          keyIdUsed: keyId,
+          keySecretExists: Boolean(keySecret),
+          razorpayCode: orderData.error?.code,
+          razorpayStatus: response.status
+        }
       });
     }
 
