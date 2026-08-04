@@ -94,6 +94,8 @@ export default async function handler(req, res) {
       razorpayPaymentId: razorpay_payment_id,
       razorpayOrderId: razorpay_order_id || null,
       purchaseDate,
+      maxDevices: 1,
+      registeredDevices: [],
       status: "active"
     };
 

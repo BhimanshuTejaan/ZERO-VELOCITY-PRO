@@ -121,7 +121,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const maxDevices = typeof licenseData.maxDevices === 'number' ? licenseData.maxDevices : 2;
+    const maxDevices = typeof licenseData.maxDevices === 'number' ? licenseData.maxDevices : 1;
     const gracePeriodDays = typeof licenseData.gracePeriodDays === 'number' ? licenseData.gracePeriodDays : 7;
     const devices = licenseData.devices || {};
     const nowIso = new Date().toISOString();

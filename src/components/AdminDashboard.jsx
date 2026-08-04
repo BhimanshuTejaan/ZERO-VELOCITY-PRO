@@ -22,7 +22,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
   const [genName, setGenName] = useState('');
   const [genEmail, setGenEmail] = useState('');
   const [genType, setGenType] = useState('Lifetime');
-  const [genMaxDevices, setGenMaxDevices] = useState('3');
+  const [genMaxDevices, setGenMaxDevices] = useState('1');
   const [genNotes, setGenNotes] = useState('');
   const [genLoading, setGenLoading] = useState(false);
   const [newlyGeneratedKey, setNewlyGeneratedKey] = useState(null);
@@ -218,7 +218,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
     const status = lic.status || 'active';
     const deviceCount = lic.registeredDevices?.length || 0;
-    const maxDev = lic.maxDevices || 3;
+    const maxDev = lic.maxDevices || 1;
 
     switch (activeFilter) {
       case 'active':
@@ -359,7 +359,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
                     {filteredLicenses.map(lic => {
                       const status = lic.status || 'active';
                       const deviceCount = lic.registeredDevices?.length || 0;
-                      const maxDev = lic.maxDevices || 3;
+                      const maxDev = lic.maxDevices || 1;
                       const isManualAdmin = lic.source === 'admin' || lic.razorpayPaymentId === 'ADMIN_GENERATED';
 
                       return (
@@ -457,10 +457,10 @@ export default function AdminDashboard({ isOpen, onClose }) {
                   <div className="form-group">
                     <label>Max Allowed Devices</label>
                     <select value={genMaxDevices} onChange={e => setGenMaxDevices(e.target.value)}>
-                      <option value="1">1 Device</option>
+                      <option value="1">1 Device (Default)</option>
                       <option value="2">2 Devices</option>
-                      <option value="3">3 Devices (Standard)</option>
-                      <option value="5">5 Devices (Pro / Team)</option>
+                      <option value="3">3 Devices</option>
+                      <option value="5">5 Devices</option>
                       <option value="10">10 Devices (Enterprise)</option>
                     </select>
                   </div>
@@ -584,7 +584,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
                 {/* Registered Devices */}
                 <div className="drawer-section">
                   <div className="section-title-row">
-                    <h4>Registered Devices ({(selectedCustomer.registeredDevices || []).length}/{selectedCustomer.maxDevices || 3})</h4>
+                    <h4>Registered Devices ({(selectedCustomer.registeredDevices || []).length}/{selectedCustomer.maxDevices || 1})</h4>
                     {(selectedCustomer.registeredDevices || []).length > 0 && (
                       <button 
                         className="btn btn-warning btn-xs" 

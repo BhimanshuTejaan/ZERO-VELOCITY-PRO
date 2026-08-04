@@ -86,7 +86,7 @@ export default async function handler(req, res) {
         razorpayOrderId: null,
         source: "admin",
         licenseType: licenseType || "Lifetime",
-        maxDevices: parseInt(maxDevices || '3', 10),
+        maxDevices: parseInt(maxDevices || '1', 10),
         notes: notes || null,
         purchaseDate: nowIso,
         status: "active",

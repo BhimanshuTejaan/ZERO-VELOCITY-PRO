@@ -216,7 +216,7 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
                     </div>
                     <div className="meta-item">
                       <span className="meta-label">Devices:</span>
-                      <span className="meta-value">{(lic.registeredDevices?.length || 0)} / 2</span>
+                      <span className="meta-value">{(lic.registeredDevices?.length || 0)} / {(lic.maxDevices || 1)}</span>
                     </div>
                   </div>
                 </div>
