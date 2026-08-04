@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   const envKeyId = (process.env.RAZORPAY_KEY_ID || "").trim().replace(/^["']|["']$/g, '');
   const envKeySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim().replace(/^["']|["']$/g, '');
 
-  // Force official production Live Key ID (rzp_live_TLJvEN6IoOE3pq) to prevent stale Vercel rzp_test_ overrides
+  // Force official production Live Key ID (rzp_live_TLJvEN6IoOE3pq) to prevent invalid Key ID overrides
   const keyId = envKeyId.startsWith("rzp_live_") ? envKeyId : "rzp_live_TLJvEN6IoOE3pq";
   const keySecret = envKeySecret;
 
