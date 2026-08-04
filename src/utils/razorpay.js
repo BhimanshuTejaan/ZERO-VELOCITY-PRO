@@ -6,8 +6,8 @@
 // Live Key Secret is stored exclusively in Vercel environment variables (RAZORPAY_KEY_SECRET)
 export const RAZORPAY_KEY_ID = "rzp_live_TLJvEN6IoOE3pq";
 
-// Launch price: ₹99 (9900 paise)
-export const PRODUCT_PRICE_INR = 99;
+// Temporary test price: ₹1 (100 paise)
+export const PRODUCT_PRICE_INR = 1;
 
 // ─────────────────────────────────────────────────────────
 // Customer Download URL – Zero_Velocity_v1.0.0.zip

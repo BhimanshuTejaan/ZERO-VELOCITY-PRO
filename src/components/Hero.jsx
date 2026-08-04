@@ -38,7 +38,7 @@ export default function Hero() {
           
           <div className="hero-pricing-widget">
             <div className="price-tag-inline">
-              <span className="price-current">₹99</span>
+              <span className="price-current">₹1</span>
               <span className="price-crossed">₹499</span>
             </div>
             <p className="price-terms-inline">Founder Launch Price. Lifetime access.</p>
