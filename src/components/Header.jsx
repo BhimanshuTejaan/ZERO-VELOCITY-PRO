@@ -59,9 +59,27 @@ export default function Header() {
       setIsLicenseModalOpen(true);
     };
 
+    const handleOpenAdmin = () => {
+      setIsAdminDashboardOpen(true);
+    };
+
+    const handleOpenLicense = () => {
+      setNewlyCreatedKey(null);
+      setDownloadUrl(null);
+      setIsLicenseModalOpen(true);
+    };
+
     window.addEventListener('zero-velocity-license-issued', handleLicenseIssued);
-    return () => window.removeEventListener('zero-velocity-license-issued', handleLicenseIssued);
+    window.addEventListener('zero-velocity-open-admin-dashboard', handleOpenAdmin);
+    window.addEventListener('zero-velocity-open-license-modal', handleOpenLicense);
+
+    return () => {
+      window.removeEventListener('zero-velocity-license-issued', handleLicenseIssued);
+      window.removeEventListener('zero-velocity-open-admin-dashboard', handleOpenAdmin);
+      window.removeEventListener('zero-velocity-open-license-modal', handleOpenLicense);
+    };
   }, []);
+
 
   return (
     <>

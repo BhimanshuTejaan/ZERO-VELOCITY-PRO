@@ -2,7 +2,6 @@
  * Vercel Serverless Function: Health Check & Environment Verification
  * Endpoint: GET /api/health
  * 
- * TEMPORARY DEBUG CHECK:
  * Includes `secretLoaded` (boolean) to safely verify that process.env.RAZORPAY_KEY_SECRET
  * is correctly injected by Vercel without exposing the secret value.
  */

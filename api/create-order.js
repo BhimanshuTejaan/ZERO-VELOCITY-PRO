@@ -11,20 +11,19 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'Method not allowed. Use POST.' });
   }
 
-  // RAZORPAY_KEY_ID must be set as a Vercel environment variable (rzp_live_XXXXXXXXXXXX).
-  // RAZORPAY_KEY_SECRET must be set as a Vercel environment variable.
-  const keyId = process.env.RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  // RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.
+  // Falls back to live key ID if process.env.RAZORPAY_KEY_ID is missing on Vercel.
+  const rawKeyId = process.env.RAZORPAY_KEY_ID || "rzp_live_TLJvEN6IoOE3pq";
+  const rawKeySecret = process.env.RAZORPAY_KEY_SECRET || "";
 
-  if (!keyId) {
-    console.error("❌ RAZORPAY_KEY_ID is missing from environment variables.");
-    return res.status(500).json({ success: false, error: 'RAZORPAY_KEY_ID environment variable is missing.' });
-  }
+  const keyId = rawKeyId.trim();
+  const keySecret = rawKeySecret.trim();
 
   if (!keySecret) {
-    console.error("❌ RAZORPAY_KEY_SECRET is missing.");
+    console.error("❌ RAZORPAY_KEY_SECRET is missing from server environment variables.");
     return res.status(500).json({ success: false, error: 'RAZORPAY_KEY_SECRET environment variable is missing.' });
   }
+
 
 
   try {

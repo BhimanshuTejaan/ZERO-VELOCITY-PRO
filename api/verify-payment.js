@@ -47,7 +47,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const secret = process.env.RAZORPAY_KEY_SECRET;
+    const secret = (process.env.RAZORPAY_KEY_SECRET || '').trim();
     if (!secret) {
       console.error("❌ RAZORPAY_KEY_SECRET environment variable is missing on server.");
       return res.status(500).json({ 

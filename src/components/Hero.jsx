@@ -4,10 +4,18 @@ import { useAuth } from '../AuthContext';
 import { executePurchaseFlow } from '../utils/purchaseFlow';
 
 export default function Hero() {
-  const { currentUser, loginWithGoogle } = useAuth();
+  const { currentUser, loginWithGoogle, isSoleAdmin, hasActiveLicense } = useAuth();
 
   const handleBuyNow = () => {
     executePurchaseFlow({ currentUser, loginWithGoogle });
+  };
+
+  const handleOpenAdmin = () => {
+    window.dispatchEvent(new CustomEvent('zero-velocity-open-admin-dashboard'));
+  };
+
+  const handleOpenLicenseModal = () => {
+    window.dispatchEvent(new CustomEvent('zero-velocity-open-license-modal'));
   };
 
   return (
@@ -42,8 +50,25 @@ export default function Hero() {
           </div>
 
           <div className="hero-cta">
-            <button className="btn btn-primary btn-large" onClick={handleBuyNow}>Buy Now</button>
-            <button className="btn btn-secondary btn-large">Watch Demo</button>
+            {isSoleAdmin ? (
+              <button className="btn btn-primary btn-large" onClick={handleOpenAdmin}>
+                Admin Control Center
+              </button>
+            ) : hasActiveLicense ? (
+              <button className="btn btn-primary btn-large" onClick={handleOpenLicenseModal}>
+                My License &amp; Download
+              </button>
+            ) : (
+              <button className="btn btn-primary btn-large" onClick={handleBuyNow}>
+                Buy Now
+              </button>
+            )}
+            <button className="btn btn-secondary btn-large" onClick={() => {
+              const el = document.getElementById('showcase');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}>
+              Watch Demo
+            </button>
           </div>
           
           <a href="#roadmap" className="roadmap-value-badge">
