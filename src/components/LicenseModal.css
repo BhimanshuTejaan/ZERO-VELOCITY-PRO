@@ -220,6 +220,16 @@
   background: #34d399;
 }
 
+.license-key-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+  margin-bottom: -0.4rem;
+}
+
 .license-key-box {
   display: flex;
   align-items: center;
@@ -264,14 +274,35 @@
   border-color: rgba(16, 185, 129, 0.4);
 }
 
+.license-action-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.3rem;
+  margin-bottom: 0.2rem;
+}
+
+.license-action-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.82rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
 .license-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 0.78rem;
   color: var(--text-muted);
-  padding-top: 0.2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .meta-item {
@@ -280,7 +311,17 @@
   gap: 0.35rem;
 }
 
+.meta-label {
+  color: var(--text-muted);
+}
+
+.meta-value {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
 .meta-value.monospace {
   font-family: monospace;
   font-size: 0.72rem;
 }
+

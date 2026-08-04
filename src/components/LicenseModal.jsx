@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import './LicenseModal.css';
 import { useAuth } from '../AuthContext';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { CUSTOMER_DOWNLOAD_URL } from '../utils/razorpay';
 
 export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, downloadUrl }) {
   const { currentUser } = useAuth();
   const [licenses, setLicenses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [copiedKey, setCopiedKey] = useState(null);
+
+  const downloadTargetUrl = downloadUrl || CUSTOMER_DOWNLOAD_URL;
 
   useEffect(() => {
     if (!isOpen || !currentUser) return;
@@ -16,47 +19,26 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
     setLoading(true);
 
     const fetchLicenses = async () => {
-      console.log("==========================================");
-      console.log("🔒 Authenticated Firebase UID:", currentUser?.uid);
-      console.log("📧 Authenticated Email:", currentUser?.email);
-      console.log("🔍 Executing Query:", `licenses collection WHERE firebaseUid == "${currentUser?.uid}"`);
-
       try {
         const db = getFirestore();
         const licensesRef = collection(db, 'licenses');
         
-        // Primary query by firebaseUid
         let q = query(licensesRef, where('firebaseUid', '==', currentUser.uid));
         let querySnapshot = await getDocs(q);
 
-        console.log("📄 Documents Returned (by UID):", querySnapshot.size);
-
         let list = [];
         querySnapshot.forEach(doc => {
-          const data = doc.data();
-          console.log(`✅ Accepted Document [${doc.id}]:`, data);
-          list.push(data);
+          list.push(doc.data());
         });
 
-        // Fallback query by email if no UID match found
         if (list.length === 0 && currentUser.email) {
-          console.log("🔍 Fallback Query Executing:", `licenses collection WHERE email == "${currentUser.email}"`);
           const qEmail = query(licensesRef, where('email', '==', currentUser.email));
           const snapEmail = await getDocs(qEmail);
-          console.log("📄 Fallback Documents Returned (by Email):", snapEmail.size);
-          
           snapEmail.forEach(doc => {
-            const data = doc.data();
-            console.log(`✅ Accepted Fallback Document [${doc.id}]:`, data);
-            list.push(data);
+            list.push(doc.data());
           });
         }
 
-        if (list.length === 0) {
-          console.warn("⚠️ Zero documents accepted into list. Triggering empty state UI.");
-        }
-
-        // Sort most recent first
         list.sort((a, b) => new Date(b.purchaseDate || 0) - new Date(a.purchaseDate || 0));
 
         if (isMounted) {
@@ -64,10 +46,8 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
         }
       } catch (err) {
         console.error("❌ Firestore Read Error:", err.code, err.message);
-        console.error("❌ Exception Stack:", err);
       } finally {
         if (isMounted) setLoading(false);
-        console.log("==========================================");
       }
     };
 
@@ -121,9 +101,9 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
               <strong>Payment Verified!</strong>
               <span>Your license has been activated successfully. It has been securely saved to your account.</span>
             </div>
-            {downloadUrl && (
+            {downloadTargetUrl && (
               <a
-                href={downloadUrl}
+                href={downloadTargetUrl}
                 download
                 className="btn btn-primary btn-sm banner-download-btn"
                 target="_blank"
@@ -167,6 +147,8 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
                     </span>
                   </div>
 
+                  <div className="license-key-label">Your License Key</div>
+
                   <div className="license-key-box">
                     <code className="license-code">{lic.licenseKey}</code>
                     <button 
@@ -187,17 +169,55 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
                     </button>
                   </div>
 
+                  {/* Customer Action Buttons */}
+                  <div className="license-action-row">
+                    <a
+                      href={downloadTargetUrl}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary btn-sm license-action-btn"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                      Download Plugin
+                    </a>
+                    <a
+                      href="#installation"
+                      onClick={() => {
+                        onClose();
+                        const el = document.getElementById('installation');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="btn btn-secondary btn-sm license-action-btn"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                      </svg>
+                      Installation Guide
+                    </a>
+                  </div>
+
+                  {/* Metadata Grid: Purchase Date, Plugin Version, Device Count */}
                   <div className="license-card-footer">
                     <div className="meta-item">
                       <span className="meta-label">Purchased:</span>
                       <span className="meta-value">{formatDate(lic.purchaseDate)}</span>
                     </div>
-                    {lic.razorpayPaymentId && (
-                      <div className="meta-item">
-                        <span className="meta-label">Payment ID:</span>
-                        <span className="meta-value monospace">{lic.razorpayPaymentId}</span>
-                      </div>
-                    )}
+                    <div className="meta-item">
+                      <span className="meta-label">Version:</span>
+                      <span className="meta-value">v1.0.0</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="meta-label">Devices:</span>
+                      <span className="meta-value">{(lic.registeredDevices?.length || 0)} / 2</span>
+                    </div>
                   </div>
                 </div>
               ))}
