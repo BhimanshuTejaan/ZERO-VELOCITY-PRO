@@ -13,12 +13,12 @@
   gap: 0.75rem;
 }
 
-.logo-icon {
-  width: 24px;
-  height: 24px;
-  background: var(--accent-color);
+.logo-icon,
+.logo-icon-img {
+  width: 28px;
+  height: 28px;
   border-radius: 6px;
-  box-shadow: 0 0 12px var(--accent-color);
+  object-fit: contain;
 }
 
 .logo-text {

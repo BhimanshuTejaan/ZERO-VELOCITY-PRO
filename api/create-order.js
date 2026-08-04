@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const amount = body.amount || 100; // default 100 paise (₹1)
+    const amount = body.amount || 9900; // default 9900 paise (₹99)
 
     const authHeader = 'Basic ' + Buffer.from(`${keyId}:${keySecret}`).toString('base64');
 

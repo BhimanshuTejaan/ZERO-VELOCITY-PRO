@@ -55,7 +55,7 @@ export default function Pricing() {
           
           <div className="pricing-amount">
             <span className="pricing-crossed">₹499</span>
-            <span className="pricing-current">₹1</span>
+            <span className="pricing-current">₹99</span>
           </div>
           
           <ul className="pricing-features">

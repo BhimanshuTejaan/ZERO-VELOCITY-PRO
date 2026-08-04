@@ -85,7 +85,7 @@ export default function Header() {
     <>
       <header className="header container">
         <div className="header-left">
-          <div className="logo-icon"></div>
+          <img src="/cep/assets/zero-velocity-logo.png" alt="Zero Velocity Logo" className="logo-icon-img" />
           <span className="logo-text">Zero Velocity</span>
         </div>
         <div className="header-right">
