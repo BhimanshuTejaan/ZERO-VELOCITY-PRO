@@ -63,14 +63,21 @@ export default function Hero() {
                 Buy Now
               </button>
             )}
-            <a 
-              href="https://youtu.be/MTN4vS5O_Bs?si=NJHWgewS74e1J8MC" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <button 
+              type="button"
               className="btn btn-secondary btn-large"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(
+                  "https://youtu.be/MTN4vS5O_Bs?si=NJHWgewS74e1J8MC",
+                  "_blank",
+                  "noopener,noreferrer"
+                );
+              }}
             >
               Watch Demo
-            </a>
+            </button>
           </div>
           
           <a href="#roadmap" className="roadmap-value-badge">
