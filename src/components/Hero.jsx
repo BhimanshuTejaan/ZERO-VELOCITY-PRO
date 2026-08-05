@@ -63,12 +63,14 @@ export default function Hero() {
                 Buy Now
               </button>
             )}
-            <button className="btn btn-secondary btn-large" onClick={() => {
-              const el = document.getElementById('showcase');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }}>
+            <a 
+              href="https://youtu.be/MTN4vS5O_Bs?si=NJHWgewS74e1J8MC" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="btn btn-secondary btn-large"
+            >
               Watch Demo
-            </button>
+            </a>
           </div>
           
           <a href="#roadmap" className="roadmap-value-badge">
