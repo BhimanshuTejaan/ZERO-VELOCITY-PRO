@@ -186,12 +186,9 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
                       Download Plugin
                     </a>
                     <a
-                      href="#installation"
-                      onClick={() => {
-                        onClose();
-                        const el = document.getElementById('installation');
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }}
+                      href="https://youtu.be/I4mxZlvKKCY?si=Zx6EZfyEb2Iv-bJL"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="btn btn-secondary btn-sm license-action-btn"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
