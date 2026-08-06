@@ -90,7 +90,8 @@ export default async function handler(req, res) {
     console.error("❌ Error in /api/create-order:", err);
     return res.status(500).json({
       success: false,
-      error: 'Internal server error creating Razorpay Order.'
+      error: 'Internal server error creating Razorpay Order.',
+      details: err.message || String(err)
     });
   }
 }
