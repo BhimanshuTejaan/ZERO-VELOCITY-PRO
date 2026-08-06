@@ -34,7 +34,7 @@
       "if (fBin.exists) { $.evalFile(fBin); }" +
       "else if (fJsx.exists) { $.evalFile(fJsx); }" +
       "else { throw new Error('Host script file not found.'); }" +
-      "__zvHostLoadResult = ($.global.ZeroVelocityHost && $.global.ZeroVelocityHost.generateFromSrt && $.global.ZeroVelocityHost.applyBlock) ? " +
+      "__zvHostLoadResult = ($.global.ZeroVelocityHost && $.global.ZeroVelocityHost.ping) ? " +
       quoteForExtendScript("READY") + " : " + quoteForExtendScript("HOST_NOT_READY") + ";" +
       "} catch (e) {__zvHostLoadResult = " + quoteForExtendScript("HOST_LOAD_ERROR: ") + " + e.message;}" +
       "__zvHostLoadResult;";
@@ -50,13 +50,17 @@
     var script;
 
     if (!csInterface) {
-      callback({ ok: false, message: "CEP bridge is not available." });
+      if (typeof callback === "function") {
+        callback({ ok: false, message: "CEP bridge is not available." });
+      }
       return;
     }
 
     ensureHostLoaded(csInterface, function (ready, message) {
       if (!ready) {
-        callback({ ok: false, message: "host script was not loaded: " + message });
+        if (typeof callback === "function") {
+          callback({ ok: false, message: "host script was not loaded: " + message });
+        }
         return;
       }
 
@@ -68,19 +72,15 @@
         } catch (error) {
           parsed = { ok: false, message: result || error.message };
         }
-        callback(parsed);
+        if (typeof callback === "function") {
+          callback(parsed);
+        }
       });
     });
   }
 
   function generate(state, callback) {
-    callHost("generateFromSrt", {
-      srtText: state.sourceText,
-      wordsPerCaption: state.controls.wordsPerCaption,
-      layoutMode: state.controls.layoutMode,
-      animationMode: state.controls.animationMode,
-      controls: state.controls
-    }, callback);
+    callHost("generateCaptions", { state: state }, callback);
   }
 
   function ping(callback) {
@@ -88,19 +88,7 @@
   }
 
   function applySelectedBlock(state, callback) {
-    var blocks = state.blocks || [];
-    var block = null;
-    var i;
-    for (i = 0; i < blocks.length; i += 1) {
-      if (blocks[i].id === state.activeBlockId) {
-        block = blocks[i];
-        break;
-      }
-    }
-    callHost("applyBlock", {
-      block: block,
-      controls: state.controls
-    }, callback);
+    callHost("applyChanges", { state: state }, callback);
   }
 
   window.ZeroVelocityAeBridge = {

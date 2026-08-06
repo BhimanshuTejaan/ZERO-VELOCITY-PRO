@@ -138,6 +138,10 @@
     window.ZeroVelocityWordSelection.render(chipRoot, modeRoot, state);
   });
 
+  if (window.ZeroVelocityLicenseManager && typeof window.ZeroVelocityLicenseManager.init === "function") {
+    window.ZeroVelocityLicenseManager.init();
+  }
+
   window.ZeroVelocityCEP = {
     version: "1.0.0",
     model: model
