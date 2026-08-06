@@ -52,28 +52,51 @@
     function loadFile(rootFolder, relativePath) {
         var file = new File(rootFolder.fsName + "/" + relativePath);
         if (!file.exists) {
-            throw new Error("Missing stable JSX module: " + file.fsName);
+            file = new File(rootFolder.fsName + "/" + relativePath.replace(/^src\//, ""));
+        }
+        if (!file.exists) {
+            throw new Error("Missing stable JSX module: " + relativePath + " in " + rootFolder.fsName);
         }
         $.evalFile(file);
     }
 
     function hasStableEngineFiles(folder) {
-        return folder &&
-            folder.exists &&
-            (new File(folder.fsName + "/src/CS_Config.jsx")).exists &&
-            (new File(folder.fsName + "/src/CS_Renderer.jsx")).exists &&
-            (new File(folder.fsName + "/src/CS_SRTParser.jsx")).exists;
+        if (!folder || !folder.exists) {
+            return false;
+        }
+        var directCheck = (new File(folder.fsName + "/CS_Config.jsx")).exists &&
+                          (new File(folder.fsName + "/CS_Renderer.jsx")).exists &&
+                          (new File(folder.fsName + "/CS_SRTParser.jsx")).exists;
+
+        var subCheck = (new File(folder.fsName + "/src/CS_Config.jsx")).exists &&
+                        (new File(folder.fsName + "/src/CS_Renderer.jsx")).exists &&
+                        (new File(folder.fsName + "/src/CS_SRTParser.jsx")).exists;
+
+        return directCheck || subCheck;
     }
 
     function findStableRoot(cepRoot) {
+        var hostFile = new File($.fileName);
+        var jsxFolder = hostFile.parent;
         var candidates = [];
         var checked = [];
         var i;
         var folder;
 
+        // 1. Bundled inside extension's own jsx/src folder (Production - Self-Contained)
+        candidates.push(new Folder(jsxFolder.fsName + "/src"));
+
+        // 2. Bundled directly inside extension's jsx/ folder
+        candidates.push(new Folder(jsxFolder.fsName));
+
+        // 3. Bundled in extension root /src
+        candidates.push(new Folder(cepRoot.fsName + "/src"));
+
+        // 4. Sibling extension directory fallback (Local Dev)
         candidates.push(new Folder(cepRoot.parent.fsName + "/AE SCRIPT AUTO CAPTION"));
+
+        // 5. User Documents directory fallback (Local Dev)
         candidates.push(new Folder(Folder.myDocuments.fsName + "/AE SCRIPT AUTO CAPTION"));
-        candidates.push(new Folder("C:/Users/Bhimanshu/OneDrive/Documents/AE SCRIPT AUTO CAPTION"));
 
         for (i = 0; i < candidates.length; i += 1) {
             folder = candidates[i];
@@ -150,188 +173,140 @@
         };
     }
 
-    function blocksToBrowserBlocks(blocks) {
-        var result = [];
+    function serializeState(comp) {
+        var blocks = [];
+        var rawState;
         var i;
-        for (i = 0; i < blocks.length; i += 1) {
-            result.push(blockToBrowserBlock(blocks[i]));
-        }
-        return result;
-    }
 
-    function applyBrowserRolesToStableBlock(stableBlock, browserBlock) {
-        var words = browserBlock.words || [];
-        var i;
-        var heroWord = stableBlock.heroWord;
-        var accentWord = stableBlock.accentWord;
-
-        for (i = 0; i < words.length; i += 1) {
-            if (words[i].role === "hero") {
-                heroWord = words[i].text;
-            } else if (words[i].role === "accent") {
-                accentWord = words[i].text;
+        ensureStableEngine();
+        rawState = $.global.CS.Config.readCompConfig(comp);
+        if (rawState && rawState.blocks) {
+            for (i = 0; i < rawState.blocks.length; i += 1) {
+                blocks.push(blockToBrowserBlock(rawState.blocks[i]));
             }
         }
 
-        stableBlock.heroWord = heroWord;
-        stableBlock.accentWord = accentWord;
-        stableBlock.supportText = $.global.CS.Utils.joinExceptRoles(stableBlock.words, heroWord, accentWord);
-        if (stableBlock.timedWords) {
-            for (i = 0; i < stableBlock.timedWords.length; i += 1) {
-                if (i < words.length) {
-                    stableBlock.timedWords[i].role = words[i].role || "support";
-                } else {
-                    stableBlock.timedWords[i].role = "support";
-                }
+        return {
+            sourceText: rawState ? rawState.sourceText || "" : "",
+            blocks: blocks,
+            controls: {
+                verticalSpacing: rawState && rawState.controls ? rawState.controls.verticalSpacing || 1 : 1,
+                heroSizeRatio: rawState && rawState.controls ? rawState.controls.heroSizeRatio || 1 : 1,
+                wordsPerCaption: rawState && rawState.controls ? rawState.controls.wordsPerCaption || "Auto" : "Auto",
+                layoutMode: rawState && rawState.controls ? rawState.controls.layoutMode || "Balanced Layout" : "Balanced Layout",
+                animationMode: rawState && rawState.controls ? rawState.controls.animationMode || "None" : "None"
             }
-        }
+        };
     }
 
-    function getGeneratedLayers(comp, block) {
-        var layers = [];
-        var names = block.generatedLayerNames || [];
-        var i;
-        var j;
-        for (i = 0; i < names.length; i += 1) {
-            for (j = 1; j <= comp.numLayers; j += 1) {
-                if (comp.layer(j).name === names[i]) {
-                    layers.push(comp.layer(j));
-                    break;
-                }
-            }
-        }
-        return layers;
-    }
-
-    function getLayerRole(layer) {
-        var comment = String(layer.comment || "");
-        if (comment.indexOf("|hero|") !== -1) {
-            return "hero";
-        }
-        if (comment.indexOf("|accent|") !== -1) {
-            return "accent";
-        }
-        return "support";
-    }
-
-    function applyHeroSizeRatio(layers, ratio) {
-        var i;
-        var textProp;
-        var doc;
-        if (!ratio || ratio === 1) {
-            return;
-        }
-        for (i = 0; i < layers.length; i += 1) {
-            if (getLayerRole(layers[i]) === "hero") {
-                textProp = layers[i].property("Source Text");
-                if (textProp) {
-                    doc = textProp.value;
-                    doc.fontSize = doc.fontSize * ratio;
-                    textProp.setValue(doc);
-                }
-            }
-        }
-    }
-
-    function applyVerticalSpacing(layers, spacing) {
-        var positions = [];
-        var center = 0;
-        var i;
-        var prop;
-        var value;
-        if (!spacing || spacing === 1 || layers.length < 2) {
-            return;
-        }
-        for (i = 0; i < layers.length; i += 1) {
-            prop = $.global.CS.Utils.getTransformProperty(layers[i], "ADBE Position", "Position");
-            if (prop) {
-                value = prop.value;
-                positions.push({ prop: prop, value: value });
-                center += value[1];
-            }
-        }
-        if (positions.length < 2) {
-            return;
-        }
-        center = center / positions.length;
-        for (i = 0; i < positions.length; i += 1) {
-            positions[i].prop.setValue([
-                positions[i].value[0],
-                center + ((positions[i].value[1] - center) * spacing)
-            ]);
-        }
-    }
-
-    function applyBrowserControls(comp, block, controls) {
-        var layers = getGeneratedLayers(comp, block);
-        if (!controls) {
-            return;
-        }
-        applyHeroSizeRatio(layers, Number(controls.heroSizeRatio || 1));
-        applyVerticalSpacing(layers, Number(controls.verticalSpacing || 1));
-    }
-
-    $.global.ZeroVelocityHost.generateFromSrt = function (payloadJson) {
-        var payload;
-        var comp;
-        var captions;
-        var blocks;
-
+    $.global.ZeroVelocityHost.getState = function () {
         try {
+            var comp = getActiveComp();
+            return jsonResult(true, "State loaded from composition.", serializeState(comp));
+        } catch (error) {
+            return jsonResult(false, error.message);
+        }
+    };
+
+    $.global.ZeroVelocityHost.generateCaptions = function (paramsJson) {
+        try {
+            var comp = getActiveComp();
+            var params = parseJson(paramsJson || "{}");
+            var state = params.state || {};
+            var blocks = [];
+            var rawBlocks = state.blocks || [];
+            var i, j, words, w;
+
             ensureStableEngine();
-            payload = parseJson(payloadJson || "{}");
-            comp = getActiveComp();
-            if (!payload.srtText) {
-                throw new Error("Import an SRT file first.");
+
+            for (i = 0; i < rawBlocks.length; i += 1) {
+                words = [];
+                if (rawBlocks[i].words) {
+                    for (j = 0; j < rawBlocks[i].words.length; j += 1) {
+                        w = rawBlocks[i].words[j];
+                        words.push({
+                            text: w.text,
+                            start: w.start,
+                            end: w.end,
+                            role: w.role || "support"
+                        });
+                    }
+                }
+                blocks.push({
+                    id: rawBlocks[i].id,
+                    start: rawBlocks[i].start,
+                    end: rawBlocks[i].end,
+                    text: rawBlocks[i].text,
+                    timedWords: words
+                });
             }
 
-            captions = $.global.CS.SRTParser.parse(payload.srtText);
-            blocks = $.global.CS.SRTParser.buildBlocks(
-                captions,
-                payload.wordsPerCaption || "Auto",
-                payload.layoutMode || "Balanced Layout",
-                payload.animationMode || "None"
-            );
-
-            $.global.CS.Renderer.generate(comp, blocks);
-            $.global.ZeroVelocityHost.blocks = blocks;
-            for (var i = 0; i < blocks.length; i += 1) {
-                applyBrowserControls(comp, blocks[i], payload.controls);
-            }
-
-            return jsonResult(true, "Generated " + blocks.length + " caption blocks.", {
-                blocks: blocksToBrowserBlocks(blocks)
+            $.global.CS.Config.writeCompConfig(comp, {
+                version: "1.0",
+                sourceText: state.sourceText || "",
+                blocks: blocks,
+                controls: state.controls || {}
             });
+
+            $.global.CS.Renderer.renderCaptions(comp, {
+                sourceText: state.sourceText || "",
+                blocks: blocks,
+                controls: state.controls || {}
+            });
+
+            return jsonResult(true, "Captions generated successfully.", serializeState(comp));
         } catch (error) {
             return jsonResult(false, "Generate failed: " + error.message);
         }
     };
 
-    $.global.ZeroVelocityHost.applyBlock = function (payloadJson) {
-        var payload;
-        var comp;
-        var browserBlock;
-        var blocks;
-        var i;
-
+    $.global.ZeroVelocityHost.applyChanges = function (paramsJson) {
         try {
+            var comp = getActiveComp();
+            var params = parseJson(paramsJson || "{}");
+            var state = params.state || {};
+            var blocks = [];
+            var rawBlocks = state.blocks || [];
+            var i, j, words, w;
+
             ensureStableEngine();
-            payload = parseJson(payloadJson || "{}");
-            browserBlock = payload.block;
-            if (!browserBlock) {
-                throw new Error("Select a caption block first.");
-            }
-            blocks = $.global.ZeroVelocityHost.blocks || [];
-            for (i = 0; i < blocks.length; i += 1) {
-                if (blocks[i].id === browserBlock.id) {
-                    comp = getActiveComp();
-                    applyBrowserRolesToStableBlock(blocks[i], browserBlock);
-                    $.global.CS.Renderer.updateBlock(comp, blocks[i]);
-                    applyBrowserControls(comp, blocks[i], payload.controls);
-                    return jsonResult(true, "Updated " + browserBlock.id + ".");
+
+            for (i = 0; i < rawBlocks.length; i += 1) {
+                words = [];
+                if (rawBlocks[i].words) {
+                    for (j = 0; j < rawBlocks[i].words.length; j += 1) {
+                        w = rawBlocks[i].words[j];
+                        words.push({
+                            text: w.text,
+                            start: w.start,
+                            end: w.end,
+                            role: w.role || "support"
+                        });
+                    }
                 }
+                blocks.push({
+                    id: rawBlocks[i].id,
+                    start: rawBlocks[i].start,
+                    end: rawBlocks[i].end,
+                    text: rawBlocks[i].text,
+                    timedWords: words
+                });
             }
-            throw new Error("Generate captions before applying changes.");
+
+            $.global.CS.Config.writeCompConfig(comp, {
+                version: "1.0",
+                sourceText: state.sourceText || "",
+                blocks: blocks,
+                controls: state.controls || {}
+            });
+
+            $.global.CS.Renderer.updateExistingCaptions(comp, {
+                sourceText: state.sourceText || "",
+                blocks: blocks,
+                controls: state.controls || {}
+            });
+
+            return jsonResult(true, "Changes applied to composition.", serializeState(comp));
         } catch (error) {
             return jsonResult(false, "Apply failed: " + error.message);
         }
