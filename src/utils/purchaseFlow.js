@@ -61,13 +61,6 @@ export async function openRazorpayCheckoutForUser(user, { onSuccess, onError } =
  * Click "Buy Now" -> Check Auth -> Sign In (if needed) -> Auto Open Razorpay
  */
 export async function executePurchaseFlow({ currentUser, loginWithGoogle, onSuccess, onError }) {
-  const authenticatedUser = await signInIfNeeded({ currentUser, loginWithGoogle });
-
-  // If user cancelled login or login failed, stop pipeline without throwing
-  if (!authenticatedUser) {
-    return;
-  }
-
-  // Automatically continue to Razorpay checkout
-  await openRazorpayCheckoutForUser(authenticatedUser, { onSuccess, onError });
+  alert("Zero Velocity is temporarily unavailable while a stability update is being deployed.");
+  return;
 }
