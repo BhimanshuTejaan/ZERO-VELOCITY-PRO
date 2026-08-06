@@ -1,0 +1,120 @@
+.editor-bg-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* Ambient Blue Lighting Glows */
+.ambient-blue-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  opacity: 0.12;
+  background: radial-gradient(circle, #3b82f6 0%, rgba(6, 11, 20, 0) 70%);
+}
+
+.hero-light {
+  width: 800px;
+  height: 800px;
+  top: -250px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: gentlePulse 10s ease-in-out infinite alternate;
+}
+
+.section-light-1 {
+  width: 600px;
+  height: 600px;
+  top: 35%;
+  left: -100px;
+}
+
+.section-light-2 {
+  width: 700px;
+  height: 700px;
+  top: 65%;
+  right: -150px;
+}
+
+@keyframes gentlePulse {
+  0% { opacity: 0.1; transform: translateX(-50%) scale(1); }
+  100% { opacity: 0.16; transform: translateX(-50%) scale(1.08); }
+}
+
+/* Keyframe Diamonds Floating Motion */
+.keyframe-floating {
+  position: absolute;
+  color: rgba(59, 130, 246, 0.15);
+  animation: floatSlow 12s ease-in-out infinite alternate;
+}
+
+.keyframe-1 {
+  top: 18%;
+  left: 8%;
+  animation-duration: 14s;
+}
+
+.keyframe-2 {
+  top: 55%;
+  right: 6%;
+  animation-duration: 18s;
+  animation-delay: -4s;
+}
+
+.keyframe-3 {
+  top: 82%;
+  left: 12%;
+  animation-duration: 16s;
+  animation-delay: -8s;
+}
+
+@keyframes floatSlow {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(8deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* Timeline Ruler Vector */
+.timeline-ruler-overlay {
+  position: absolute;
+  top: 120px;
+  left: 0;
+  width: 100%;
+  opacity: 0.7;
+}
+
+/* Bezier Curve Vector */
+.velocity-curve-overlay {
+  position: absolute;
+  top: 48%;
+  right: 3%;
+  opacity: 0.8;
+  transform: rotate(-10deg);
+}
+
+/* Safe Margin Guides */
+.safe-margin-guide {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-color: rgba(255, 255, 255, 0.03);
+  border-style: solid;
+}
+
+.left-guide {
+  top: 25%;
+  left: 3%;
+  border-width: 1.5px 0 0 1.5px;
+}
+
+.right-guide {
+  top: 75%;
+  right: 3%;
+  border-width: 0 1.5px 1.5px 0;
+}

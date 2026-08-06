@@ -8,11 +8,12 @@ import SupportCard from './components/SupportCard';
 import Installation from './components/Installation';
 import Reviews from './components/Reviews';
 import Footer from './components/Footer';
+import EditorBackground from './components/EditorBackground';
 
 function App() {
   return (
     <>
-      <div className="glow-bg"></div>
+      <EditorBackground />
       <Header />
       <main>
         <Hero />

@@ -46,9 +46,9 @@ export default function Showcase() {
         </div>
         
         <div className="showcase-list">
-          {showcases.map((item, index) => (
+          {showcases.map((item) => (
             <div key={item.id} className={`showcase-block ${item.align === 'right' ? 'row-reverse' : ''}`}>
-              <div className="showcase-visual glass-panel">
+              <div className={`showcase-visual glass-panel showcase-card-${item.id}`}>
                 <div className="visual-placeholder">
                   <span className="placeholder-text">{item.placeholder}</span>
                 </div>

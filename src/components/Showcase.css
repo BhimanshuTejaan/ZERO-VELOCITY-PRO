@@ -45,12 +45,59 @@
   background: linear-gradient(135deg, rgba(13, 20, 36, 0.6) 0%, rgba(6, 11, 20, 0.85) 100%);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-card);
-  transition: all 0.3s var(--transition-smooth);
+  transition: all 0.35s var(--transition-smooth);
+  position: relative;
 }
 
 .showcase-visual:hover {
-  border-color: var(--border-hover);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  transform: translateY(-4px);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.85);
+}
+
+/* Unique Handcrafted Visual Treatments for Each Feature Card (Requirement 5) */
+.showcase-card-workflow {
+  background: linear-gradient(135deg, rgba(15, 25, 48, 0.75) 0%, rgba(6, 11, 20, 0.9) 100%);
+  border-color: rgba(59, 130, 246, 0.22);
+}
+.showcase-card-workflow:hover {
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.18);
+}
+
+.showcase-card-corporate {
+  background: linear-gradient(135deg, rgba(10, 28, 30, 0.75) 0%, rgba(6, 11, 20, 0.9) 100%);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+.showcase-card-corporate:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.15);
+}
+.showcase-card-corporate .showcase-subtitle {
+  color: #34d399;
+}
+
+.showcase-card-preview {
+  background: linear-gradient(135deg, rgba(24, 20, 48, 0.75) 0%, rgba(6, 11, 20, 0.9) 100%);
+  border-color: rgba(147, 51, 234, 0.22);
+}
+.showcase-card-preview:hover {
+  border-color: rgba(147, 51, 234, 0.45);
+  box-shadow: 0 25px 50px -12px rgba(147, 51, 234, 0.18);
+}
+.showcase-card-preview .showcase-subtitle {
+  color: #c084fc;
+}
+
+.showcase-card-hero {
+  background: linear-gradient(135deg, rgba(32, 26, 12, 0.75) 0%, rgba(6, 11, 20, 0.9) 100%);
+  border-color: rgba(245, 158, 11, 0.22);
+}
+.showcase-card-hero:hover {
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 25px 50px -12px rgba(245, 158, 11, 0.18);
+}
+.showcase-card-hero .showcase-subtitle {
+  color: #fbbf24;
 }
 
 .visual-placeholder {
@@ -58,7 +105,7 @@
   text-align: center;
   border: 1px dashed rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .placeholder-text {

@@ -1,5 +1,6 @@
 .release-notes {
   position: relative;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .release-badge {
@@ -7,9 +8,9 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.35rem 0.85rem;
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.08);
   border: 1px solid rgba(59, 130, 246, 0.25);
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   color: #60a5fa;
   font-size: 0.8rem;
   font-weight: 600;
@@ -37,11 +38,11 @@
 }
 
 .section-title {
-  font-size: 2.5rem;
+  font-size: clamp(2.2rem, 3.8vw, 3.2rem);
   font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  color: #ffffff;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--text-heading);
   margin-bottom: 1rem;
 }
 
@@ -51,7 +52,7 @@
   line-height: 1.6;
 }
 
-/* Timeline Structure - Reference Image Left-Line Inspired */
+/* Timeline Structure - Connector Line Animation (Requirement 7) */
 .timeline-container {
   position: relative;
   max-width: 780px;
@@ -68,10 +69,18 @@
   background: linear-gradient(
     180deg, 
     #3b82f6 0%, 
-    rgba(59, 130, 246, 0.4) 60%, 
+    rgba(59, 130, 246, 0.6) 40%, 
+    rgba(147, 51, 234, 0.4) 75%, 
     rgba(255, 255, 255, 0.08) 100%
   );
+  background-size: 100% 200%;
+  animation: lineFlow 6s linear infinite alternate;
   z-index: 1;
+}
+
+@keyframes lineFlow {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 0% 100%; }
 }
 
 .timeline-list {
@@ -103,7 +112,7 @@
   align-items: center;
   justify-content: center;
   z-index: 3;
-  transition: all 0.3s ease;
+  transition: all 0.3s var(--transition-smooth);
 }
 
 .node-dot {
@@ -111,10 +120,10 @@
   height: 8px;
   border-radius: 50%;
   background: #64748b;
-  transition: all 0.3s ease;
+  transition: all 0.3s var(--transition-smooth);
 }
 
-/* Current Version Highlight Node */
+/* Current Release Indicator Highlight (Requirement 7) */
 .timeline-item.is-current .timeline-node {
   border-color: #3b82f6;
   box-shadow: 0 0 16px rgba(59, 130, 246, 0.6);
@@ -129,15 +138,15 @@
 /* Card Styling */
 .timeline-card {
   width: 100%;
-  padding: 1.75rem;
-  border-radius: 16px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  padding: 1.85rem 2rem;
+  border-radius: var(--radius-lg);
+  transition: transform 0.3s var(--transition-smooth), box-shadow 0.3s var(--transition-smooth), border-color 0.3s var(--transition-smooth);
 }
 
 .timeline-item.is-current .timeline-card {
-  background: rgba(13, 20, 36, 0.65);
+  background: rgba(13, 20, 36, 0.7);
   border: 1px solid rgba(59, 130, 246, 0.35);
-  box-shadow: 0 12px 30px -10px rgba(59, 130, 246, 0.18), 0 0 0 1px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 14px 35px -10px rgba(59, 130, 246, 0.2), 0 0 0 1px rgba(59, 130, 246, 0.1);
 }
 
 .timeline-card:hover {
@@ -159,15 +168,15 @@
 }
 
 .version-number {
-  font-size: 1.4rem;
+  font-size: 1.45rem;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--text-heading);
   letter-spacing: -0.01em;
 }
 
 .version-status-pill {
-  padding: 0.2rem 0.6rem;
-  border-radius: 9999px;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -175,21 +184,21 @@
 }
 
 .pill-released {
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.12);
   color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.28);
 }
 
 .pill-development {
-  background: rgba(59, 130, 246, 0.15);
+  background: rgba(59, 130, 246, 0.12);
   color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.28);
 }
 
 .pill-planned {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(245, 158, 11, 0.12);
   color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  border: 1px solid rgba(245, 158, 11, 0.28);
 }
 
 .version-date {
@@ -217,9 +226,9 @@
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  font-size: 0.92rem;
+  font-size: 0.925rem;
   color: #cbd5e1;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .check-icon {
@@ -230,10 +239,6 @@
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-  .section-title {
-    font-size: 1.85rem;
-  }
-
   .timeline-container {
     padding-left: 1.75rem;
   }
@@ -247,11 +252,11 @@
   }
 
   .timeline-card {
-    padding: 1.25rem;
+    padding: 1.35rem 1.25rem;
   }
 
   .version-number {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
   }
 
   .card-tagline {
