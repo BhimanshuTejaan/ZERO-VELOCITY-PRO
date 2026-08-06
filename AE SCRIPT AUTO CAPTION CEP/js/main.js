@@ -93,40 +93,6 @@
     window.CaptionPreviewRenderer.render(previewTargetWords, layoutData);
   }
 
-  /* Subtle Live Idle Animation (Requirement 4) */
-  function startLivePreviewCycle() {
-    var cycleIndex = 0;
-    setInterval(function () {
-      var state = model.getState();
-      if (!state.blocks || state.blocks.length === 0) {
-        return;
-      }
-      var firstBlock = state.blocks[0];
-      if (!firstBlock.words || firstBlock.words.length < 2) {
-        return;
-      }
-      var wordIndex = cycleIndex % firstBlock.words.length;
-      cycleIndex += 1;
-      
-      var newWords = firstBlock.words.map(function (w, idx) {
-        return {
-          text: w.text,
-          role: idx === wordIndex ? "hero" : "support"
-        };
-      });
-
-      var updatedBlocks = state.blocks.slice();
-      updatedBlocks[0] = {
-        id: firstBlock.id,
-        index: firstBlock.index,
-        timeRange: firstBlock.timeRange,
-        words: newWords
-      };
-
-      model.setBlocks(updatedBlocks);
-    }, 3200);
-  }
-
   bindImport();
   bindWorkspaces();
   bindInstagramLink();
@@ -171,8 +137,6 @@
     window.ZeroVelocityCaptionBlockList.render(blockListRoot, state);
     window.ZeroVelocityWordSelection.render(chipRoot, modeRoot, state);
   });
-
-  startLivePreviewCycle();
 
   window.ZeroVelocityCEP = {
     version: "1.0.0",
