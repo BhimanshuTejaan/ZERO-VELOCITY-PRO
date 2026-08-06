@@ -20,7 +20,7 @@ export default function SupportCard() {
 
           <div className="support-actions">
             <a 
-              href="https://youtu.be/MTN4vS5O_Bs?si=NJHWgewS74e1J8MC" 
+              href="https://www.youtube.com/watch?v=I4mxZlvKKCY" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="support-btn btn-guide"
