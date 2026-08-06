@@ -46,7 +46,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    let body = {};
+    if (typeof req.body === 'string') {
+      try {
+        body = JSON.parse(req.body);
+      } catch (_e) {
+        body = {};
+      }
+    } else if (req.body && typeof req.body === 'object') {
+      body = req.body;
+    }
+
     const amount = body.amount || 9900; // default 9900 paise (₹99)
 
     const authHeader = 'Basic ' + Buffer.from(`${keyId}:${keySecret}`).toString('base64');

@@ -80,7 +80,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    let body = {};
+    if (typeof req.body === 'string') {
+      try {
+        body = JSON.parse(req.body);
+      } catch (_e) {
+        body = {};
+      }
+    } else if (req.body && typeof req.body === 'object') {
+      body = req.body;
+    }
     const rawKey = body.licenseKey || '';
     const licenseKey = rawKey.trim().toUpperCase();
     const deviceId = (body.deviceId || '').trim();
