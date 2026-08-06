@@ -74,7 +74,23 @@ export default async function handler(req, res) {
       })
     });
 
-    const orderData = await response.json();
+    const responseText = await response.text();
+    let orderData = {};
+    try {
+      orderData = JSON.parse(responseText);
+    } catch (_e) {
+      console.error("❌ Non-JSON response from Razorpay:", response.status, responseText);
+      return res.status(response.status || 500).json({
+        success: false,
+        error: "Non-JSON response from Razorpay Orders API",
+        diagnostics: {
+          status: response.status,
+          rawResponse: responseText.slice(0, 300),
+          keyIdUsed: keyId,
+          keySecretLength: keySecret.length
+        }
+      });
+    }
 
     if (!response.ok) {
       console.error("❌ Razorpay Orders API Error:", response.status, orderData);
@@ -84,6 +100,7 @@ export default async function handler(req, res) {
         diagnostics: {
           keyIdUsed: keyId,
           keySecretExists: Boolean(keySecret),
+          keySecretLength: keySecret.length,
           razorpayCode: orderData.error?.code,
           razorpayStatus: response.status
         }
