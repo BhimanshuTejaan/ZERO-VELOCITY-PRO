@@ -1,17 +1,23 @@
 .support-section {
-  padding: 2.5rem 0 5rem 0;
+  padding: 2rem 0 5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .support-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 2rem 2.5rem;
-  border-radius: 20px;
-  background: rgba(13, 20, 36, 0.55);
+  padding: 2.25rem 2.75rem;
+  border-radius: var(--radius-xl);
+  background: var(--bg-card);
   border: 1px solid rgba(59, 130, 246, 0.25);
-  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.5);
-  gap: 2rem;
+  box-shadow: var(--shadow-card);
+  gap: 2.5rem;
+  transition: border-color 0.3s var(--transition-smooth);
+}
+
+.support-card:hover {
+  border-color: rgba(59, 130, 246, 0.4);
 }
 
 .support-left {
@@ -23,9 +29,9 @@
 .support-icon-badge {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgba(59, 130, 246, 0.12);
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,7 +39,7 @@
 }
 
 .chat-emoji {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
 }
 
 .support-header-text {
@@ -45,15 +51,16 @@
 .support-title {
   font-size: 1.35rem;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--text-heading);
   margin-bottom: 0.25rem;
+  letter-spacing: -0.01em;
 }
 
 .support-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.925rem;
   color: var(--text-muted);
   max-width: 420px;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .support-actions {
@@ -67,24 +74,24 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.65rem 1.1rem;
-  border-radius: 10px;
-  font-size: 0.85rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: all 0.25s var(--transition-smooth);
   text-decoration: none;
   white-space: nowrap;
 }
 
 .btn-guide {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  color: var(--text-heading);
 }
 
 .btn-guide:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-hover);
   transform: translateY(-2px);
 }
 
