@@ -26,7 +26,7 @@ export default function Footer() {
             </a>
 
             <a 
-              href="https://www.instagram.com/p/DbpoOQ6B-BK/" 
+              href="https://www.instagram.com/zero.velocity.ai/" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="social-btn instagram-btn"
@@ -43,7 +43,7 @@ export default function Footer() {
 
           <div className="footer-support-message">
             <span className="support-icon">💬</span>
-            <span>Need help? <a href="https://www.instagram.com/p/DbpoOQ6B-BK/" target="_blank" rel="noopener noreferrer" className="support-link">DM us on Instagram.</a></span>
+            <span>Need help? <a href="https://www.instagram.com/zero.velocity.ai/" target="_blank" rel="noopener noreferrer" className="support-link">DM us on Instagram.</a></span>
           </div>
 
           <div className="footer-meta">
