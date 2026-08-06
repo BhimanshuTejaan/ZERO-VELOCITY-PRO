@@ -24,16 +24,16 @@ export default function Hero() {
         <div className="hero-content">
           <div className="launch-badge">
             <span className="badge-dot"></span>
-            Founder's Launch
+            Zero Velocity v1.0 • Now Available
           </div>
           
           <h1 className="hero-title">
-            Professional Captions, <br />
-            <span className="text-gradient-accent">Zero Velocity.</span>
+            Automated Captions.<br />
+            <span className="text-gradient-accent">Built for After Effects.</span>
           </h1>
           
           <p className="hero-subtitle">
-            The ultimate After Effects plugin for creating perfectly timed, stunning captions with zero friction. Build faster, create better.
+            Zero Velocity eliminates manual keyframing and tedious text positioning. Generate crisp, animated, perfectly timed captions in seconds.
           </p>
           
           <div className="hero-pricing-widget">
@@ -42,11 +42,6 @@ export default function Hero() {
               <span className="price-crossed">₹499</span>
             </div>
             <p className="price-terms-inline">Founder Launch Price. Lifetime access.</p>
-          </div>
-          
-          <div className="version-live-badge">
-            <span className="pulse-dot"></span>
-            Now Shipping: Version 1.0
           </div>
 
           <div className="hero-cta">
@@ -80,7 +75,7 @@ export default function Hero() {
             </button>
           </div>
           
-          <a href="#roadmap" className="roadmap-value-badge">
+          <a href="#release-notes" className="roadmap-value-badge">
             <div className="rv-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"></path>
@@ -88,7 +83,7 @@ export default function Hero() {
             </div>
             <div className="rv-text">
               <span className="rv-title">All Version 1.x Updates Included &rarr;</span>
-              <span className="rv-subtitle">Buy once today. Explore upcoming features.</span>
+              <span className="rv-subtitle">Buy once today. Receive every feature update for free.</span>
             </div>
           </a>
         </div>

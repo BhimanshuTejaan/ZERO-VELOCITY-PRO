@@ -4,37 +4,52 @@ import './ReleaseNotes.css';
 const releases = [
   {
     version: 'v1.0',
-    status: 'Current Version',
+    date: 'August 2026',
+    status: 'Released',
+    badgeType: 'released',
     isCurrent: true,
-    tag: 'Latest Release',
+    tagline: 'Initial Public Release & Licensing Engine',
     features: [
-      'Initial public release',
-      'One-word captions',
-      'Hero & Accent words',
-      'Live preview',
-      'Secure licensing'
+      'One-word animated caption engine',
+      'Hero & Accent word styling controls',
+      'Real-time live panel preview',
+      'Hardware-locked Ed25519 signature security',
+      'High-speed After Effects script integration',
+      'Auto-composition detection & layer sync'
     ]
   },
   {
     version: 'v1.1',
-    status: 'Coming Soon',
+    date: 'September 2026',
+    status: 'In Development',
+    badgeType: 'development',
     isCurrent: false,
-    tag: 'Next Update',
+    tagline: 'Presets, Color Samplers & Animations',
     features: [
-      'New caption layouts',
-      'Additional animation presets',
-      'Performance improvements'
+      'Hero Color Picker (sample hex codes directly in panel)',
+      '1-Click Animation Presets (bounce, pop, slide, fade)',
+      'Built-in local SRT Audio Generator',
+      'Saved Custom Presets & Layouts manager',
+      'System Font Selection browser',
+      'Shorts, Reels & TikTok optimized layout templates',
+      'Liquid Glass & Liquid Color text styles',
+      'Panel UI & rendering speed optimizations'
     ]
   },
   {
     version: 'v1.2',
-    status: 'Coming Soon',
+    date: 'Q4 2026',
+    status: 'Planned',
+    badgeType: 'planned',
     isCurrent: false,
-    tag: 'Planned',
+    tagline: 'AI Workflows & Multi-Comp Batch Processing',
     features: [
-      'More customization',
-      'Better workflow',
-      'Quality of life improvements'
+      'AI-assisted intelligent emphasis word highlighting',
+      'Multi-line & stacked subtitle layout modes',
+      'Batch captioning across multiple compositions',
+      'Custom expression engine integrations',
+      'Keyboard shortcuts & workflow accelerators',
+      'Expanded Mac OS & Premiere Pro optimizations'
     ]
   }
 ];
@@ -46,11 +61,11 @@ export default function ReleaseNotes() {
         <div className="section-header text-center">
           <div className="release-badge">
             <span className="badge-pulse"></span>
-            Release Notes
+            Release Notes & Roadmap
           </div>
-          <h2 className="section-title">It keeps getting better.</h2>
+          <h2 className="section-title">It keeps shipping.</h2>
           <p className="section-subtitle">
-            Every update is included with your purchase. Buy once and receive all Version 1.x updates for free.
+            Every update lands in your panel automatically, free for life. Buy once and receive all Version 1.x updates for free.
           </p>
         </div>
 
@@ -58,27 +73,29 @@ export default function ReleaseNotes() {
           <div className="timeline-line"></div>
           
           <div className="timeline-list">
-            {releases.map((rel, index) => (
+            {releases.map((rel) => (
               <div 
                 key={rel.version} 
-                className={`timeline-item ${rel.isCurrent ? 'is-current' : 'is-upcoming'}`}
+                className={`timeline-item ${rel.isCurrent ? 'is-current' : ''}`}
               >
-                {/* Timeline node marker */}
+                {/* Node Marker on Line */}
                 <div className="timeline-node">
                   <div className="node-dot"></div>
                 </div>
 
-                {/* Release Card */}
+                {/* Card Panel */}
                 <div className="timeline-card glass-panel">
                   <div className="card-header">
                     <div className="version-info">
                       <span className="version-number">{rel.version}</span>
-                      <span className={`version-status-pill ${rel.isCurrent ? 'pill-active' : 'pill-soon'}`}>
+                      <span className={`version-status-pill pill-${rel.badgeType}`}>
                         {rel.status}
                       </span>
                     </div>
-                    <span className="version-tag">{rel.tag}</span>
+                    <span className="version-date">{rel.date}</span>
                   </div>
+
+                  <h3 className="card-tagline">{rel.tagline}</h3>
 
                   <ul className="feature-list">
                     {rel.features.map((feat, idx) => (

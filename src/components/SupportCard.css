@@ -1,0 +1,130 @@
+.support-section {
+  padding: 2.5rem 0 5rem 0;
+}
+
+.support-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem 2.5rem;
+  border-radius: 20px;
+  background: rgba(13, 20, 36, 0.55);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.5);
+  gap: 2rem;
+}
+
+.support-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.support-icon-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chat-emoji {
+  font-size: 1.4rem;
+}
+
+.support-header-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.support-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.25rem;
+}
+
+.support-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 420px;
+  line-height: 1.45;
+}
+
+.support-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.support-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-guide {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.btn-guide:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.btn-youtube {
+  background: rgba(255, 0, 0, 0.08);
+  border: 1px solid rgba(255, 0, 0, 0.25);
+  color: #ff4d4d;
+}
+
+.btn-youtube:hover {
+  background: rgba(255, 0, 0, 0.15);
+  border-color: rgba(255, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-instagram {
+  background: rgba(225, 48, 108, 0.08);
+  border: 1px solid rgba(225, 48, 108, 0.25);
+  color: #f472b6;
+}
+
+.btn-instagram:hover {
+  background: rgba(225, 48, 108, 0.15);
+  border-color: rgba(225, 48, 108, 0.4);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 992px) {
+  .support-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.75rem;
+  }
+
+  .support-actions {
+    width: 100%;
+  }
+
+  .support-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}

@@ -3,10 +3,10 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import Showcase from './components/Showcase';
 import ReleaseNotes from './components/ReleaseNotes';
-import Roadmap from './components/Roadmap';
-import Reviews from './components/Reviews';
 import Pricing from './components/Pricing';
+import SupportCard from './components/SupportCard';
 import Installation from './components/Installation';
+import Reviews from './components/Reviews';
 import Footer from './components/Footer';
 
 function App() {
@@ -18,10 +18,10 @@ function App() {
         <Hero />
         <Showcase />
         <ReleaseNotes />
-        <Roadmap />
-        <Reviews />
         <Pricing />
+        <SupportCard />
         <Installation />
+        <Reviews />
       </main>
       <Footer />
     </>
