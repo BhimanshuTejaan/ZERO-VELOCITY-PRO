@@ -1,0 +1,127 @@
+.reviews {
+  position: relative;
+}
+
+.reviews-card {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3.5rem 2.5rem;
+  border-radius: 24px;
+  background: rgba(13, 20, 36, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.reviews-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 9999px;
+  color: #fbbf24;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: 1.25rem;
+}
+
+.star-icon {
+  font-size: 0.9rem;
+  color: #fbbf24;
+}
+
+.reviews-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.reviews-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+}
+
+/* Skeleton Placeholder Grid */
+.reviews-placeholder-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+  opacity: 0.65;
+}
+
+.placeholder-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.placeholder-card.featured-card {
+  background: rgba(59, 130, 246, 0.03);
+  border-color: rgba(59, 130, 246, 0.12);
+}
+
+.stars-row {
+  color: rgba(251, 191, 36, 0.5);
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-align: left;
+}
+
+.text-skeleton {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.skeleton-1 { width: 90%; }
+.skeleton-2 { width: 65%; }
+.skeleton-3 { width: 75%; }
+
+.user-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.avatar-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.user-meta-skeleton {
+  height: 8px;
+  width: 50%;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 768px) {
+  .reviews-card {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .reviews-title {
+    font-size: 1.75rem;
+  }
+
+  .reviews-placeholder-grid {
+    grid-template-columns: 1fr;
+  }
+}
