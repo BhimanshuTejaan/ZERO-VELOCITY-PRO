@@ -88,16 +88,9 @@ export default function Pricing() {
               My License &amp; Download
             </button>
           ) : (
-            <div className="disabled-checkout-box">
-              <button className="btn btn-primary btn-full btn-disabled" disabled>
-                Temporarily Unavailable
-              </button>
-              <p className="pause-notice-text">
-                Zero Velocity is temporarily unavailable while a stability update is being deployed.<br />
-                Existing customers will receive the update shortly.<br />
-                Thank you for your patience.
-              </p>
-            </div>
+            <button className="btn btn-primary btn-full" onClick={handleBuyNow}>
+              Buy Now
+            </button>
           )}
         </div>
       </div>
