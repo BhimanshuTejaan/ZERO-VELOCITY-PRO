@@ -3,7 +3,7 @@ import './Installation.css';
 
 export default function Installation() {
   return (
-    <section className="installation section-padding">
+    <section id="installation" className="installation section-padding">
       <div className="container">
         <div className="installation-box glass-panel">
           <div className="section-header text-center">
@@ -35,14 +35,6 @@ export default function Installation() {
                 <p className="step-text">Paste the license key sent to your email to unlock instantly.</p>
               </div>
             </div>
-          </div>
-          
-          <div className="troubleshooting">
-            <div className="troubleshoot-text">
-              <strong>Still not working?</strong>
-              <p>If the extension doesn't show up in After Effects, Windows might be blocking unsigned extensions.</p>
-            </div>
-            <button className="btn btn-secondary">Download Regedit Fix</button>
           </div>
         </div>
       </div>

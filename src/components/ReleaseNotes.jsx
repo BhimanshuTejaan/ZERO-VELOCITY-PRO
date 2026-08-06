@@ -8,14 +8,14 @@ const releases = [
     status: 'Released',
     badgeType: 'released',
     isCurrent: true,
-    tagline: 'Initial Public Release & Licensing Engine',
+    tagline: 'Initial Public Release',
     features: [
-      'One-word animated caption engine',
+      'One-word animated captions',
       'Hero & Accent word styling controls',
       'Real-time live panel preview',
-      'Hardware-locked Ed25519 signature security',
-      'High-speed After Effects script integration',
-      'Auto-composition detection & layer sync'
+      'Automatic layer organization',
+      'Instant composition alignment',
+      'Seamless After Effects workflow'
     ]
   },
   {
@@ -24,16 +24,16 @@ const releases = [
     status: 'In Development',
     badgeType: 'development',
     isCurrent: false,
-    tagline: 'Presets, Color Samplers & Animations',
+    tagline: 'Presets, Animations & Speed Enhancements',
     features: [
-      'Hero Color Picker (sample hex codes directly in panel)',
       '1-Click Animation Presets (bounce, pop, slide, fade)',
-      'Built-in local SRT Audio Generator',
-      'Saved Custom Presets & Layouts manager',
+      'Hero Color Picker (sample colors directly from video)',
+      'Saved Custom Presets & Style Templates',
+      'Shorts, Reels & TikTok layout templates',
       'System Font Selection browser',
-      'Shorts, Reels & TikTok optimized layout templates',
-      'Liquid Glass & Liquid Color text styles',
-      'Panel UI & rendering speed optimizations'
+      'Faster rendering & playback performance',
+      'Cleaner animation workflow & custom controls',
+      'Built-in audio transcription helper'
     ]
   },
   {
@@ -42,14 +42,14 @@ const releases = [
     status: 'Planned',
     badgeType: 'planned',
     isCurrent: false,
-    tagline: 'AI Workflows & Multi-Comp Batch Processing',
+    tagline: 'AI Highlights & Multi-Timeline Workflow',
     features: [
-      'AI-assisted intelligent emphasis word highlighting',
-      'Multi-line & stacked subtitle layout modes',
-      'Batch captioning across multiple compositions',
-      'Custom expression engine integrations',
-      'Keyboard shortcuts & workflow accelerators',
-      'Expanded Mac OS & Premiere Pro optimizations'
+      'Smart AI key-word highlighting',
+      'Multi-line & stacked subtitle layout options',
+      'Batch caption creation across multiple sequences',
+      'Keyboard shortcuts & editing speed controls',
+      'Expanded Mac & Premiere Pro workflow tools',
+      'Lifetime updates for all v1.x releases'
     ]
   }
 ];
