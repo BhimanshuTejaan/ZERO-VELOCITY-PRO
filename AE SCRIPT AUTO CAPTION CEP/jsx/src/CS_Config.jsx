@@ -79,3 +79,34 @@ CS.Config = {
         direction: 135
     }
 };
+
+CS.Config.writeCompConfig = function (comp, configData) {
+    try {
+        if (!comp) {
+            return false;
+        }
+        var jsonStr = typeof JSON !== "undefined" && JSON.stringify ? JSON.stringify(configData) : "";
+        comp.comment = jsonStr;
+        return true;
+    } catch (_err) {
+        return false;
+    }
+};
+
+CS.Config.readCompConfig = function (comp) {
+    try {
+        if (!comp || !comp.comment) {
+            return null;
+        }
+        var rawComment = comp.comment;
+        if (!rawComment || typeof rawComment !== "string") {
+            return null;
+        }
+        if (typeof JSON !== "undefined" && JSON.parse) {
+            return JSON.parse(rawComment);
+        }
+        return eval("(" + rawComment + ")");
+    } catch (_err) {
+        return null;
+    }
+};
