@@ -23,9 +23,9 @@ export default function Pricing() {
       <div className="container">
         <div className="pricing-card glass-panel">
           <div className="pricing-header">
-            <h2 className="pricing-title">Founder Launch</h2>
+            <h2 className="pricing-title">Early User Offer</h2>
             <div className="pricing-badge">
-              {isSoleAdmin ? 'Admin Mode' : hasActiveLicense ? 'Purchased' : 'First 50 Customers'}
+              {isSoleAdmin ? 'Admin Mode' : hasActiveLicense ? 'Purchased' : 'First 50 Users'}
             </div>
           </div>
           
@@ -37,17 +37,17 @@ export default function Pricing() {
               {isSoleAdmin ? (
                 <>
                   <strong>Administrator Account</strong>
-                  <span>Full control panel & license generator.</span>
+                  <span>Full control panel &amp; license generator.</span>
                 </>
               ) : hasActiveLicense ? (
                 <>
-                  <strong>You Own Version 1.0!</strong>
+                  <strong>You Own Zero Velocity V1.1!</strong>
                   <span>Your lifetime license is active on your account.</span>
                 </>
               ) : (
                 <>
-                  <strong>Buy Version 1.0</strong>
-                  <span>Every Version 1.x update is FREE.</span>
+                  <strong>Buy Version 1.1</strong>
+                  <span>Every Version 1.x update is FREE for life.</span>
                 </>
               )}
             </div>

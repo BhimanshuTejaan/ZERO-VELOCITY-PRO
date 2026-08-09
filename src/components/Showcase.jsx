@@ -3,36 +3,45 @@ import './Showcase.css';
 
 const showcases = [
   {
-    id: 'workflow',
-    title: 'The Fastest Workflow',
-    subtitle: 'Import → Edit → Apply',
-    description: 'Stop wasting hours manually placing text. Just import your SRT, adjust the style, and hit apply. Zero Velocity handles the complex keyframing instantly.',
+    id: 'transcribe',
+    badge: 'NEW IN V1.1',
+    title: 'One-Click Auto Transcribe',
+    subtitle: 'English + Hinglish Support',
+    description: 'No manual SRT creation required. Select your media in After Effects, select English or Hinglish, and click Auto Transcribe. Zero Velocity generates your timed transcription instantly.',
+    quote: '“Built for the way Indian creators actually speak.” (Hindi बोलो, Roman captions पाओ.)',
     align: 'left',
-    placeholder: 'Visual: Timeline workflow demonstration'
+    chips: ['Auto Transcribe', 'English', 'Hinglish Support'],
+    placeholder: 'Visual: One-Click Auto Transcribe (English & Hinglish)'
   },
   {
-    id: 'corporate',
-    title: 'Corporate Clean Layout',
-    subtitle: 'Professional & Understated',
-    description: 'Perfect for LinkedIn, corporate interviews, and professional documentaries. Maintain readability without the flashy distraction of social media styles.',
+    id: 'font-pairing',
+    badge: 'V1.1 UPGRADE',
+    title: 'Flexible Font Selection & Pairing',
+    subtitle: 'Approved Combinations & Detection',
+    description: 'Choose approved Support, Hero, and Accent font combinations or apply your own style. Missing system fonts are automatically detected inside the plugin panel.',
     align: 'right',
-    placeholder: 'Visual: Clean layout style example'
+    chips: ['Font Pairing', 'Custom Fonts', 'Font Detection'],
+    placeholder: 'Visual: Font selection & pairing controls'
   },
   {
-    id: 'preview',
-    title: 'True Live Preview',
-    subtitle: 'No more guessing',
-    description: 'See exactly what your captions will look like before you apply them. Tweak spacing, size, and layout with immediate visual feedback.',
+    id: 'color-control',
+    badge: 'V1.1 UPGRADE',
+    title: 'Full Custom Color Palette',
+    subtitle: 'Hero & Accent Pickers',
+    description: 'Customize your Hero and Accent word colors using the built-in color picker. Match your channel branding without preset color restrictions.',
     align: 'left',
-    placeholder: 'Visual: Live preview engine in action'
+    chips: ['Hero Color', 'Accent Color', 'Color Picker'],
+    placeholder: 'Visual: Custom Hero & Accent color pickers'
   },
   {
-    id: 'hero',
-    title: 'Hero Word Editing',
-    subtitle: 'Emphasize what matters',
-    description: 'Click any word to instantly make it a Hero or Accent word. Zero Velocity automatically adjusts the sizing and colors to make your key points pop.',
+    id: 'accurate-preview',
+    badge: 'V1.1 UPGRADE',
+    title: 'Accurate In-Plugin Preview',
+    subtitle: 'No More Guesswork',
+    description: 'Preview your caption layout, sizing, and word highlighting directly inside the panel before generating. Much closer to your final After Effects composition result.',
     align: 'right',
-    placeholder: 'Visual: Word selection and coloring'
+    chips: ['Live Preview', 'Layout Engine', 'AE Alignment'],
+    placeholder: 'Visual: Improved live panel preview engine'
   }
 ];
 
@@ -41,8 +50,12 @@ export default function Showcase() {
     <section className="showcase-section section-padding">
       <div className="container">
         <div className="showcase-header text-center">
-          <h2 className="section-title">Engineered for Speed</h2>
-          <p className="section-subtitle">Every feature is designed to cut down your editing time.</p>
+          <div className="v11-badge">
+            <span className="v11-dot"></span>
+            Version 1.1 Major Features
+          </div>
+          <h2 className="section-title">Engineered for Speed &amp; Style</h2>
+          <p className="section-subtitle">Auto transcribe, custom fonts, full color control, and accurate preview—all inside After Effects.</p>
         </div>
         
         <div className="showcase-list">
@@ -55,9 +68,25 @@ export default function Showcase() {
               </div>
               
               <div className="showcase-content">
-                <div className="showcase-subtitle">{item.subtitle}</div>
+                <div className="showcase-meta">
+                  <span className="showcase-pill">{item.badge}</span>
+                  <span className="showcase-subtitle">{item.subtitle}</span>
+                </div>
                 <h3 className="showcase-title">{item.title}</h3>
                 <p className="showcase-description">{item.description}</p>
+                
+                {item.quote && (
+                  <div className="showcase-hinglish-box">
+                    <span className="hinglish-icon">🇮🇳</span>
+                    <span className="hinglish-text">{item.quote}</span>
+                  </div>
+                )}
+
+                <div className="showcase-chips">
+                  {item.chips.map((c, i) => (
+                    <span key={i} className="showcase-chip">{c}</span>
+                  ))}
+                </div>
               </div>
             </div>
           ))}

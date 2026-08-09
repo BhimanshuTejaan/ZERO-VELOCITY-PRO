@@ -16,6 +16,15 @@
   margin-bottom: 2.75rem;
 }
 
+.install-video-btn {
+  margin-top: 1.25rem;
+  padding: 0.6rem 1.4rem;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .install-steps {
   display: flex;
   flex-direction: column;

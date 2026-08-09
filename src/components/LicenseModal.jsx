@@ -114,7 +114,7 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Download Zero Velocity v1.0
+                Download Zero Velocity v1.1
               </a>
             )}
           </div>
@@ -130,9 +130,9 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
             <div className="license-empty-state">
               <div className="empty-icon">🔑</div>
               <h3>No Active Licenses Found</h3>
-              <p>You haven't purchased Zero Velocity Version 1.0 yet.</p>
+              <p>You haven't purchased Zero Velocity Version 1.1 yet.</p>
               <a href="#pricing" onClick={onClose} className="btn btn-primary btn-sm">
-                Buy Version 1.0 (₹99)
+                Buy Version 1.1 (₹99)
               </a>
             </div>
           ) : (
@@ -140,7 +140,7 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
               {licenses.map((lic, index) => (
                 <div className="license-card" key={lic.licenseKey || index}>
                   <div className="license-card-header">
-                    <span className="product-name">Zero Velocity v1.0 (Founder Launch)</span>
+                    <span className="product-name">Zero Velocity v1.1</span>
                     <span className={`status-badge ${lic.status === 'active' ? 'active' : ''}`}>
                       <span className="status-dot"></span>
                       {lic.status || 'active'}
@@ -186,7 +186,7 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
                       Download Plugin
                     </a>
                     <a
-                      href="https://youtu.be/I4mxZlvKKCY?si=Zx6EZfyEb2Iv-bJL"
+                      href="https://youtu.be/a9_mlWnkiXs?si=4hbxWOXYLSHpYwnD"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-secondary btn-sm license-action-btn"
@@ -209,7 +209,7 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
                     </div>
                     <div className="meta-item">
                       <span className="meta-label">Version:</span>
-                      <span className="meta-value">v1.0.0</span>
+                      <span className="meta-value">v1.1</span>
                     </div>
                     <div className="meta-item">
                       <span className="meta-label">Devices:</span>

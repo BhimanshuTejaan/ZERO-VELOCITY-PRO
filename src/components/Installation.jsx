@@ -7,8 +7,24 @@ export default function Installation() {
       <div className="container">
         <div className="installation-box glass-panel">
           <div className="section-header text-center">
-            <h2 className="section-title">How to Install</h2>
+            <h2 className="section-title">How to Install V1.1</h2>
             <p className="section-subtitle">Get up and running in less than 60 seconds.</p>
+
+            <button 
+              type="button"
+              className="btn btn-secondary install-video-btn"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(
+                  "https://youtu.be/a9_mlWnkiXs?si=4hbxWOXYLSHpYwnD",
+                  "_blank",
+                  "noopener,noreferrer"
+                );
+              }}
+            >
+              ▶ Watch V1.1 Installation Guide
+            </button>
           </div>
           
           <div className="install-steps">

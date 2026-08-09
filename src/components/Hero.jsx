@@ -24,24 +24,30 @@ export default function Hero() {
         <div className="hero-content">
           <div className="launch-badge">
             <span className="badge-dot"></span>
-            Zero Velocity v1.0 • Now Available
+            Zero Velocity v1.1 • Available Now
           </div>
           
           <h1 className="hero-title">
-            Automated Captions.<br />
+            TRANSCRIBE. STYLE. GENERATE.<br />
             <span className="text-gradient-accent">Built for After Effects.</span>
           </h1>
           
           <p className="hero-subtitle">
-            Zero Velocity eliminates manual keyframing and tedious text positioning. Generate crisp, animated, perfectly timed captions in seconds.
+            Generate captions directly from your video with built-in English + Hinglish transcription, then style them with custom fonts, colors, and accurate live preview.
           </p>
+
+          <div className="v11-feature-chips">
+            <span className="chip chip-accent">⚡ One-Click Auto Transcribe</span>
+            <span className="chip">English</span>
+            <span className="chip chip-hinglish">Hinglish Support</span>
+          </div>
           
           <div className="hero-pricing-widget">
             <div className="price-tag-inline">
               <span className="price-current">₹99</span>
               <span className="price-crossed">₹499</span>
             </div>
-            <p className="price-terms-inline">Founder Launch Price. Lifetime access.</p>
+            <p className="price-terms-inline">Early User Price (First 50 Users) • Lifetime access</p>
           </div>
 
           <div className="hero-cta">
@@ -65,13 +71,13 @@ export default function Hero() {
                 e.preventDefault();
                 e.stopPropagation();
                 window.open(
-                  "https://youtu.be/MTN4vS5O_Bs?si=NJHWgewS74e1J8MC",
+                  "https://youtu.be/avL82crHQVU?si=xjR9XZncFAaG20vh",
                   "_blank",
                   "noopener,noreferrer"
                 );
               }}
             >
-              Watch Demo
+              Watch V1.1 Demo
             </button>
           </div>
           

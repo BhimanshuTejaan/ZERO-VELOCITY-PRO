@@ -5,51 +5,47 @@ const releases = [
   {
     version: 'v1.0',
     date: 'August 2026',
-    status: 'Released',
+    status: 'RELEASED',
     badgeType: 'released',
-    isCurrent: true,
-    tagline: 'Initial Public Release',
+    isCurrent: false,
+    tagline: 'Core Foundation',
     features: [
-      'One-word animated captions',
+      'SRT File Import & Timed Parsing',
+      'Balanced Layout & Corporate Clean styles',
       'Hero & Accent word styling controls',
-      'Real-time live panel preview',
-      'Automatic layer organization',
-      'Instant composition alignment',
-      'Seamless After Effects workflow'
+      'Edit Words interactive editor',
+      'Vertical Spacing & Hero Size Ratio controls',
+      'Composition caption rendering engine'
     ]
   },
   {
     version: 'v1.1',
-    date: 'September 2026',
-    status: 'In Development',
-    badgeType: 'development',
-    isCurrent: false,
-    tagline: 'Presets, Animations & Speed Enhancements',
+    date: 'AVAILABLE NOW',
+    status: 'CURRENT',
+    badgeType: 'released',
+    isCurrent: true,
+    tagline: 'One-Click Auto Transcribe & Full Customization',
     features: [
-      '1-Click Animation Presets (bounce, pop, slide, fade)',
-      'Hero Color Picker (sample colors directly from video)',
-      'Saved Custom Presets & Style Templates',
-      'Shorts, Reels & TikTok layout templates',
-      'System Font Selection browser',
-      'Faster rendering & playback performance',
-      'Cleaner animation workflow & custom controls',
-      'Built-in audio transcription helper'
+      'One-Click Built-in Auto Transcribe',
+      'English & Hinglish transcription support ("Built for Indian creators")',
+      'Font selection & recommended font pairs',
+      'Custom Hero & Accent color pickers',
+      'Improved accurate in-plugin preview engine',
+      'Panel UI polish & font availability detection'
     ]
   },
   {
-    version: 'v1.2',
-    date: 'Q4 2026',
-    status: 'Planned',
-    badgeType: 'planned',
+    version: 'FUTURE',
+    date: 'Coming Later',
+    status: 'IN DEVELOPMENT',
+    badgeType: 'development',
     isCurrent: false,
-    tagline: 'AI Highlights & Multi-Timeline Workflow',
+    tagline: 'More Animation & Custom Styles',
     features: [
-      'Smart AI key-word highlighting',
-      'Multi-line & stacked subtitle layout options',
-      'Batch caption creation across multiple sequences',
-      'Keyboard shortcuts & editing speed controls',
-      'Expanded Mac & Premiere Pro workflow tools',
-      'Lifetime updates for all v1.x releases'
+      'Motion Animation Controls (Fade, Pop, Up, Down, Left, Right)',
+      'Expanded social media caption layout templates',
+      'Create Your Own Style (Reuse your design language across captions)',
+      'Advanced multi-sequence batching & editing workflows'
     ]
   }
 ];

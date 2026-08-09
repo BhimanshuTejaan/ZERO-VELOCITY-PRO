@@ -47,7 +47,7 @@ export default function Footer() {
           </div>
 
           <div className="footer-meta">
-            <span className="version">Version 1.0</span>
+            <span className="version">Version 1.1</span>
             <span className="copyright">&copy; {new Date().getFullYear()} Zero Velocity. All rights reserved.</span>
           </div>
         </div>
