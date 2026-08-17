@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './ProcessingOverlay.css';
+import { useAuth } from '../AuthContext';
 
 export default function ProcessingOverlay() {
+  const { currentUser } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorDetails, setErrorDetails] = useState(null);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -40,7 +42,7 @@ export default function ProcessingOverlay() {
   }, []);
 
   const handleRetry = async () => {
-    if (!errorDetails?.retryPayload) return;
+    if (!errorDetails?.retryPayload || !currentUser) return;
 
     setIsRetrying(true);
     setIsProcessing(true);
@@ -49,9 +51,13 @@ export default function ProcessingOverlay() {
 
     const startTime = performance.now();
     try {
+      const token = await currentUser.getIdToken();
       const verifyRes = await fetch('/api/verify-payment', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(payload)
       });
 
@@ -61,11 +67,11 @@ export default function ProcessingOverlay() {
       if (data.success) {
         console.log(`⏱️ Retry Payment Verification Duration: ${duration} ms`);
         console.log("🎉 License Created & Stored in Firestore:", data.licenseKey);
-        
+
         window.dispatchEvent(new CustomEvent('zero-velocity-payment-processing-success', {
           detail: { licenseKey: data.licenseKey, duration }
         }));
-        
+
         window.dispatchEvent(new CustomEvent('zero-velocity-license-issued', {
           detail: { licenseKey: data.licenseKey }
         }));
@@ -140,16 +146,16 @@ export default function ProcessingOverlay() {
 
           <div className="error-actions">
             {errorDetails.retryPayload && (
-              <button 
-                className="btn btn-primary retry-btn" 
+              <button
+                className="btn btn-primary retry-btn"
                 onClick={handleRetry}
                 disabled={isRetrying}
               >
                 {isRetrying ? "Retrying..." : "Retry Verification"}
               </button>
             )}
-            <button 
-              className="btn btn-secondary close-error-btn" 
+            <button
+              className="btn btn-secondary close-error-btn"
               onClick={() => setErrorDetails(null)}
             >
               Close

@@ -34,12 +34,15 @@ export default function AdminDashboard({ isOpen, onClose }) {
     setLoading(true);
 
     try {
+      const token = await currentUser.getIdToken();
       const res = await fetch('/api/admin-action', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
-          action: 'fetch_all_licenses',
-          adminEmail: currentUser.email
+          action: 'fetch_all_licenses'
         })
       });
 
@@ -91,12 +94,15 @@ export default function AdminDashboard({ isOpen, onClose }) {
     setActionLoading(true);
 
     try {
+      const token = await currentUser.getIdToken();
       const res = await fetch('/api/admin-action', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           action: actionType,
-          adminEmail: currentUser.email,
           licenseKey: licenseKey
         })
       });
@@ -126,12 +132,15 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
     setGenLoading(true);
     try {
+      const token = await currentUser.getIdToken();
       const res = await fetch('/api/admin-action', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           action: 'generate_manual_license',
-          adminEmail: currentUser.email,
           customerName: genName,
           email: genEmail,
           licenseType: genType,
@@ -208,7 +217,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
   // Filter & Search Logic
   const filteredLicenses = licenses.filter(lic => {
-    const matchesSearch = 
+    const matchesSearch =
       (lic.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (lic.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (lic.licenseKey || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -239,7 +248,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
   return (
     <div className="admin-overlay-backdrop animate-fade-in" onClick={onClose}>
       <div className="admin-dashboard-container glass-panel" onClick={e => e.stopPropagation()}>
-        
+
         {/* Top Header Bar */}
         <div className="admin-header">
           <div className="admin-header-title">
@@ -248,13 +257,13 @@ export default function AdminDashboard({ isOpen, onClose }) {
           </div>
           <div className="admin-header-actions">
             <div className="tab-navigation">
-              <button 
+              <button
                 className={`tab-btn ${activeTab === 'directory' ? 'active' : ''}`}
                 onClick={() => setActiveTab('directory')}
               >
                 📁 Customer Directory
               </button>
-              <button 
+              <button
                 className={`tab-btn ${activeTab === 'generator' ? 'active' : ''}`}
                 onClick={() => setActiveTab('generator')}
               >
@@ -310,9 +319,9 @@ export default function AdminDashboard({ isOpen, onClose }) {
             <div className="controls-bar">
               <div className="search-box">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input 
-                  type="text" 
-                  placeholder="Search by email, name, or license key..." 
+                <input
+                  type="text"
+                  placeholder="Search by email, name, or license key..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                 />
@@ -424,8 +433,8 @@ export default function AdminDashboard({ isOpen, onClose }) {
                 <div className="form-row-two">
                   <div className="form-group">
                     <label>Customer Name (Optional)</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="e.g. John Doe"
                       value={genName}
                       onChange={e => setGenName(e.target.value)}
@@ -433,8 +442,8 @@ export default function AdminDashboard({ isOpen, onClose }) {
                   </div>
                   <div className="form-group">
                     <label>Customer Email (Optional)</label>
-                    <input 
-                      type="email" 
+                    <input
+                      type="email"
                       placeholder="e.g. customer@example.com"
                       value={genEmail}
                       onChange={e => setGenEmail(e.target.value)}
@@ -468,8 +477,8 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
                 <div className="form-group">
                   <label>Notes / Justification (Optional)</label>
-                  <textarea 
-                    rows="2" 
+                  <textarea
+                    rows="2"
                     placeholder="e.g. Granted key for YouTube reviewer video sponsorship"
                     value={genNotes}
                     onChange={e => setGenNotes(e.target.value)}
@@ -496,7 +505,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
               <div className="generated-key-box">
                 <code className="monospace">{newlyGeneratedKey}</code>
-                <button 
+                <button
                   className={`btn btn-primary copy-key-btn ${copiedField === 'new-key' ? 'copied' : ''}`}
                   onClick={() => copyToClipboard(newlyGeneratedKey, 'new-key')}
                 >
@@ -586,8 +595,8 @@ export default function AdminDashboard({ isOpen, onClose }) {
                   <div className="section-title-row">
                     <h4>Registered Devices ({(selectedCustomer.registeredDevices || []).length}/{selectedCustomer.maxDevices || 1})</h4>
                     {(selectedCustomer.registeredDevices || []).length > 0 && (
-                      <button 
-                        className="btn btn-warning btn-xs" 
+                      <button
+                        className="btn btn-warning btn-xs"
                         onClick={() => handleAdminAction('reset_devices', selectedCustomer.licenseKey)}
                         disabled={actionLoading}
                       >
@@ -621,16 +630,16 @@ export default function AdminDashboard({ isOpen, onClose }) {
                   <h4>Admin Actions</h4>
                   <div className="action-buttons-grid">
                     {selectedCustomer.status === 'disabled' ? (
-                      <button 
-                        className="btn btn-success btn-sm" 
+                      <button
+                        className="btn btn-success btn-sm"
                         onClick={() => handleAdminAction('enable_license', selectedCustomer.licenseKey)}
                         disabled={actionLoading}
                       >
                         Enable License
                       </button>
                     ) : (
-                      <button 
-                        className="btn btn-danger btn-sm" 
+                      <button
+                        className="btn btn-danger btn-sm"
                         onClick={() => handleAdminAction('disable_license', selectedCustomer.licenseKey)}
                         disabled={actionLoading}
                       >
@@ -638,23 +647,23 @@ export default function AdminDashboard({ isOpen, onClose }) {
                       </button>
                     )}
 
-                    <button 
-                      className="btn btn-secondary btn-sm" 
+                    <button
+                      className="btn btn-secondary btn-sm"
                       onClick={() => handleAdminAction('reset_devices', selectedCustomer.licenseKey)}
                       disabled={actionLoading}
                     >
                       Reset Registered Devices
                     </button>
 
-                    <button 
-                      className="btn btn-secondary btn-sm" 
+                    <button
+                      className="btn btn-secondary btn-sm"
                       onClick={() => copyToClipboard(selectedCustomer.licenseKey, 'btn-key')}
                     >
                       {copiedField === 'btn-key' ? 'Key Copied!' : 'Copy License Key'}
                     </button>
 
-                    <button 
-                      className="btn btn-secondary btn-sm" 
+                    <button
+                      className="btn btn-secondary btn-sm"
                       onClick={() => copyToClipboard(selectedCustomer.email, 'btn-email')}
                     >
                       {copiedField === 'btn-email' ? 'Email Copied!' : 'Copy Email'}
@@ -706,8 +715,8 @@ export default function AdminDashboard({ isOpen, onClose }) {
               <p className="warning-text">This action cannot be undone.</p>
               <div className="confirm-actions">
                 <button className="btn btn-secondary" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
-                <button 
-                  className="btn btn-danger" 
+                <button
+                  className="btn btn-danger"
                   onClick={() => handleAdminAction('delete_license', selectedCustomer.licenseKey)}
                   disabled={actionLoading}
                 >
