@@ -50,15 +50,18 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
   // Step 1: Create Order ID on backend to fix unanchored/international card restrictions
   let orderData = null;
   try {
-    const amountInPaise = PRODUCT_PRICE_INR * 100;
+    const token = await currentUser.getIdToken();
     const orderRes = await fetch('/api/create-order', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: amountInPaise })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ productId: "zero_velocity" })
     });
 
     const resJson = await orderRes.json();
-    if (!resJson.success || !resJson.order) {
+    if (!orderRes.ok || !resJson.success || !resJson.order) {
       throw new Error(resJson.error || "Could not create Razorpay order");
     }
     orderData = resJson.order;
@@ -76,7 +79,7 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
     currency: orderData.currency, // INR
     order_id: orderData.id, // Official Razorpay Order ID
     name: "Zero Velocity",
-    description: "Zero Velocity Version 1.0 (Founder Launch)",
+    description: "Zero Velocity Version 1.1",
     image: "/cep/assets/zero-velocity-logo.png",
     prefill: {
       name: currentUser?.displayName || "",
@@ -95,17 +98,18 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
       const verifyPayload = {
         razorpay_payment_id: response.razorpay_payment_id,
         razorpay_order_id: response.razorpay_order_id || orderData.id,
-        razorpay_signature: response.razorpay_signature || "",
-        firebaseUid: currentUser?.uid || null,
-        email: currentUser?.email || null,
-        customerName: currentUser?.displayName || null
+        razorpay_signature: response.razorpay_signature || ""
       };
 
       // Step 3: Verify HMAC signature and store license in Firestore
       try {
+        const token = await currentUser.getIdToken();
         const verifyRes = await fetch('/api/verify-payment', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify(verifyPayload)
         });
 
@@ -115,7 +119,7 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
         if (data.success) {
           console.log(`⏱️ Payment Verification Processing Duration: ${duration} ms`);
           console.log("🎉 License Created & Stored in Firestore:", data.licenseKey);
-          
+
           // Notify overlay of success
           window.dispatchEvent(new CustomEvent('zero-velocity-payment-processing-success', {
             detail: { licenseKey: data.licenseKey, duration }
@@ -132,10 +136,10 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
           if (onSuccess) onSuccess({ ...response, licenseKey: data.licenseKey });
         } else {
           console.error(`⏱️ Payment Verification Failed after ${duration} ms:`, data.error);
-          
+
           // Notify overlay of failure and attach retry payload
           window.dispatchEvent(new CustomEvent('zero-velocity-payment-processing-error', {
-            detail: { 
+            detail: {
               error: data.error || "Payment signature verification failed.",
               retryPayload: verifyPayload
             }
@@ -146,9 +150,9 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
       } catch (verifyErr) {
         const duration = Math.round(performance.now() - startTime);
         console.error(`⏱️ Error contacting verification API after ${duration} ms:`, verifyErr);
-        
+
         window.dispatchEvent(new CustomEvent('zero-velocity-payment-processing-error', {
-          detail: { 
+          detail: {
             error: "Payment completed, but verification server failed to respond. Please click Retry.",
             retryPayload: verifyPayload
           }

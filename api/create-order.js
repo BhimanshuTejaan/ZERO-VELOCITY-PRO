@@ -1,10 +1,10 @@
+import { dbAdmin } from './_firebaseAdmin.js';
+import { verifyUserToken } from './_auth.js';
+import { FieldValue } from 'firebase-admin/firestore';
+
 /**
- * Vercel Serverless Function: Create Razorpay Order
+ * Vercel Serverless Function: Create Razorpay Order securely
  * Endpoint: POST /api/create-order
- * 
- * Purpose:
- * Creates an official Razorpay Order ID on the server before opening Checkout on the client.
- * Fixes international card / unanchored payment errors in Razorpay test mode.
  */
 export default async function handler(req, res) {
   // CORS Headers to allow cross-origin requests from frontend and CEP
@@ -13,8 +13,9 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
   );
+  res.setHeader('Cache-Control', 'no-store');
 
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -23,6 +24,12 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method not allowed. Use POST.' });
+  }
+
+  // 1. Verify user session via Firebase ID token
+  const authResult = await verifyUserToken(req);
+  if (!authResult.authenticated) {
+    return res.status(401).json({ success: false, error: authResult.error });
   }
 
   // Load credentials and strip surrounding whitespace/quotes
@@ -37,11 +44,7 @@ export default async function handler(req, res) {
     console.error("❌ RAZORPAY_KEY_SECRET environment variable is missing on server.");
     return res.status(500).json({
       success: false,
-      error: 'RAZORPAY_KEY_SECRET environment variable is missing on server.',
-      diagnostics: {
-        keyIdUsed: keyId,
-        keySecretExists: false
-      }
+      error: 'RAZORPAY_KEY_SECRET environment variable is missing on server.'
     });
   }
 
@@ -57,7 +60,14 @@ export default async function handler(req, res) {
       body = req.body;
     }
 
-    const amount = body.amount || 9900; // default 9900 paise (₹99)
+    // Enforce pricing authority server-side
+    const productId = body.productId || "zero_velocity";
+    if (productId !== "zero_velocity") {
+      return res.status(400).json({ success: false, error: 'Invalid or unknown product ID.' });
+    }
+
+    const amount = 9900; // Server-authoritative ₹99 (9900 paise)
+    const currency = 'INR';
 
     const authHeader = 'Basic ' + Buffer.from(`${keyId}:${keySecret}`).toString('base64');
 
@@ -69,7 +79,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         amount: amount,
-        currency: 'INR',
+        currency: currency,
         receipt: `receipt_zv_${Date.now()}`
       })
     });
@@ -82,13 +92,7 @@ export default async function handler(req, res) {
       console.error("❌ Non-JSON response from Razorpay:", response.status, responseText);
       return res.status(response.status || 500).json({
         success: false,
-        error: "Non-JSON response from Razorpay Orders API",
-        diagnostics: {
-          status: response.status,
-          rawResponse: responseText.slice(0, 300),
-          keyIdUsed: keyId,
-          keySecretLength: keySecret.length
-        }
+        error: "Non-JSON response from Razorpay Orders API"
       });
     }
 
@@ -96,18 +100,30 @@ export default async function handler(req, res) {
       console.error("❌ Razorpay Orders API Error:", response.status, orderData);
       return res.status(response.status).json({
         success: false,
-        error: orderData.error?.description || "Failed to create Razorpay Order",
-        diagnostics: {
-          keyIdUsed: keyId,
-          keySecretExists: Boolean(keySecret),
-          keySecretLength: keySecret.length,
-          razorpayCode: orderData.error?.code,
-          razorpayStatus: response.status
-        }
+        error: orderData.error?.description || "Failed to create Razorpay Order"
       });
     }
 
-    console.log(`✅ Created Razorpay Order ${orderData.id} for amount ₹${amount / 100}`);
+    // Save initial order context for secure signature & payment verification later
+    const orderDoc = {
+      razorpayOrderId: orderData.id,
+      firebaseUid: authResult.uid,
+      email: authResult.email,
+      customerName: authResult.displayName || null,
+      productId: productId,
+      expectedAmount: amount,
+      expectedCurrency: currency,
+      status: "pending",
+      createdAt: FieldValue.serverTimestamp(),
+      fulfilledAt: null,
+      licenseKey: null,
+      razorpayPaymentId: null
+    };
+
+    await dbAdmin.collection('paymentOrders').doc(orderData.id).set(orderDoc);
+
+    console.log(`✅ Stored secure paymentOrders record for ${orderData.id}`);
+
     return res.status(200).json({
       success: true,
       order: orderData
@@ -117,8 +133,7 @@ export default async function handler(req, res) {
     console.error("❌ Error in /api/create-order:", err);
     return res.status(500).json({
       success: false,
-      error: 'Internal server error creating Razorpay Order.',
-      details: err.message || String(err)
+      error: 'Internal server error creating Razorpay Order.'
     });
   }
 }
