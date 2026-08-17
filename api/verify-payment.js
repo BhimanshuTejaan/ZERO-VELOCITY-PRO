@@ -95,10 +95,28 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Payment order details mismatch.' });
     }
 
-    // 3. HMAC Signature Verification
-    const secret = (process.env.RAZORPAY_KEY_SECRET || '').trim().replace(/^["']|["']$/g, '');
+    // 3. HMAC Signature Verification & Credentials Resolution
+    let keyId = "";
+    let secret = "";
+
+    if (process.env.VERCEL_ENV === 'preview') {
+      const envTestKeyId = (process.env.RAZORPAY_TEST_KEY_ID || "").trim().replace(/^["']|["']$/g, '');
+      const envTestKeySecret = (process.env.RAZORPAY_TEST_KEY_SECRET || "").trim().replace(/^["']|["']$/g, '');
+      if (!envTestKeyId || !envTestKeySecret) {
+        console.error("❌ RAZORPAY_TEST_KEY_ID or RAZORPAY_TEST_KEY_SECRET is missing in Preview mode.");
+        return res.status(500).json({ success: false, error: 'Server configuration error.' });
+      }
+      keyId = envTestKeyId;
+      secret = envTestKeySecret;
+    } else {
+      const envKeyId = (process.env.RAZORPAY_KEY_ID || "").trim().replace(/^["']|["']$/g, '');
+      const envKeySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim().replace(/^["']|["']$/g, '');
+      keyId = envKeyId.startsWith("rzp_live_") ? envKeyId : "rzp_live_TLJvEN6IoOE3pq";
+      secret = envKeySecret;
+    }
+
     if (!secret) {
-      console.error("❌ RAZORPAY_KEY_SECRET environment variable is missing on server.");
+      console.error("❌ Razorpay key secret is missing on server.");
       return res.status(500).json({ success: false, error: 'Server configuration error.' });
     }
 
@@ -120,8 +138,6 @@ export default async function handler(req, res) {
     }
 
     // 4. Server-to-Server Razorpay API captured verification
-    const envKeyId = (process.env.RAZORPAY_KEY_ID || "").trim().replace(/^["']|["']$/g, '');
-    const keyId = envKeyId.startsWith("rzp_live_") ? envKeyId : "rzp_live_TLJvEN6IoOE3pq";
     const authHeader = 'Basic ' + Buffer.from(`${keyId}:${secret}`).toString('base64');
 
     const rzpPayRes = await fetch(`https://api.razorpay.com/v1/payments/${razorpay_payment_id}`, {

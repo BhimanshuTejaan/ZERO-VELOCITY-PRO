@@ -32,19 +32,34 @@ export default async function handler(req, res) {
     return res.status(401).json({ success: false, error: authResult.error });
   }
 
-  // Load credentials and strip surrounding whitespace/quotes
-  const envKeyId = (process.env.RAZORPAY_KEY_ID || "").trim().replace(/^["']|["']$/g, '');
-  const envKeySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim().replace(/^["']|["']$/g, '');
+  // Load credentials based on Vercel environment
+  let keyId = "";
+  let keySecret = "";
 
-  // Force official production Live Key ID (rzp_live_TLJvEN6IoOE3pq) to prevent invalid Key ID overrides
-  const keyId = envKeyId.startsWith("rzp_live_") ? envKeyId : "rzp_live_TLJvEN6IoOE3pq";
-  const keySecret = envKeySecret;
+  if (process.env.VERCEL_ENV === 'preview') {
+    const envTestKeyId = (process.env.RAZORPAY_TEST_KEY_ID || "").trim().replace(/^["']|["']$/g, '');
+    const envTestKeySecret = (process.env.RAZORPAY_TEST_KEY_SECRET || "").trim().replace(/^["']|["']$/g, '');
+    if (!envTestKeyId || !envTestKeySecret) {
+      console.error("❌ RAZORPAY_TEST_KEY_ID or RAZORPAY_TEST_KEY_SECRET is missing in Preview mode.");
+      return res.status(500).json({
+        success: false,
+        error: 'Razorpay Test credentials are not configured in Preview environment.'
+      });
+    }
+    keyId = envTestKeyId;
+    keySecret = envTestKeySecret;
+  } else {
+    const envKeyId = (process.env.RAZORPAY_KEY_ID || "").trim().replace(/^["']|["']$/g, '');
+    const envKeySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim().replace(/^["']|["']$/g, '');
+    keyId = envKeyId.startsWith("rzp_live_") ? envKeyId : "rzp_live_TLJvEN6IoOE3pq";
+    keySecret = envKeySecret;
+  }
 
   if (!keySecret) {
-    console.error("❌ RAZORPAY_KEY_SECRET environment variable is missing on server.");
+    console.error("❌ Razorpay key secret is missing on server.");
     return res.status(500).json({
       success: false,
-      error: 'RAZORPAY_KEY_SECRET environment variable is missing on server.'
+      error: 'Razorpay key secret is missing on server.'
     });
   }
 
@@ -126,7 +141,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      order: orderData
+      order: orderData,
+      keyId: keyId
     });
 
   } catch (err) {

@@ -74,7 +74,7 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
 
   // Step 2: Configure Checkout with official order_id
   const options = {
-    key: RAZORPAY_KEY_ID,
+    key: resJson.keyId || RAZORPAY_KEY_ID,
     amount: orderData.amount, // from server order
     currency: orderData.currency, // INR
     order_id: orderData.id, // Official Razorpay Order ID
