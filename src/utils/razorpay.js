@@ -49,6 +49,7 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
 
   // Step 1: Create Order ID on backend to fix unanchored/international card restrictions
   let orderData = null;
+  let keyIdFromServer = null;
   try {
     const token = await currentUser.getIdToken();
     const orderRes = await fetch('/api/create-order', {
@@ -65,6 +66,7 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
       throw new Error(resJson.error || "Could not create Razorpay order");
     }
     orderData = resJson.order;
+    keyIdFromServer = resJson.keyId;
   } catch (orderErr) {
     console.error("❌ Order Creation Error:", orderErr);
     alert(`Payment initialization failed: ${orderErr.message}`);
@@ -74,7 +76,7 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
 
   // Step 2: Configure Checkout with official order_id
   const options = {
-    key: resJson.keyId || RAZORPAY_KEY_ID,
+    key: keyIdFromServer || RAZORPAY_KEY_ID,
     amount: orderData.amount, // from server order
     currency: orderData.currency, // INR
     order_id: orderData.id, // Official Razorpay Order ID
