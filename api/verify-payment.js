@@ -102,8 +102,8 @@ export default async function handler(req, res) {
     if (process.env.VERCEL_ENV === 'preview') {
       const envTestKeyId = (process.env.RAZORPAY_TEST_KEY_ID || "").trim().replace(/^["']|["']$/g, '');
       const envTestKeySecret = (process.env.RAZORPAY_TEST_KEY_SECRET || "").trim().replace(/^["']|["']$/g, '');
-      if (!envTestKeyId || !envTestKeySecret) {
-        console.error("❌ RAZORPAY_TEST_KEY_ID or RAZORPAY_TEST_KEY_SECRET is missing in Preview mode.");
+      if (!envTestKeyId || !envTestKeySecret || !envTestKeyId.startsWith("rzp_test_")) {
+        console.error("❌ Invalid or missing Razorpay Test credentials in Preview mode.");
         return res.status(500).json({ success: false, error: 'Server configuration error.' });
       }
       keyId = envTestKeyId;
@@ -111,7 +111,11 @@ export default async function handler(req, res) {
     } else {
       const envKeyId = (process.env.RAZORPAY_KEY_ID || "").trim().replace(/^["']|["']$/g, '');
       const envKeySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim().replace(/^["']|["']$/g, '');
-      keyId = envKeyId.startsWith("rzp_live_") ? envKeyId : "rzp_live_TLJvEN6IoOE3pq";
+      if (!envKeyId || !envKeySecret || !envKeyId.startsWith("rzp_live_")) {
+        console.error("❌ Invalid or missing Razorpay Live credentials in Production mode.");
+        return res.status(500).json({ success: false, error: 'Server configuration error.' });
+      }
+      keyId = envKeyId;
       secret = envKeySecret;
     }
 
