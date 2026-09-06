@@ -19,79 +19,161 @@ export default function Pricing() {
   };
 
   return (
-    <section className="pricing section-padding">
+    <section id="pricing" className="pricing">
       <div className="container">
-        <div className="pricing-card glass-panel">
-          <div className="pricing-header">
-            <h2 className="pricing-title">Early User Offer</h2>
-            <div className="pricing-badge">
-              {isSoleAdmin ? 'Admin Mode' : hasActiveLicense ? 'Purchased' : 'First 50 Users'}
-            </div>
+        <div className="pricing-header text-center">
+          <div className="section-eyebrow">
+            <span className="eyebrow-dot"></span>
+            <span>Simple, Honest Lifetime Access</span>
           </div>
-          
-          <div className="early-adopter-notice">
-            <span className="rocket-icon">
-              {isSoleAdmin ? '⚡' : hasActiveLicense ? '🎉' : '🚀'}
-            </span>
-            <div className="early-adopter-text">
+          <h2 className="section-title">
+            One Investment.<br />
+            <span className="text-gradient-accent">Lifetime After Effects Studio.</span>
+          </h2>
+          <p className="section-subtitle">
+            One-time payment of ₹99. No subscriptions, no rendering credits, and no recurring fees ever.
+          </p>
+        </div>
+
+        {/* 2-Column Wide Pricing Matrix */}
+        <div className="pricing-master-card panel-matte-elevated">
+          {/* Left Column: Plan Info, Price & Action CTA */}
+          <div className="pricing-left-col">
+            <div className="pricing-plan-badge-row">
+              <span className="pricing-tier-pill">
+                {isSoleAdmin ? 'Admin Mode' : hasActiveLicense ? 'Active License' : 'Version 1.2 Studio Access'}
+              </span>
+              <span className="pricing-lifetime-tag">Lifetime Rights</span>
+            </div>
+
+            <h3 className="pricing-plan-title">Zero Velocity Studio License</h3>
+            <p className="pricing-plan-summary">
+              Full commercial license for video editors, motion designers, and creators using Adobe After Effects.
+            </p>
+
+            <div className="pricing-amount-block">
+              <div className="pricing-number-line">
+                <span className="pricing-currency">₹</span>
+                <span className="pricing-current-val">99</span>
+                <span className="pricing-crossed-val">₹499</span>
+                <span className="pricing-save-badge">80% OFF</span>
+              </div>
+              <span className="pricing-terms-note">One-time payment • Lifetime access</span>
+            </div>
+
+            <div className="pricing-cta-wrap">
               {isSoleAdmin ? (
-                <>
-                  <strong>Administrator Account</strong>
-                  <span>Full control panel &amp; license generator.</span>
-                </>
+                <button className="btn btn-primary btn-pricing-hero" onClick={handleOpenAdmin}>
+                  Open Admin Dashboard
+                </button>
               ) : hasActiveLicense ? (
-                <>
-                  <strong>You Own Zero Velocity V1.1!</strong>
-                  <span>Your lifetime license is active on your account.</span>
-                </>
+                <button className="btn btn-primary btn-pricing-hero" onClick={handleOpenLicenseModal}>
+                  My License &amp; Download
+                </button>
               ) : (
-                <>
-                  <strong>Buy Version 1.1</strong>
-                  <span>Every Version 1.x update is FREE for life.</span>
-                </>
+                <button className="btn btn-primary btn-pricing-hero" onClick={handleBuyNow}>
+                  <span>Get Lifetime Access • ₹99</span>
+                  <span className="btn-arrow">&rarr;</span>
+                </button>
               )}
             </div>
+
+            <div className="pricing-guarantee-box">
+              <span className="guarantee-icon">⚡</span>
+              <div className="guarantee-text">
+                <strong>Honest Lifetime Upgrade Guarantee</strong>
+                <span>Pay once today. Receive every Version 1.x update and feature addition free forever.</span>
+              </div>
+            </div>
+
+            {/* Clear OS Compatibility Notice */}
+            <div className="pricing-os-notice">
+              <span className="os-warning-icon">ℹ</span>
+              <span><strong>Windows (AE 2020–2025)</strong> • macOS is not supported yet (coming very soon).</span>
+            </div>
           </div>
-          
-          <div className="pricing-amount">
-            <span className="pricing-crossed">₹499</span>
-            <span className="pricing-current">₹99</span>
+
+          {/* Right Column: Complete Feature Breakdown & Trust Specs */}
+          <div className="pricing-right-col">
+            <div className="features-col-header">
+              <h4 className="features-heading">Everything Included with Lifetime Access</h4>
+              <span className="features-subheading">Instant download &amp; license activation</span>
+            </div>
+
+            <ul className="pricing-features-list">
+              <li>
+                <span className="feat-check">✓</span>
+                <div className="feat-detail">
+                  <strong>6 Signature Caption Styles</strong>
+                  <span>Balanced, Corporate Clean, Progressive Line, Simple Line, Clean Caption &amp; Devin Style</span>
+                </div>
+              </li>
+              <li>
+                <span className="feat-check">✓</span>
+                <div className="feat-detail">
+                  <strong>10 Native Motion Presets</strong>
+                  <span>Word and Line entrance animations with authentic bezier easing graph curves</span>
+                </div>
+              </li>
+              <li>
+                <span className="feat-check">✓</span>
+                <div className="feat-detail">
+                  <strong>5 Built-In Audio Cues</strong>
+                  <span>Pops, Clicks, Whooshes, and Snaps locked to entrance keyframes</span>
+                </div>
+              </li>
+              <li>
+                <span className="feat-check">✓</span>
+                <div className="feat-detail">
+                  <strong>In-Plugin Caption Workbench</strong>
+                  <span>Correct text, balance phrases, and assign Support, Hero, and Accent role tags</span>
+                </div>
+              </li>
+              <li>
+                <span className="feat-check">✓</span>
+                <div className="feat-detail">
+                  <strong>Deep Styling &amp; Typography Engine</strong>
+                  <span>Font pairing (including Tactic Sans, Syne, Garamond, Inter), casing, and color palettes</span>
+                </div>
+              </li>
+              <li>
+                <span className="feat-check">✓</span>
+                <div className="feat-detail">
+                  <strong>100% Native After Effects Layers</strong>
+                  <span>Frame-accurate keyframed vector text and shapes (never flat video exports)</span>
+                </div>
+              </li>
+              <li>
+                <span className="feat-check">✓</span>
+                <div className="feat-detail">
+                  <strong>Offline Speech Recognition</strong>
+                  <span>100% private, on-device audio transcription for English and Roman Hinglish</span>
+                </div>
+              </li>
+              <li>
+                <span className="feat-check">✓</span>
+                <div className="feat-detail">
+                  <strong>2 Device Activations</strong>
+                  <span>Activate on your primary desktop workstation and laptop simultaneously</span>
+                </div>
+              </li>
+            </ul>
+
+            <div className="pricing-bottom-trust-strip">
+              <div className="trust-badge-item">
+                <span className="trust-icon">🔒</span>
+                <span>Secure Razorpay Checkout</span>
+              </div>
+              <div className="trust-badge-item">
+                <span className="trust-icon">⚡</span>
+                <span>Instant License Key</span>
+              </div>
+              <div className="trust-badge-item">
+                <span className="trust-icon">🔄</span>
+                <span>Free Lifetime Updates</span>
+              </div>
+            </div>
           </div>
-          
-          <ul className="pricing-features">
-            <li>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-              Lifetime Access
-            </li>
-            <li>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-              All Version 1.x Updates
-            </li>
-            <li>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-              Premium Support
-            </li>
-          </ul>
-          
-          {isSoleAdmin ? (
-            <button className="btn btn-primary btn-full" onClick={handleOpenAdmin}>
-              Open Admin Dashboard
-            </button>
-          ) : hasActiveLicense ? (
-            <button className="btn btn-primary btn-full" onClick={handleOpenLicenseModal}>
-              My License &amp; Download
-            </button>
-          ) : (
-            <button className="btn btn-primary btn-full" onClick={handleBuyNow}>
-              Buy Now
-            </button>
-          )}
         </div>
       </div>
     </section>

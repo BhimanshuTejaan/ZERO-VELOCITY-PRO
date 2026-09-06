@@ -69,6 +69,17 @@ export default function AdminDashboard({ isOpen, onClose }) {
     }
   }, [isOpen, currentUser]);
 
+  // Lock body scroll when dashboard is open, restore when closed
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   // Strict Frontend Security Gate
@@ -251,37 +262,39 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
         {/* Top Header Bar */}
         <div className="admin-header">
-          <div className="admin-header-title">
-            <div className="admin-badge">ADMIN CONTROL CENTER</div>
-            <h2>Zero Velocity Console</h2>
-          </div>
-          <div className="admin-header-actions">
-            <div className="tab-navigation">
-              <button
-                className={`tab-btn ${activeTab === 'directory' ? 'active' : ''}`}
-                onClick={() => setActiveTab('directory')}
-              >
-                📁 Customer Directory
+          <div className="admin-header-top-row">
+            <div className="admin-header-title">
+              <div className="admin-badge">ADMIN CONTROL CENTER</div>
+              <h2>Zero Velocity Console</h2>
+            </div>
+            <div className="admin-quick-actions">
+              <button className="btn btn-secondary btn-sm refresh-btn" onClick={fetchAdminData} disabled={loading}>
+                <svg className={loading ? 'spin' : ''} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                <span>Refresh</span>
               </button>
-              <button
-                className={`tab-btn ${activeTab === 'generator' ? 'active' : ''}`}
-                onClick={() => setActiveTab('generator')}
-              >
-                ✨ Admin Tools (License Generator)
+              <button className="admin-close-btn" onClick={onClose} aria-label="Close">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
-            <button className="btn btn-secondary btn-sm refresh-btn" onClick={fetchAdminData} disabled={loading}>
-              <svg className={loading ? 'spin' : ''} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-              <span>Refresh</span>
+          </div>
+          <div className="tab-navigation">
+            <button
+              className={`tab-btn ${activeTab === 'directory' ? 'active' : ''}`}
+              onClick={() => setActiveTab('directory')}
+            >
+              📁 Customer Directory
             </button>
-            <button className="admin-close-btn" onClick={onClose} aria-label="Close">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <button
+              className={`tab-btn ${activeTab === 'generator' ? 'active' : ''}`}
+              onClick={() => setActiveTab('generator')}
+            >
+              ✨ Admin Tools (License Generator)
             </button>
           </div>
         </div>
 
         {/* Dashboard Home Metrics Grid */}
-        <div className="metrics-grid">
+        <div className={`metrics-grid ${activeTab === 'generator' ? 'metrics-grid--hide-mobile' : ''}`}>
           <div className="metric-card">
             <span className="metric-label">Total Customers</span>
             <span className="metric-value">{totalCustomers}</span>
@@ -352,19 +365,74 @@ export default function AdminDashboard({ isOpen, onClose }) {
                   <p>No licenses found matching your criteria.</p>
                 </div>
               ) : (
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Customer</th>
-                      <th>Source</th>
-                      <th>License Key</th>
-                      <th>Status</th>
-                      <th>Purchase Date</th>
-                      <th>Devices</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <>
+                  {/* Desktop Table View */}
+                  <table className="admin-table desktop-only-table">
+                    <thead>
+                      <tr>
+                        <th>Customer</th>
+                        <th>Source</th>
+                        <th>License Key</th>
+                        <th>Status</th>
+                        <th>Purchase Date</th>
+                        <th>Devices</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredLicenses.map(lic => {
+                        const status = lic.status || 'active';
+                        const deviceCount = lic.registeredDevices?.length || 0;
+                        const maxDev = lic.maxDevices || 1;
+                        const isManualAdmin = lic.source === 'admin' || lic.razorpayPaymentId === 'ADMIN_GENERATED';
+
+                        return (
+                          <tr key={lic.id || lic.licenseKey} className={selectedCustomer?.licenseKey === lic.licenseKey ? 'selected-row' : ''}>
+                            <td>
+                              <div className="customer-email-cell">
+                                <span className="email-text">{lic.email || lic.customerName || 'N/A'}</span>
+                                {lic.customerName && lic.email && <span className="name-subtext">{lic.customerName}</span>}
+                                {lic.firebaseUid && <span className="uid-subtext">UID: {lic.firebaseUid.substring(0, 10)}...</span>}
+                              </div>
+                            </td>
+                            <td>
+                              <span className={`source-badge ${isManualAdmin ? 'admin' : 'razorpay'}`}>
+                                {isManualAdmin ? 'Admin' : 'Razorpay'}
+                              </span>
+                            </td>
+                            <td>
+                              <div className="key-cell">
+                                <code className="monospace">{lic.licenseKey}</code>
+                                <button className="icon-copy-btn" title="Copy Key" onClick={() => copyToClipboard(lic.licenseKey, `table-${lic.licenseKey}`)}>
+                                  {copiedField === `table-${lic.licenseKey}` ? '✓' : '📋'}
+                                </button>
+                              </div>
+                            </td>
+                            <td>
+                              <span className={`status-badge-sm ${status === 'active' ? 'active' : 'disabled'}`}>
+                                <span className="dot"></span>
+                                {status}
+                              </span>
+                            </td>
+                            <td className="date-cell">{formatDate(lic.purchaseDate)}</td>
+                            <td>
+                              <span className={`device-tag ${deviceCount >= maxDev ? 'limit' : ''}`}>
+                                {deviceCount}/{maxDev} Devices
+                              </span>
+                            </td>
+                            <td>
+                              <button className="btn btn-secondary btn-xs view-details-btn" onClick={() => setSelectedCustomer(lic)}>
+                                Inspect Details
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  {/* Mobile Customer Cards View */}
+                  <div className="mobile-cards-list mobile-only-cards">
                     {filteredLicenses.map(lic => {
                       const status = lic.status || 'active';
                       const deviceCount = lic.registeredDevices?.length || 0;
@@ -372,49 +440,60 @@ export default function AdminDashboard({ isOpen, onClose }) {
                       const isManualAdmin = lic.source === 'admin' || lic.razorpayPaymentId === 'ADMIN_GENERATED';
 
                       return (
-                        <tr key={lic.id || lic.licenseKey} className={selectedCustomer?.licenseKey === lic.licenseKey ? 'selected-row' : ''}>
-                          <td>
-                            <div className="customer-email-cell">
-                              <span className="email-text">{lic.email || lic.customerName || 'N/A'}</span>
-                              {lic.customerName && lic.email && <span className="name-subtext">{lic.customerName}</span>}
-                              {lic.firebaseUid && <span className="uid-subtext">UID: {lic.firebaseUid.substring(0, 10)}...</span>}
+                        <div
+                          key={lic.id || lic.licenseKey}
+                          className={`mobile-customer-card ${selectedCustomer?.licenseKey === lic.licenseKey ? 'selected-card' : ''}`}
+                        >
+                          <div className="mobile-card-header">
+                            <div className="mobile-card-identity">
+                              <span className="mobile-card-name">{lic.customerName || lic.email || 'N/A'}</span>
+                              {lic.customerName && lic.email && (
+                                <span className="mobile-card-email">{lic.email}</span>
+                              )}
+                              {lic.firebaseUid && (
+                                <span className="mobile-card-uid">UID: {lic.firebaseUid.substring(0, 8)}...</span>
+                              )}
                             </div>
-                          </td>
-                          <td>
-                            <span className={`source-badge ${isManualAdmin ? 'admin' : 'razorpay'}`}>
-                              {isManualAdmin ? 'Admin' : 'Razorpay'}
-                            </span>
-                          </td>
-                          <td>
-                            <div className="key-cell">
-                              <code className="monospace">{lic.licenseKey}</code>
-                              <button className="icon-copy-btn" title="Copy Key" onClick={() => copyToClipboard(lic.licenseKey, `table-${lic.licenseKey}`)}>
-                                {copiedField === `table-${lic.licenseKey}` ? '✓' : '📋'}
-                              </button>
-                            </div>
-                          </td>
-                          <td>
                             <span className={`status-badge-sm ${status === 'active' ? 'active' : 'disabled'}`}>
                               <span className="dot"></span>
                               {status}
                             </span>
-                          </td>
-                          <td className="date-cell">{formatDate(lic.purchaseDate)}</td>
-                          <td>
-                            <span className={`device-tag ${deviceCount >= maxDev ? 'limit' : ''}`}>
-                              {deviceCount}/{maxDev} Devices
-                            </span>
-                          </td>
-                          <td>
-                            <button className="btn btn-secondary btn-xs view-details-btn" onClick={() => setSelectedCustomer(lic)}>
-                              Inspect Details
+                          </div>
+
+                          <div className="mobile-card-key-box">
+                            <code className="monospace mobile-key-text">{lic.licenseKey}</code>
+                            <button
+                              className="icon-copy-btn mobile-copy-btn"
+                              title="Copy Key"
+                              onClick={() => copyToClipboard(lic.licenseKey, `card-${lic.licenseKey}`)}
+                            >
+                              {copiedField === `card-${lic.licenseKey}` ? '✓' : '📋'}
                             </button>
-                          </td>
-                        </tr>
+                          </div>
+
+                          <div className="mobile-card-meta">
+                            <span className={`source-badge ${isManualAdmin ? 'admin' : 'razorpay'}`}>
+                              {isManualAdmin ? 'Admin' : 'Razorpay'}
+                            </span>
+                            <span className={`device-tag ${deviceCount >= maxDev ? 'limit' : ''}`}>
+                              {deviceCount}/{maxDev} Dev
+                            </span>
+                            <span className="mobile-card-date">{formatDate(lic.purchaseDate)}</span>
+                          </div>
+
+                          <div className="mobile-card-actions">
+                            <button
+                              className="btn btn-secondary mobile-inspect-btn"
+                              onClick={() => setSelectedCustomer(lic)}
+                            >
+                              Inspect Details →
+                            </button>
+                          </div>
+                        </div>
                       );
                     })}
-                  </tbody>
-                </table>
+                  </div>
+                </>
               )}
             </div>
           </>

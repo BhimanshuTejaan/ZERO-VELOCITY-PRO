@@ -22,7 +22,7 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
       try {
         const db = getFirestore();
         const licensesRef = collection(db, 'licenses');
-        
+
         let q = query(licensesRef, where('firebaseUid', '==', currentUser.uid));
         let querySnapshot = await getDocs(q);
 
@@ -130,9 +130,9 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
             <div className="license-empty-state">
               <div className="empty-icon">🔑</div>
               <h3>No Active Licenses Found</h3>
-              <p>You haven't purchased Zero Velocity Version 1.1 yet.</p>
+              <p>You haven't purchased a Zero Velocity Studio license yet.</p>
               <a href="#pricing" onClick={onClose} className="btn btn-primary btn-sm">
-                Buy Version 1.1 (₹99)
+                Get Lifetime Access · ₹99
               </a>
             </div>
           ) : (
@@ -140,7 +140,7 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
               {licenses.map((lic, index) => (
                 <div className="license-card" key={lic.licenseKey || index}>
                   <div className="license-card-header">
-                    <span className="product-name">Zero Velocity v1.1</span>
+                    <span className="product-name">Zero Velocity v1.2</span>
                     <span className={`status-badge ${lic.status === 'active' ? 'active' : ''}`}>
                       <span className="status-dot"></span>
                       {lic.status || 'active'}
@@ -151,8 +151,8 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
 
                   <div className="license-key-box">
                     <code className="license-code">{lic.licenseKey}</code>
-                    <button 
-                      className={`copy-btn ${copiedKey === lic.licenseKey ? 'copied' : ''}`} 
+                    <button
+                      className={`copy-btn ${copiedKey === lic.licenseKey ? 'copied' : ''}`}
                       onClick={() => handleCopy(lic.licenseKey)}
                     >
                       {copiedKey === lic.licenseKey ? (

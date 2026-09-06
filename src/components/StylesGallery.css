@@ -1,0 +1,201 @@
+/* Styles Gallery - 6 Production Caption Layouts */
+.styles-gallery-section {
+  position: relative;
+  padding: 5rem 0;
+  background-color: var(--zv-bg-canvas, #06080b);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.styles-header {
+  max-width: 680px;
+  margin: 0 auto 3rem auto;
+}
+
+.styles-header .section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.75rem;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: var(--zv-radius-pill, 9999px);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--zv-accent-primary, #38bdf8);
+  margin-bottom: 1rem;
+}
+
+.eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--zv-accent-primary, #38bdf8);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--zv-accent-primary, #38bdf8);
+}
+
+.styles-header .section-title {
+  font-size: clamp(1.85rem, 3.2vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.styles-header .section-subtitle {
+  font-size: clamp(0.95rem, 1.15vw, 1.05rem);
+  color: var(--zv-text-secondary, #94a3b8);
+  line-height: 1.6;
+}
+
+/* 6 Layout Cards Grid */
+.layout-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+  margin-bottom: 2.5rem;
+}
+
+.layout-card {
+  display: flex;
+  flex-direction: column;
+  background: #0a0d16;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.layout-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.06);
+}
+
+.layout-card-preview {
+  position: relative;
+  background: #04060a;
+  padding: 1.25rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.layout-card-img {
+  max-width: 100%;
+  height: auto;
+  max-height: 110px;
+  object-fit: contain;
+  border-radius: 6px;
+  display: block;
+}
+
+.layout-card-body {
+  padding: 1.25rem 1.25rem 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.layout-card-header {
+  margin-bottom: 1rem;
+}
+
+.layout-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.layout-spec-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.spec-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.spec-label {
+  color: var(--zv-text-secondary, #94a3b8);
+  font-weight: 500;
+  font-family: var(--zv-font-mono, monospace);
+  font-size: 0.75rem;
+}
+
+.spec-val {
+  color: #f1f5f9;
+  font-weight: 600;
+  text-align: right;
+}
+
+.spec-val.highlight-val {
+  color: var(--zv-accent-primary, #38bdf8);
+  font-size: 0.78rem;
+}
+
+/* Honest Disclaimer Card */
+.styles-disclaimer-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0.85rem 1.25rem;
+  background: rgba(56, 189, 248, 0.04);
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.disclaimer-icon {
+  color: var(--zv-accent-primary, #38bdf8);
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+.disclaimer-text {
+  font-size: 0.82rem;
+  color: var(--zv-text-secondary, #94a3b8);
+  line-height: 1.45;
+}
+
+/* Responsive Rules */
+@media (max-width: 1024px) {
+  .layout-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .styles-gallery-section {
+    padding: 3.5rem 0;
+  }
+
+  .layout-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .layout-card-preview {
+    min-height: 120px;
+    padding: 1rem;
+  }
+
+  .layout-card-body {
+    padding: 1rem 1rem 1.25rem 1rem;
+  }
+}

@@ -1,12 +1,14 @@
 import React from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
-import Showcase from './components/Showcase';
-import ReleaseNotes from './components/ReleaseNotes';
-import Pricing from './components/Pricing';
-import SupportCard from './components/SupportCard';
+import StylesGallery from './components/StylesGallery';
+import StylingControls from './components/StylingControls';
+import WorkflowStudio from './components/WorkflowStudio';
+import VersionComparison from './components/VersionComparison';
 import Installation from './components/Installation';
+import Pricing from './components/Pricing';
 import Reviews from './components/Reviews';
+import SupportCard from './components/SupportCard';
 import Footer from './components/Footer';
 import EditorBackground from './components/EditorBackground';
 
@@ -16,14 +18,35 @@ function App() {
       <EditorBackground />
       <Header />
       <main>
+        {/* 01: Hero Section */}
         <Hero />
-        <Showcase />
-        <ReleaseNotes />
-        <Pricing />
-        <SupportCard />
+
+        {/* 02: 6 Authentic Signature Styles Gallery */}
+        <StylesGallery />
+
+        {/* 03: Deeper Typography & Styling Controls */}
+        <StylingControls />
+
+        {/* 04: Unified 5-Stage Workflow Studio */}
+        <WorkflowStudio />
+
+        {/* 05: Version 1.0 vs Version 1.2 Comparison */}
+        <VersionComparison />
+
+        {/* 06: Fast 4-Step Installation Setup */}
         <Installation />
+
+        {/* 07: Honest Lifetime Pricing & Checkout */}
+        <Pricing />
+
+        {/* 08: Editor Advantages, Ratings & Guarantee */}
         <Reviews />
+
+        {/* 09: Priority Creator Support */}
+        <SupportCard />
       </main>
+
+      {/* 10: Comprehensive Footer */}
       <Footer />
     </>
   );

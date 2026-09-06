@@ -1,0 +1,12 @@
+*.bak*
+**/*.bak*
+**/*.bak-*
+snapshot_*
+**/snapshot_*
+SECURITY_*
+**/SECURITY_*
+awesome-design-md-main
+WEBSITE_HANDOFF.md
+src/components/CaptionEditorSection.*
+src/components/CompatibilitySection.*
+src/components/MotionSoundSection.*

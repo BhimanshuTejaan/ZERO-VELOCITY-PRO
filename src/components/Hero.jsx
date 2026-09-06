@@ -19,90 +19,97 @@ export default function Hero() {
   };
 
   return (
-    <section className="hero animate-fade-in">
-      <div className="container hero-grid">
-        <div className="hero-content">
-          <div className="launch-badge">
-            <span className="badge-dot"></span>
-            Zero Velocity v1.1 • Available Now
-          </div>
-          
-          <h1 className="hero-title">
-            TRANSCRIBE. STYLE. GENERATE.<br />
-            <span className="text-gradient-accent">Built for After Effects.</span>
-          </h1>
-          
-          <p className="hero-subtitle">
-            Generate captions directly from your video with built-in English + Hinglish transcription, then style them with custom fonts, colors, and accurate live preview.
-          </p>
+    <section className="editorial-hero" id="hero">
+      <div className="hero-backdrop" aria-hidden="true">
+        <div className="backdrop-ambient-glow"></div>
+        <div className="backdrop-fine-grid"></div>
+      </div>
 
-          <div className="v11-feature-chips">
-            <span className="chip chip-accent">⚡ One-Click Auto Transcribe</span>
-            <span className="chip">English</span>
-            <span className="chip chip-hinglish">Hinglish Support</span>
-          </div>
-          
-          <div className="hero-pricing-widget">
-            <div className="price-tag-inline">
-              <span className="price-current">₹99</span>
-              <span className="price-crossed">₹499</span>
+      <div className="editorial-container">
+        {/* Main Editorial Asymmetrical Grid */}
+        <div className="editorial-grid">
+          {/* Left Column: Copy & Actions */}
+          <div className="editorial-copy-col">
+            <div className="editorial-eyebrow">
+              <span className="eyebrow-pip" aria-hidden="true"></span>
+              <span>ZERO VELOCITY 1.2 · FOR AFTER EFFECTS</span>
             </div>
-            <p className="price-terms-inline">Early User Price (First 50 Users) • Lifetime access</p>
+
+            <h1 className="editorial-headline">
+              Captions that move<br />
+              <span className="headline-accent">with your edit.</span>
+            </h1>
+
+            <p className="editorial-subtitle">
+              Turn raw audio into styled, animated, editable, and sound-synced captions without leaving After Effects.
+            </p>
+
+            {/* Actions: One Primary Button & One Clean Text Link */}
+            <div className="editorial-actions-row">
+              {isSoleAdmin ? (
+                <button className="btn-hero-primary" onClick={handleOpenAdmin}>
+                  Admin Control Center
+                </button>
+              ) : hasActiveLicense ? (
+                <button className="btn-hero-primary" onClick={handleOpenLicenseModal}>
+                  My License &amp; Download
+                </button>
+              ) : (
+                <button className="btn-hero-primary" onClick={handleBuyNow}>
+                  Get Lifetime Access · ₹99
+                </button>
+              )}
+
+              <a href="#workflow" className="hero-secondary-link">
+                <span>Explore the workflow</span>
+                <span className="link-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+            </div>
+
+            {/* Quiet Platform Trust Line */}
+            <p className="editorial-trust-note">
+              Windows · AE 2020–2025 · 2 devices · Version 1.x updates included
+            </p>
           </div>
 
-          <div className="hero-cta">
-            {isSoleAdmin ? (
-              <button className="btn btn-primary btn-large" onClick={handleOpenAdmin}>
-                Admin Control Center
-              </button>
-            ) : hasActiveLicense ? (
-              <button className="btn btn-primary btn-large" onClick={handleOpenLicenseModal}>
-                My License &amp; Download
-              </button>
-            ) : (
-              <button className="btn btn-primary btn-large" onClick={handleBuyNow}>
-                Buy Now
-              </button>
-            )}
-            <button 
-              type="button"
-              className="btn btn-secondary btn-large"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                window.open(
-                  "https://youtu.be/avL82crHQVU?si=xjR9XZncFAaG20vh",
-                  "_blank",
-                  "noopener,noreferrer"
-                );
-              }}
-            >
-              Watch V1.1 Demo
-            </button>
+          {/* Right Column: Original Code-Rendered Kinetic Typography Composition */}
+          <div className="editorial-motion-col" aria-label="Kinetic Caption Presentation">
+            <div className="kinetic-stage">
+              <div className="kinetic-light-field" aria-hidden="true"></div>
+
+              <div className="kinetic-typography-stack">
+                {/* 1. Support Phrase: MAKE */}
+                <div className="kinetic-line line-support">
+                  <span className="phrase-support">MAKE</span>
+                </div>
+
+                {/* 2. Dominant Hero Phrase: EVERY WORD */}
+                <div className="kinetic-line line-hero">
+                  <span className="phrase-hero">EVERY WORD</span>
+                </div>
+
+                {/* 3. Accent Phrase: LAND. */}
+                <div className="kinetic-line line-accent">
+                  <span className="phrase-accent">LAND<span className="accent-dot">.</span></span>
+                </div>
+              </div>
+            </div>
           </div>
-          
-          <a href="#release-notes" className="roadmap-value-badge">
-            <div className="rv-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"></path>
-              </svg>
-            </div>
-            <div className="rv-text">
-              <span className="rv-title">All Version 1.x Updates Included &rarr;</span>
-              <span className="rv-subtitle">Buy once today. Receive every feature update for free.</span>
-            </div>
-          </a>
         </div>
-        
-        <div className="hero-visual">
-          <div className="iframe-container glass-panel">
-            <iframe 
-              src="/cep/index.html" 
-              title="Zero Velocity Preview" 
-              className="cep-iframe"
-            />
+
+        {/* Supporting Capability Rail at bottom edge: Thin, Calm, Secondary */}
+        <div className="editorial-capability-rail" aria-label="Core Capabilities">
+          <div className="cap-group">
+            <span className="cap-item">Offline transcription</span>
+            <span className="cap-sep" aria-hidden="true">·</span>
+            <span className="cap-item">6 caption styles</span>
           </div>
-          <div className="glow-bg-hero"></div>
+          <span className="cap-sep cap-sep-mid" aria-hidden="true">·</span>
+          <div className="cap-group">
+            <span className="cap-item">10 entrance animations</span>
+            <span className="cap-sep" aria-hidden="true">·</span>
+            <span className="cap-item">Built-in sound sync</span>
+          </div>
         </div>
       </div>
     </section>

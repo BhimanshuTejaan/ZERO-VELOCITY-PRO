@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
     try {
       const db = getFirestore();
       const licensesRef = collection(db, 'licenses');
-      
+
       let q = query(licensesRef, where('firebaseUid', '==', user.uid));
       let snap = await getDocs(q);
 
@@ -102,4 +102,3 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-

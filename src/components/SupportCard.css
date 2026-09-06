@@ -1,23 +1,23 @@
 .support-section {
-  padding: 2rem 0 5rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 2.5rem 0 5rem 0;
+  border-top: 1px solid var(--zv-border-subtle, rgba(255, 255, 255, 0.06));
 }
 
 .support-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 2.25rem 2.75rem;
-  border-radius: var(--radius-xl);
-  background: var(--bg-card);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  box-shadow: var(--shadow-card);
+  padding: 2.25rem 2.5rem;
+  border-radius: var(--zv-radius-xl, 24px);
+  background: var(--zv-bg-surface-1, #090c14);
+  border: 1px solid var(--zv-border-strong, rgba(255, 255, 255, 0.18));
+  box-shadow: var(--zv-shadow-lg);
   gap: 2.5rem;
-  transition: border-color 0.3s var(--transition-smooth);
+  transition: all 0.25s ease;
 }
 
 .support-card:hover {
-  border-color: rgba(59, 130, 246, 0.4);
+  border-color: var(--zv-border-accent, rgba(56, 189, 248, 0.35));
 }
 
 .support-left {
@@ -27,11 +27,11 @@
 }
 
 .support-icon-badge {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-md);
-  background: rgba(59, 130, 246, 0.12);
-  border: 1px solid rgba(59, 130, 246, 0.25);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--zv-radius-md, 10px);
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid var(--zv-border-accent, rgba(56, 189, 248, 0.35));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,7 +39,7 @@
 }
 
 .chat-emoji {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
 }
 
 .support-header-text {
@@ -49,17 +49,17 @@
 }
 
 .support-title {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 800;
-  color: var(--text-heading);
-  margin-bottom: 0.25rem;
-  letter-spacing: -0.01em;
+  color: #ffffff;
+  margin-bottom: 0.2rem;
+  letter-spacing: -0.02em;
 }
 
 .support-subtitle {
-  font-size: 0.925rem;
-  color: var(--text-muted);
-  max-width: 420px;
+  font-size: 0.92rem;
+  color: var(--zv-text-secondary, #94a3b8);
+  max-width: 440px;
   line-height: 1.5;
 }
 
@@ -74,48 +74,48 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.7rem 1.2rem;
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
+  padding: 0.65rem 1.15rem;
+  border-radius: var(--zv-radius-pill, 9999px);
+  font-size: 0.85rem;
   font-weight: 600;
-  transition: all 0.25s var(--transition-smooth);
+  transition: all 0.2s ease;
   text-decoration: none;
   white-space: nowrap;
 }
 
 .btn-guide {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-color);
-  color: var(--text-heading);
+  background: var(--zv-bg-surface-2, #0e1320);
+  border: 1px solid var(--zv-border-default, rgba(255, 255, 255, 0.1));
+  color: #ffffff;
 }
 
 .btn-guide:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--border-hover);
+  background: var(--zv-bg-surface-3, #141b2e);
+  border-color: var(--zv-border-accent, rgba(56, 189, 248, 0.35));
   transform: translateY(-2px);
 }
 
 .btn-youtube {
-  background: rgba(255, 0, 0, 0.08);
-  border: 1px solid rgba(255, 0, 0, 0.25);
-  color: #ff4d4d;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #f87171;
 }
 
 .btn-youtube:hover {
-  background: rgba(255, 0, 0, 0.15);
-  border-color: rgba(255, 0, 0, 0.4);
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
   transform: translateY(-2px);
 }
 
 .btn-instagram {
-  background: rgba(225, 48, 108, 0.08);
-  border: 1px solid rgba(225, 48, 108, 0.25);
+  background: rgba(236, 72, 153, 0.08);
+  border: 1px solid rgba(236, 72, 153, 0.25);
   color: #f472b6;
 }
 
 .btn-instagram:hover {
-  background: rgba(225, 48, 108, 0.15);
-  border-color: rgba(225, 48, 108, 0.4);
+  background: rgba(236, 72, 153, 0.15);
+  border-color: rgba(236, 72, 153, 0.4);
   transform: translateY(-2px);
 }
 
@@ -123,7 +123,7 @@
   .support-card {
     flex-direction: column;
     align-items: flex-start;
-    padding: 1.75rem;
+    padding: 1.75rem 1.5rem;
   }
 
   .support-actions {
@@ -132,6 +132,25 @@
 
   .support-btn {
     flex: 1;
+    min-height: 44px;
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .support-card {
+    padding: 1.5rem 1rem;
+    border-radius: 16px;
+    gap: 1.5rem;
+  }
+
+  .support-actions {
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .support-btn {
+    width: 100%;
+    flex: none;
   }
 }
