@@ -83,6 +83,21 @@
   white-space: nowrap;
 }
 
+.btn-email {
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.btn-email:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: rgba(56, 189, 248, 0.6);
+  transform: translateY(-2px);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
+}
+
 .btn-guide {
   background: var(--zv-bg-surface-2, #0e1320);
   border: 1px solid var(--zv-border-default, rgba(255, 255, 255, 0.1));

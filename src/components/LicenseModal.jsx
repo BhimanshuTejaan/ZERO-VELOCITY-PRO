@@ -220,6 +220,13 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
               ))}
             </div>
           )}
+
+          <div className="license-modal-support-footer">
+            <span>Need installation or activation support?</span>
+            <a href="mailto:support@zerovelocitycaptions.com" className="license-modal-support-link">
+              support@zerovelocitycaptions.com
+            </a>
+          </div>
         </div>
       </div>
     </div>

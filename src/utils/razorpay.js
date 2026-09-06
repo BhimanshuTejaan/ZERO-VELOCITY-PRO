@@ -166,17 +166,74 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
     modal: {
       ondismiss: function () {
         console.log("ℹ️ Razorpay Checkout popup closed by user.");
+        restoreBodyScroll();
+        setTimeout(restoreBodyScroll, 50);
+        setTimeout(restoreBodyScroll, 250);
+        setTimeout(restoreBodyScroll, 750);
         if (onError) onError(new Error("Payment cancelled by user"));
+      },
+      onhidden: function () {
+        restoreBodyScroll();
       }
     }
   };
 
   const razorpayInstance = new window.Razorpay(options);
   razorpayInstance.on("payment.failed", function (response) {
+    restoreBodyScroll();
     console.error("❌ Razorpay Payment Failed:", response.error);
     alert(`Payment Failed: ${response.error.description || "Transaction could not be completed."}`);
     if (onError) onError(response.error);
   });
 
+  // Watchdog: detect when modal closes or is removed to guarantee scroll restoration
+  const watchdog = setInterval(() => {
+    const container = document.querySelector('.razorpay-container');
+    if (!container || container.style.display === 'none') {
+      clearInterval(watchdog);
+      restoreBodyScroll();
+    }
+  }, 300);
+
+  // Clear watchdog after 30 minutes to prevent resource leak
+  setTimeout(() => clearInterval(watchdog), 30 * 60 * 1000);
+
   razorpayInstance.open();
+};
+
+/**
+ * Restores body and document scroll state if locked by Razorpay Checkout.
+ * Strips inline overflow/contain locks, cleans up hidden modal containers,
+ * and restores focus to window to re-enable scroll wheel and keyboard navigation.
+ */
+export const restoreBodyScroll = () => {
+  try {
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('contain');
+    document.documentElement.style.removeProperty('overflow');
+    document.documentElement.style.removeProperty('contain');
+
+    if (document.body.style.overflow === 'hidden') {
+      document.body.style.overflow = '';
+    }
+    if (document.documentElement.style.overflow === 'hidden') {
+      document.documentElement.style.overflow = '';
+    }
+
+    // Clean up any hidden or orphaned razorpay containers
+    const containers = document.querySelectorAll('.razorpay-container');
+    containers.forEach((container) => {
+      if (container.style.display === 'none' || !container.offsetParent) {
+        container.remove();
+      }
+    });
+
+    // Reset focus if trapped in iframe or container
+    if (document.activeElement && (document.activeElement.tagName === 'IFRAME' || document.activeElement.closest?.('.razorpay-container'))) {
+      document.activeElement.blur();
+      window.focus();
+    }
+  } catch (err) {
+    console.warn('⚠️ Scroll restoration notice:', err);
+  }
 };

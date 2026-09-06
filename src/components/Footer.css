@@ -85,6 +85,19 @@
   color: #ffffff;
 }
 
+.footer-support-email {
+  color: #38bdf8 !important;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  word-break: break-all;
+}
+
+.footer-support-email:hover {
+  color: #7dd3fc !important;
+  text-decoration: underline;
+}
+
 /* Footer Bottom */
 .footer-bottom {
   display: flex;

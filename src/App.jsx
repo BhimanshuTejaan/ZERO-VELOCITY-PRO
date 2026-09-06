@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import StylesGallery from './components/StylesGallery';
@@ -13,6 +13,28 @@ import Footer from './components/Footer';
 import EditorBackground from './components/EditorBackground';
 
 function App() {
+  // Global safeguard: restore scroll wheel if no modal overlay is active
+  useEffect(() => {
+    const ensureScrollUnlocked = () => {
+      const activeModal = document.querySelector('.license-modal-overlay, .admin-overlay, .processing-overlay-container, .modal-backdrop');
+      if (!activeModal && document.body.style.overflow === 'hidden') {
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('contain');
+        document.documentElement.style.removeProperty('overflow');
+        document.documentElement.style.removeProperty('contain');
+      }
+    };
+
+    window.addEventListener('focus', ensureScrollUnlocked);
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') ensureScrollUnlocked();
+    });
+
+    return () => {
+      window.removeEventListener('focus', ensureScrollUnlocked);
+    };
+  }, []);
+
   return (
     <>
       <EditorBackground />
