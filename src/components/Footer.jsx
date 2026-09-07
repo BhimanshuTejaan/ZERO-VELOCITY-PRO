@@ -51,8 +51,8 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="https://youtu.be/avL82crHQVU?si=xjR9XZncFAaG20vh" target="_blank" rel="noopener noreferrer">
-                  Feature Walkthrough &rarr;
+                <a href="https://www.youtube.com/watch?v=pxf3k0pU-oE" target="_blank" rel="noopener noreferrer">
+                  Watch Full Breakdown &rarr;
                 </a>
               </li>
               <li>
