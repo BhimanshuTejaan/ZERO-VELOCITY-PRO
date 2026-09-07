@@ -9,9 +9,9 @@ function generateEmailTemplate({
   purchaseDate,
   razorpayPaymentId,
   downloadUrl,
-  productName = "Zero Velocity Version 1.0 (Founder Launch)",
-  pluginVersion = "v1.0.0",
-  supportEmail = "bhimanshutejaan@gmail.com"
+  productName = "Zero Velocity Version 1.2",
+  pluginVersion = "v1.2",
+  supportEmail = "support@zerovelocitycaptions.com"
 }) {
   const formattedDate = purchaseDate 
     ? new Date(purchaseDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
@@ -240,7 +240,7 @@ function generateEmailTemplate({
           </p>
           <div style="text-align:center;margin-bottom:20px;">
             <a href="${downloadUrl}" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#ffffff;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;">
-              ⬇️ Download Zero Velocity v1.0
+              ⬇️ Download Zero Velocity v1.2
             </a>
           </div>
           ` : `
@@ -250,10 +250,10 @@ function generateEmailTemplate({
           </p>
           `}
           <ol class="instructions-list">
-            <li>Download and install the free <strong>ZXP Installer</strong> from <a href="https://aescripts.com/learn/zxp-installer/" style="color:#3b82f6;">aescripts.com/learn/zxp-installer/</a></li>
-            <li>Open ZXP Installer and drag <code>ZeroVelocity-v1.0.0.zxp</code> onto it</li>
-            <li>Restart After Effects, then open <strong>Window → Extensions → Zero Velocity</strong></li>
-            <li>Enter your License Key (<code>${licenseKey}</code>) when prompted</li>
+            <li>Download the Zero Velocity v1.2 package and extract the files.</li>
+            <li>Follow the quick installation steps in the included guide or use ZXP Installer if installing .zxp format.</li>
+            <li>Open After Effects, then go to <strong>Window → Extensions → Zero Velocity</strong>.</li>
+            <li>Enter your License Key (<code>${licenseKey}</code>) when prompted to activate.</li>
           </ol>
         </div>
       </div>

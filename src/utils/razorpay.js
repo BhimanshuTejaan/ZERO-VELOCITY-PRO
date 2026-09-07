@@ -82,7 +82,13 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
     order_id: orderData.id, // Official Razorpay Order ID
     name: "Zero Velocity",
     description: "Zero Velocity Version 1.2",
-    image: "/cep/assets/zero-velocity-logo.png",
+    image: typeof window !== 'undefined' && window.location.origin
+      ? `${window.location.origin}/cep/assets/zero-velocity-logo.png`
+      : "https://www.zerovelocitycaptions.com/cep/assets/zero-velocity-logo.png",
+    notes: {
+      website: typeof window !== 'undefined' ? window.location.origin : "https://www.zerovelocitycaptions.com",
+      order_id: orderData.id
+    },
     prefill: {
       name: currentUser?.displayName || "",
       email: currentUser?.email || ""

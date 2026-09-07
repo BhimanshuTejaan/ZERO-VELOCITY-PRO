@@ -93,6 +93,9 @@ export default async function handler(req, res) {
 
     const authHeader = 'Basic ' + Buffer.from(`${keyId}:${keySecret}`).toString('base64');
 
+    const requestOrigin = req.headers.origin || req.headers.referer || "https://www.zerovelocitycaptions.com";
+    const requestHost = req.headers.host || "www.zerovelocitycaptions.com";
+
     const response = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
       headers: {
@@ -102,7 +105,12 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         amount: amount,
         currency: currency,
-        receipt: `receipt_zv_${Date.now()}`
+        receipt: `receipt_zv_${Date.now()}`,
+        notes: {
+          website: requestOrigin,
+          host: requestHost,
+          productId: productId
+        }
       })
     });
 
@@ -133,6 +141,8 @@ export default async function handler(req, res) {
       email: authResult.email,
       customerName: authResult.displayName || null,
       productId: productId,
+      origin: requestOrigin,
+      host: requestHost,
       expectedAmount: amount,
       expectedCurrency: currency,
       status: "pending",
@@ -144,7 +154,7 @@ export default async function handler(req, res) {
 
     await dbAdmin.collection('paymentOrders').doc(orderData.id).set(orderDoc);
 
-    console.log(`✅ Stored secure paymentOrders record for ${orderData.id}`);
+    console.log(`✅ Stored secure paymentOrders record for ${orderData.id} (Origin: ${requestOrigin})`);
 
     return res.status(200).json({
       success: true,
