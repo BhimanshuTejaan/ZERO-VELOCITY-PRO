@@ -263,7 +263,7 @@ export default async function handler(req, res) {
           licenseKey: finalLicenseKey,
           purchaseDate: nowIso,
           razorpayPaymentId: razorpay_payment_id,
-          downloadUrl: process.env.CUSTOMER_DOWNLOAD_URL || "https://drive.usercontent.google.com/download?id=1Q471jVzYPJG78fZ7ibDpgiogk5rRbNgv&export=download&confirm=t"
+          downloadUrl: process.env.CUSTOMER_DOWNLOAD_URL || "https://drive.usercontent.google.com/download?id=1dG_Wla6yz9A8GotwFvVaa37XnoFL_eFu&export=download&confirm=t"
         });
       } catch (emailErr) {
         console.error("❌ Isolated error during email dispatch attempt:", emailErr);

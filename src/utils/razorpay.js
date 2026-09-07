@@ -10,10 +10,10 @@ export const RAZORPAY_KEY_ID = "rzp_live_TLJvEN6IoOE3pq";
 export const PRODUCT_PRICE_INR = 99;
 
 // ─────────────────────────────────────────────────────────
-// Customer Download URL – Zero_Velocity_v1.0.0.zip
+// Customer Download URL – ZeroVelocity v.1.2.zip
 // Direct download via Google Drive (bypasses virus-scan interstitial)
 // ─────────────────────────────────────────────────────────
-export const CUSTOMER_DOWNLOAD_URL = "https://drive.usercontent.google.com/download?id=1Q471jVzYPJG78fZ7ibDpgiogk5rRbNgv&export=download&confirm=t";
+export const CUSTOMER_DOWNLOAD_URL = "https://drive.usercontent.google.com/download?id=1dG_Wla6yz9A8GotwFvVaa37XnoFL_eFu&export=download&confirm=t";
 
 /**
  * Dynamically loads the Razorpay Checkout SDK script if not already present.
@@ -81,7 +81,7 @@ export const initiateRazorpayCheckout = async ({ currentUser, onSuccess, onError
     currency: orderData.currency, // INR
     order_id: orderData.id, // Official Razorpay Order ID
     name: "Zero Velocity",
-    description: "Zero Velocity Version 1.1",
+    description: "Zero Velocity Version 1.2",
     image: "/cep/assets/zero-velocity-logo.png",
     prefill: {
       name: currentUser?.displayName || "",

@@ -114,7 +114,7 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Download Zero Velocity v1.1
+                Download Zero Velocity v1.2
               </a>
             )}
           </div>
@@ -209,7 +209,7 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
                     </div>
                     <div className="meta-item">
                       <span className="meta-label">Version:</span>
-                      <span className="meta-value">v1.1</span>
+                      <span className="meta-value">v1.2</span>
                     </div>
                     <div className="meta-item">
                       <span className="meta-label">Devices:</span>
