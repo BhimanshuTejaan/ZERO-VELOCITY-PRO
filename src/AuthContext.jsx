@@ -39,19 +39,53 @@ export function AuthProvider({ children }) {
 
     setCheckingLicense(true);
     try {
-      const db = getFirestore();
-      const licensesRef = collection(db, 'licenses');
-
-      let q = query(licensesRef, where('firebaseUid', '==', user.uid));
-      let snap = await getDocs(q);
-
       let list = [];
-      snap.forEach(doc => list.push(doc.data()));
 
-      if (list.length === 0 && user.email) {
-        let qEmail = query(licensesRef, where('email', '==', user.email));
-        let snapEmail = await getDocs(qEmail);
-        snapEmail.forEach(doc => list.push(doc.data()));
+      // 1. Primary: Secure authenticated entitlement API (with auto-linking of admin grants)
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/my-licenses', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.licenses)) {
+            list = data.licenses;
+          }
+        }
+      } catch (apiErr) {
+        console.warn("⚠️ /api/my-licenses unreachable, falling back to direct Firestore query:", apiErr.message);
+      }
+
+      // 2. Fallback: Direct Firestore query if serverless API returned empty or failed
+      if (list.length === 0) {
+        try {
+          const db = getFirestore();
+          const licensesRef = collection(db, 'licenses');
+
+          let q = query(licensesRef, where('firebaseUid', '==', user.uid));
+          let snap = await getDocs(q);
+          snap.forEach(doc => list.push(doc.data()));
+
+          if (list.length === 0 && user.email) {
+            const rawEmail = user.email.trim();
+            const lowerEmail = rawEmail.toLowerCase();
+            let qEmail = query(licensesRef, where('email', '==', lowerEmail));
+            let snapEmail = await getDocs(qEmail);
+            snapEmail.forEach(doc => list.push(doc.data()));
+
+            if (list.length === 0 && rawEmail !== lowerEmail) {
+              let qRaw = query(licensesRef, where('email', '==', rawEmail));
+              let snapRaw = await getDocs(qRaw);
+              snapRaw.forEach(doc => list.push(doc.data()));
+            }
+          }
+        } catch (dbErr) {
+          console.error("❌ Direct Firestore read error:", dbErr);
+        }
       }
 
       const activeList = list.filter(l => (l.status || 'active') === 'active');

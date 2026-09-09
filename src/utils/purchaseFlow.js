@@ -13,7 +13,7 @@ export function checkAuth(currentUser) {
  * If user is not signed in, triggers Google Sign-In popup.
  * Returns authenticated user object, or null if auth failed/cancelled.
  */
-export async function signInIfNeeded({ currentUser, loginWithGoogle }) {
+export async function signInIfNeeded({ currentUser, loginWithGoogle, isRetry = false }) {
   if (checkAuth(currentUser)) {
     return currentUser;
   }
@@ -26,8 +26,18 @@ export async function signInIfNeeded({ currentUser, loginWithGoogle }) {
       console.log("ℹ️ User closed Google Sign-In popup. Purchase flow stopped gracefully.");
       return null;
     }
+
+    const isDbClosing = (error?.message && (error.message.includes('Database is closing') || error.message.includes('hidden'))) ||
+                        error?.code?.includes('database-closing');
+
+    if (isDbClosing && !isRetry) {
+      console.warn("⚠️ Detected IndexedDB connection closing state during popup auth. Retrying after stabilization...");
+      await new Promise(r => setTimeout(r, 600));
+      return signInIfNeeded({ currentUser, loginWithGoogle, isRetry: true });
+    }
+
     console.error("❌ Authentication error during purchase flow:", error);
-    alert(`Sign in failed: ${error.message || "Authentication error"}`);
+    alert("Sign-in could not be completed. Please try again.");
     return null;
   }
 }

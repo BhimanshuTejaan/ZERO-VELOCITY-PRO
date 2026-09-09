@@ -1,5 +1,6 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 /**
  * Singleton Firebase Admin SDK initializer using official Firebase Admin v12+ ESM API.
@@ -51,4 +52,5 @@ function initializeFirebaseAdmin() {
 
 const adminApp = initializeFirebaseAdmin();
 export const dbAdmin = getFirestore(adminApp);
+export const authAdmin = getAuth(adminApp);
 export default adminApp;

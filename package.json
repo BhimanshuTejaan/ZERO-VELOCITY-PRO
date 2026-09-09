@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "firebase": "^12.17.0",
+    "firebase": "^12.18.0",
     "firebase-admin": "13.10.0",
     "nodemailer": "^9.0.3",
     "react": "^19.2.8",

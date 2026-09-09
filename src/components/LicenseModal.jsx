@@ -5,8 +5,8 @@ import { getFirestore, collection, query, where, getDocs } from 'firebase/firest
 import { CUSTOMER_DOWNLOAD_URL } from '../utils/razorpay';
 
 export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, downloadUrl }) {
-  const { currentUser } = useAuth();
-  const [licenses, setLicenses] = useState([]);
+  const { currentUser, userLicenses, refreshLicenseStatus } = useAuth();
+  const [licenses, setLicenses] = useState(userLicenses || []);
   const [loading, setLoading] = useState(false);
   const [copiedKey, setCopiedKey] = useState(null);
 
@@ -20,32 +20,69 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
 
     const fetchLicenses = async () => {
       try {
-        const db = getFirestore();
-        const licensesRef = collection(db, 'licenses');
-
-        let q = query(licensesRef, where('firebaseUid', '==', currentUser.uid));
-        let querySnapshot = await getDocs(q);
-
         let list = [];
-        querySnapshot.forEach(doc => {
-          list.push(doc.data());
-        });
 
-        if (list.length === 0 && currentUser.email) {
-          const qEmail = query(licensesRef, where('email', '==', currentUser.email));
-          const snapEmail = await getDocs(qEmail);
-          snapEmail.forEach(doc => {
-            list.push(doc.data());
+        // 1. Primary: Secure authenticated entitlement API (with auto-linking of admin grants)
+        try {
+          const token = await currentUser.getIdToken();
+          const res = await fetch('/api/my-licenses', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
           });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && Array.isArray(data.licenses)) {
+              list = data.licenses;
+            }
+          }
+        } catch (apiErr) {
+          console.warn("⚠️ /api/my-licenses unreachable in LicenseModal, falling back:", apiErr.message);
+        }
+
+        // 2. Fallback: Direct Firestore query if serverless API returned empty or failed
+        if (list.length === 0) {
+          try {
+            const db = getFirestore();
+            const licensesRef = collection(db, 'licenses');
+
+            let q = query(licensesRef, where('firebaseUid', '==', currentUser.uid));
+            let querySnapshot = await getDocs(q);
+            querySnapshot.forEach(doc => {
+              list.push(doc.data());
+            });
+
+            if (list.length === 0 && currentUser.email) {
+              const rawEmail = currentUser.email.trim();
+              const lowerEmail = rawEmail.toLowerCase();
+              const qEmail = query(licensesRef, where('email', '==', lowerEmail));
+              const snapEmail = await getDocs(qEmail);
+              snapEmail.forEach(doc => {
+                list.push(doc.data());
+              });
+
+              if (list.length === 0 && rawEmail !== lowerEmail) {
+                const qRaw = query(licensesRef, where('email', '==', rawEmail));
+                const snapRaw = await getDocs(qRaw);
+                snapRaw.forEach(doc => {
+                  list.push(doc.data());
+                });
+              }
+            }
+          } catch (dbErr) {
+            console.error("❌ Direct Firestore read error in LicenseModal:", dbErr);
+          }
         }
 
         list.sort((a, b) => new Date(b.purchaseDate || 0) - new Date(a.purchaseDate || 0));
 
         if (isMounted) {
           setLicenses(list);
+          if (refreshLicenseStatus) refreshLicenseStatus();
         }
       } catch (err) {
-        console.error("❌ Firestore Read Error:", err.code, err.message);
+        console.error("❌ License retrieval error:", err);
       } finally {
         if (isMounted) setLoading(false);
       }

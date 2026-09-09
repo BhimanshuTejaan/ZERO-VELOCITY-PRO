@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { dbAdmin } from './_firebaseAdmin.js';
+import { dbAdmin, authAdmin } from './_firebaseAdmin.js';
 import { verifyUserToken } from './_auth.js';
 
 // STRICT SINGLE ADMINISTRATOR ALLOWLIST
@@ -90,14 +90,30 @@ export default async function handler(req, res) {
     if (action === 'generate_manual_license') {
       const { customerName, email, licenseType, maxDevices, notes } = body;
 
+      const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : null;
+      const sanitizedName = typeof customerName === 'string' ? customerName.trim() : null;
+
+      let matchedUid = null;
+      if (normalizedEmail) {
+        try {
+          const existingUser = await authAdmin.getUserByEmail(normalizedEmail);
+          if (existingUser && existingUser.uid) {
+            matchedUid = existingUser.uid;
+            console.log(`🎯 Admin grant pre-linked to existing Firebase UID ${matchedUid} (${normalizedEmail})`);
+          }
+        } catch (_errUser) {
+          // User has not registered yet; will be auto-linked upon their first sign-in via /api/my-licenses
+        }
+      }
+
       const newLicenseKey = generateKey();
       const nowIso = new Date().toISOString();
 
       const newDoc = {
         licenseKey: newLicenseKey,
-        customerName: customerName || null,
-        email: email || null,
-        firebaseUid: null,
+        customerName: sanitizedName,
+        email: normalizedEmail,
+        firebaseUid: matchedUid,
         razorpayPaymentId: "ADMIN_GENERATED",
         razorpayOrderId: null,
         source: "admin",
@@ -113,7 +129,7 @@ export default async function handler(req, res) {
       };
 
       await dbAdmin.collection('licenses').doc(newLicenseKey).set(newDoc);
-      console.log(`✨ Admin ${adminEmail} manually generated license ${newLicenseKey}`);
+      console.log(`✨ Admin ${adminEmail} manually generated license ${newLicenseKey} for ${normalizedEmail || 'unassigned'}`);
 
       return res.status(200).json({
         success: true,
