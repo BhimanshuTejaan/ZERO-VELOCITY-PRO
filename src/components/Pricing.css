@@ -189,6 +189,32 @@
   margin-bottom: 1.5rem;
 }
 
+.pricing-os-cta-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  margin-top: 0.75rem;
+  width: 100%;
+  text-align: center;
+}
+
+.pricing-os-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+  flex-shrink: 0;
+}
+
 .btn-pricing-hero {
   width: 100%;
   padding: 1.15rem 1.75rem;
@@ -384,6 +410,56 @@
 
 .trust-icon {
   font-size: 0.95rem;
+}
+
+/* Short OS Compatibility FAQ */
+.pricing-faq-section {
+  max-width: 780px;
+  margin: 2.5rem auto 0;
+  width: 100%;
+}
+
+.pricing-faq-card {
+  padding: 1.35rem 1.75rem;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  text-align: left;
+}
+
+.pricing-faq-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.pricing-faq-pill {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.55rem;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  border-radius: 6px;
+}
+
+.pricing-faq-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.pricing-faq-text {
+  font-size: 0.92rem;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin: 0;
 }
 
 /* Responsive adjustments */

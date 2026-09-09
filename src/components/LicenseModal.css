@@ -117,6 +117,19 @@
   text-decoration: none;
 }
 
+.banner-os-tag {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  width: fit-content;
+}
+
 
 .modal-body {
   padding: 1.5rem;
@@ -293,6 +306,30 @@
   border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
+}
+
+.license-os-note {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  margin-top: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.license-os-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+  flex-shrink: 0;
 }
 
 .license-card-footer {

@@ -137,6 +137,7 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
             <div className="banner-text">
               <strong>Payment Verified!</strong>
               <span>Your license has been activated successfully. It has been securely saved to your account.</span>
+              <span className="banner-os-tag">Windows Only — macOS Version in Development</span>
             </div>
             {downloadTargetUrl && (
               <a
@@ -236,6 +237,12 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
                       </svg>
                       Installation Guide
                     </a>
+                  </div>
+
+                  {/* OS Compatibility notice near download button */}
+                  <div className="license-os-note">
+                    <span className="license-os-dot"></span>
+                    <span><strong>Windows Only — macOS Version in Development</strong></span>
                   </div>
 
                   {/* Metadata Grid: Purchase Date, Plugin Version, Device Count */}

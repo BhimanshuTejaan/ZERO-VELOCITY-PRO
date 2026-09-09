@@ -41,8 +41,32 @@
   margin-bottom: 2.75rem;
 }
 
+.install-os-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.install-os-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+  flex-shrink: 0;
+}
+
 .install-video-btn {
-  margin-top: 1.25rem;
+  margin-top: 0.5rem;
   padding: 0.65rem 1.4rem;
   font-size: 0.88rem;
   font-weight: 600;

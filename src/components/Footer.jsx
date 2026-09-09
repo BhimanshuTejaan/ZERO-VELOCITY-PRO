@@ -16,7 +16,7 @@ export default function Footer() {
             </p>
             <div className="footer-compatibility-badge">
               <span className="compat-dot"></span>
-              <span>AE 2020–2025 • Windows Only (macOS coming very soon)</span>
+              <span>AE 2020–2025 • <strong>Windows Only — macOS Version in Development</strong></span>
             </div>
           </div>
 

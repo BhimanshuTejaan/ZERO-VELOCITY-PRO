@@ -12,24 +12,31 @@ export default function Installation() {
               <span>SETUP WORKFLOW</span>
             </div>
             <h2 className="section-title">Get Running in 4 Simple Steps</h2>
-            <p className="section-subtitle">Zero complicated configuration. Works seamlessly with Adobe After Effects 2020 through 2025 on Windows (macOS coming very soon).</p>
+            <p className="section-subtitle">Zero complicated configuration. Works seamlessly with Adobe After Effects 2020 through 2025.</p>
 
-            <button
-              type="button"
-              className="btn btn-secondary install-video-btn"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                window.open(
-                  "https://youtu.be/a9_mlWnkiXs?si=4hbxWOXYLSHpYwnD",
-                  "_blank",
-                  "noopener,noreferrer"
-                );
-              }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-              <span>Watch Video Setup Guide</span>
-            </button>
+            <div className="install-os-badge">
+              <span className="install-os-dot"></span>
+              <span><strong>Windows Only — macOS Version in Development</strong></span>
+            </div>
+
+            <div>
+              <button
+                type="button"
+                className="btn btn-secondary install-video-btn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.open(
+                    "https://youtu.be/a9_mlWnkiXs?si=4hbxWOXYLSHpYwnD",
+                    "_blank",
+                    "noopener,noreferrer"
+                  );
+                }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <span>Watch Video Setup Guide</span>
+              </button>
+            </div>
           </div>
 
           <div className="install-steps">

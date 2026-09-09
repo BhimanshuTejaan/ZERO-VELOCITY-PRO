@@ -76,6 +76,10 @@ export default function Pricing() {
                   <span className="btn-arrow">&rarr;</span>
                 </button>
               )}
+              <div className="pricing-os-cta-badge">
+                <span className="pricing-os-dot"></span>
+                <span><strong>Windows Only — macOS Version in Development</strong></span>
+              </div>
             </div>
 
             <div className="pricing-guarantee-box">
@@ -89,7 +93,7 @@ export default function Pricing() {
             {/* Clear OS Compatibility Notice */}
             <div className="pricing-os-notice">
               <span className="os-warning-icon">ℹ</span>
-              <span><strong>Windows (AE 2020–2025)</strong> • macOS is not supported yet (coming very soon).</span>
+              <span><strong>Windows Only — macOS Version in Development</strong> • Compatible with AE 2020–2025.</span>
             </div>
           </div>
 
@@ -173,6 +177,19 @@ export default function Pricing() {
                 <span>Free Lifetime Updates</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Short OS Compatibility FAQ */}
+        <div className="pricing-faq-section">
+          <div className="pricing-faq-card glass-panel">
+            <div className="pricing-faq-header">
+              <span className="pricing-faq-pill">FAQ</span>
+              <h4 className="pricing-faq-title">Does Zero Velocity support macOS?</h4>
+            </div>
+            <p className="pricing-faq-text">
+              No. Zero Velocity v1.2 currently supports Windows only. A macOS version is in development.
+            </p>
           </div>
         </div>
       </div>

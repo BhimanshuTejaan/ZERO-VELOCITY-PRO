@@ -66,9 +66,15 @@ export default function Hero() {
               </a>
             </div>
 
+            {/* Exact Primary OS Compatibility Notice Directly Below Button */}
+            <div className="hero-os-badge">
+              <span className="hero-os-dot"></span>
+              <span><strong>Windows Only — macOS Version in Development</strong></span>
+            </div>
+
             {/* Quiet Platform Trust Line */}
             <p className="editorial-trust-note">
-              Windows · AE 2020–2025 · 2 devices · Version 1.x updates included
+              Windows (AE 2020–2025) · 2 devices · Version 1.x updates included
             </p>
           </div>
 
