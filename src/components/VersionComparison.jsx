@@ -75,7 +75,7 @@ export default function VersionComparison() {
           </p>
           <div className="summary-upgrade-row">
             <span className="summary-check">✓</span>
-            <span>Free update for all existing license holders • ₹99 lifetime access for new users</span>
+            <span>Free update for all existing license holders • ₹299 lifetime access for new users</span>
           </div>
         </div>
       </div>

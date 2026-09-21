@@ -74,7 +74,7 @@ export default function ReleaseNotes() {
           </div>
           <h2 className="section-title">Built for the Long Run</h2>
           <p className="section-subtitle">
-            Zero Velocity is actively maintained and continuously updated. Pay once today for ₹99 and receive every Version 1.x release and feature addition completely free.
+            Zero Velocity is actively maintained and continuously updated. Pay once today for ₹299 and receive every Version 1.x release and feature addition completely free.
           </p>
         </div>
 

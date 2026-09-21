@@ -135,7 +135,7 @@ export default function Header() {
           <div className="header-right">
             <a href="#pricing" className="header-cta-link">
               <span>Lifetime Access</span>
-              <span className="header-cta-price">₹99</span>
+              <span className="header-cta-price">₹299</span>
             </a>
           {currentUser ? (
             <div className="user-menu-container" ref={menuRef}>
@@ -291,7 +291,7 @@ export default function Header() {
             <div className="mobile-drawer-cta">
               <a href="#pricing" className="btn-mobile-drawer-cta" onClick={() => setIsMobileNavOpen(false)}>
                 <span>Get Lifetime Access</span>
-                <span className="mobile-cta-badge">₹99</span>
+                <span className="mobile-cta-badge">₹299</span>
               </a>
             </div>
           </div>

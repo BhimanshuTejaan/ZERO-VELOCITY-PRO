@@ -88,7 +88,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Invalid or unknown product ID.' });
     }
 
-    const amount = 9900; // Server-authoritative ₹99 (9900 paise)
+    const amount = 29900; // Server-authoritative ₹299 (29900 paise)
     const currency = 'INR';
 
     const authHeader = 'Basic ' + Buffer.from(`${keyId}:${keySecret}`).toString('base64');

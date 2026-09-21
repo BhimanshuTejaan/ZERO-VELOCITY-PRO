@@ -170,7 +170,7 @@ export default function LicenseModal({ isOpen, onClose, newlyCreatedLicenseKey, 
               <h3>No Active Licenses Found</h3>
               <p>You haven't purchased a Zero Velocity Studio license yet.</p>
               <a href="#pricing" onClick={onClose} className="btn btn-primary btn-sm">
-                Get Lifetime Access · ₹99
+                Get Lifetime Access · ₹299
               </a>
             </div>
           ) : (

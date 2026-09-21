@@ -31,7 +31,7 @@ export default function Pricing() {
             <span className="text-gradient-accent">Lifetime After Effects Studio.</span>
           </h2>
           <p className="section-subtitle">
-            One-time payment of ₹99. No subscriptions, no rendering credits, and no recurring fees ever.
+            One-time payment of ₹299. No subscriptions, no rendering credits, and no recurring fees ever.
           </p>
         </div>
 
@@ -54,7 +54,7 @@ export default function Pricing() {
             <div className="pricing-amount-block">
               <div className="pricing-number-line">
                 <span className="pricing-currency">₹</span>
-                <span className="pricing-current-val">99</span>
+                <span className="pricing-current-val">299</span>
                 <span className="pricing-crossed-val">₹499</span>
                 <span className="pricing-save-badge">80% OFF</span>
               </div>
@@ -72,7 +72,7 @@ export default function Pricing() {
                 </button>
               ) : (
                 <button className="btn btn-primary btn-pricing-hero" onClick={handleBuyNow}>
-                  <span>Get Lifetime Access • ₹99</span>
+                  <span>Get Lifetime Access • ₹299</span>
                   <span className="btn-arrow">&rarr;</span>
                 </button>
               )}

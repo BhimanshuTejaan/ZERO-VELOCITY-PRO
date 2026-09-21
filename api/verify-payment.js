@@ -90,7 +90,7 @@ export default async function handler(req, res) {
 
     // Assert expected product pricing parameters
     if (orderData.productId !== 'zero_velocity' ||
-        orderData.expectedAmount !== 9900 ||
+        orderData.expectedAmount !== 29900 ||
         orderData.expectedCurrency !== 'INR') {
       return res.status(400).json({ success: false, error: 'Payment order details mismatch.' });
     }
@@ -156,7 +156,7 @@ export default async function handler(req, res) {
     const paymentData = await rzpPayRes.json();
     if (paymentData.status !== 'captured' ||
         paymentData.captured !== true ||
-        paymentData.amount !== 9900 ||
+        paymentData.amount !== 29900 ||
         paymentData.currency !== 'INR' ||
         paymentData.order_id !== orderData.razorpayOrderId) {
       console.warn(`⚠️ Uncaptured or incorrect payment payload summary:`, {
@@ -226,7 +226,7 @@ export default async function handler(req, res) {
         firebaseUid: authResult.uid,
         email: authResult.email,
         productId: "zero_velocity",
-        amount: 9900,
+        amount: 29900,
         currency: "INR",
         licenseKey: candidateLicenseKey,
         fulfilledAt: FieldValue.serverTimestamp()

@@ -56,7 +56,7 @@ export default function Hero() {
                 </button>
               ) : (
                 <button className="btn-hero-primary" onClick={handleBuyNow}>
-                  Get Lifetime Access · ₹99
+                  Get Lifetime Access · ₹299
                 </button>
               )}
 
