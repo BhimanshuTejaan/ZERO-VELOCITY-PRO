@@ -38,11 +38,14 @@
 .video-theatre {
   max-width: 980px;
   margin: 0 auto;
-  background: var(--zv-bg-surface-1, #080b12);
-  border: 1px solid var(--zv-border-default, rgba(255, 255, 255, 0.1));
-  border-radius: var(--zv-radius-xl, 20px);
+  background: rgba(18, 24, 35, 0.72);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid var(--zv-border-subtle);
+  border-top: 1px solid var(--zv-border-lightedge);
+  border-radius: var(--zv-radius-xl, 24px);
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(56, 189, 248, 0.05);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* Topbar Chrome */
@@ -50,42 +53,43 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.85rem 1.25rem;
-  background: rgba(14, 19, 32, 0.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0.85rem 1.35rem;
+  background: rgba(10, 14, 22, 0.85);
+  border-bottom: 1px solid var(--zv-border-subtle);
 }
 
 .theatre-dots {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 }
 
 .t-dot {
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
 }
 
-.t-dot.close { background: #ef4444; opacity: 0.8; }
-.t-dot.min { background: #f59e0b; opacity: 0.8; }
-.t-dot.max { background: #10b981; opacity: 0.8; }
+.t-dot.close { background: #ff5f57; }
+.t-dot.min { background: #febc2e; }
+.t-dot.max { background: #28c840; }
 
 .theatre-title-bar {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.82rem;
-  color: var(--zv-text-secondary, #94a3b8);
+  color: var(--zv-text-secondary);
 }
 
 .theatre-app-pill {
   padding: 0.15rem 0.45rem;
   border-radius: 4px;
-  background: #00005b;
-  color: #9999ff;
+  background: rgba(41, 151, 255, 0.15);
+  border: 1px solid rgba(41, 151, 255, 0.3);
+  color: var(--zv-accent-primary);
   font-size: 0.7rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.02em;
 }
 
@@ -100,20 +104,22 @@
 .theatre-ext-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  color: #38bdf8;
+  gap: 0.4rem;
+  color: var(--zv-text-secondary);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 550;
   text-decoration: none;
-  transition: all 0.2s ease;
-  padding: 0.25rem 0.6rem;
+  transition: all 0.18s ease;
+  padding: 0.3rem 0.65rem;
   border-radius: 6px;
-  background: rgba(56, 189, 248, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--zv-border-subtle);
 }
 
 .theatre-ext-link:hover {
   color: #ffffff;
-  background: rgba(56, 189, 248, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--zv-border-default);
 }
 
 /* Video Viewport: Strict 16:9 ratio */

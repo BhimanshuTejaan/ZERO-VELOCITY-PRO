@@ -1,17 +1,20 @@
 .installation {
   display: flex;
   justify-content: center;
-  border-top: 1px solid var(--zv-border-subtle, rgba(255, 255, 255, 0.06));
+  border-top: 1px solid var(--zv-border-subtle);
 }
 
 .installation-box {
-  max-width: 860px;
+  max-width: 880px;
   margin: 0 auto;
   padding: 3.5rem 3.5rem;
-  background: var(--zv-bg-surface-1, #090c14);
-  border: 1px solid var(--zv-border-strong, rgba(255, 255, 255, 0.18));
+  background: rgba(18, 24, 35, 0.72);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid var(--zv-border-subtle);
+  border-top: 1px solid var(--zv-border-lightedge);
   border-radius: var(--zv-radius-xl, 24px);
-  box-shadow: var(--zv-shadow-lg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .workflow-badge {
@@ -19,10 +22,10 @@
   align-items: center;
   gap: 0.45rem;
   padding: 0.25rem 0.75rem;
-  background: rgba(56, 189, 248, 0.1);
-  border: 1px solid var(--zv-border-accent, rgba(56, 189, 248, 0.35));
+  background: rgba(41, 151, 255, 0.1);
+  border: 1px solid rgba(41, 151, 255, 0.25);
   border-radius: var(--zv-radius-pill, 9999px);
-  color: var(--zv-accent-primary, #38bdf8);
+  color: var(--zv-accent-primary);
   font-family: var(--zv-font-mono, monospace);
   font-size: 0.72rem;
   font-weight: 700;
@@ -33,7 +36,7 @@
 .wf-dot {
   width: 6px;
   height: 6px;
-  background: var(--zv-accent-primary, #38bdf8);
+  background: var(--zv-accent-primary);
   border-radius: 50%;
 }
 
@@ -46,10 +49,10 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.84rem;
-  font-weight: 650;
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  font-weight: 550;
+  color: var(--zv-text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--zv-border-subtle);
   padding: 0.35rem 0.9rem;
   border-radius: 9999px;
   margin-top: 0.75rem;
@@ -60,8 +63,8 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #38bdf8;
-  box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+  background: #30d158;
+  box-shadow: 0 0 8px rgba(48, 209, 88, 0.8);
   flex-shrink: 0;
 }
 
@@ -87,30 +90,31 @@
   align-items: flex-start;
   gap: 1.5rem;
   padding: 1.4rem 1.6rem;
-  background: var(--zv-bg-surface-2, #0e1320);
-  border: 1px solid var(--zv-border-default, rgba(255, 255, 255, 0.1));
-  border-radius: var(--zv-radius-md, 10px);
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--zv-border-subtle);
+  border-radius: var(--zv-radius-md, 14px);
+  transition: all 0.2s var(--transition-spring);
 }
 
 .step-card:hover {
-  border-color: var(--zv-border-accent, rgba(56, 189, 248, 0.35));
-  transform: translateX(4px);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
 .step-number {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  background: var(--zv-bg-surface-3, #141b2e);
-  color: var(--zv-accent-primary, #38bdf8);
-  border: 1px solid var(--zv-border-accent, rgba(56, 189, 248, 0.35));
-  border-radius: var(--zv-radius-sm, 6px);
+  width: 40px;
+  height: 40px;
+  background: rgba(41, 151, 255, 0.12);
+  color: var(--zv-accent-primary);
+  border: 1px solid rgba(41, 151, 255, 0.25);
+  border-radius: 50%;
   font-family: var(--zv-font-mono, monospace);
-  font-weight: 800;
-  font-size: 1rem;
+  font-weight: 700;
+  font-size: 0.95rem;
   flex-shrink: 0;
 }
 
@@ -129,15 +133,16 @@
 
 .step-title {
   font-size: 1.08rem;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 650;
+  color: var(--zv-text-primary);
+  letter-spacing: -0.01em;
 }
 
 .step-link-badge {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--zv-accent-primary, #38bdf8);
-  background: rgba(56, 189, 248, 0.1);
+  color: var(--zv-accent-primary);
+  background: rgba(41, 151, 255, 0.1);
   border: 1px solid rgba(56, 189, 248, 0.25);
   padding: 0.15rem 0.5rem;
   border-radius: 4px;

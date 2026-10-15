@@ -59,28 +59,31 @@
 .layout-card {
   display: flex;
   flex-direction: column;
-  background: #0a0d16;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  background: rgba(18, 24, 35, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--zv-border-subtle);
+  border-top: 1px solid var(--zv-border-lightedge);
+  border-radius: var(--zv-radius-lg, 18px);
   overflow: hidden;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.22s var(--transition-spring), border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .layout-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(56, 189, 248, 0.35);
-  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.06);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 .layout-card-preview {
   position: relative;
-  background: #04060a;
-  padding: 1.25rem 1rem;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 1.5rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 140px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--zv-border-subtle);
 }
 
 .layout-card-img {
@@ -88,12 +91,12 @@
   height: auto;
   max-height: 110px;
   object-fit: contain;
-  border-radius: 6px;
+  border-radius: 8px;
   display: block;
 }
 
 .layout-card-body {
-  padding: 1.25rem 1.25rem 1.5rem 1.25rem;
+  padding: 1.35rem 1.35rem 1.5rem 1.35rem;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -105,18 +108,18 @@
 
 .layout-card-title {
   font-size: 1.15rem;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: -0.01em;
+  font-weight: 650;
+  color: var(--zv-text-primary);
+  letter-spacing: -0.015em;
 }
 
 .layout-spec-matrix {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.6rem;
   margin-top: auto;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--zv-border-subtle);
 }
 
 .spec-row {
@@ -124,25 +127,27 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.75rem;
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
 }
 
 .spec-label {
-  color: var(--zv-text-secondary, #94a3b8);
-  font-weight: 500;
+  color: var(--zv-text-secondary);
+  font-weight: 450;
   font-family: var(--zv-font-mono, monospace);
   font-size: 0.75rem;
 }
 
 .spec-val {
-  color: #f1f5f9;
-  font-weight: 600;
+  color: var(--zv-text-primary);
+  font-weight: 550;
   text-align: right;
+  letter-spacing: -0.01em;
 }
 
 .spec-val.highlight-val {
-  color: var(--zv-accent-primary, #38bdf8);
-  font-size: 0.78rem;
+  color: var(--zv-accent-primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 /* Honest Disclaimer Card */

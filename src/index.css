@@ -42,63 +42,68 @@
 }
 
 :root {
-  /* Zero Velocity Obsidian Surface Ladder */
-  --zv-bg-canvas: #06080b;
-  --zv-bg-surface-1: #0b0f15;
-  --zv-bg-surface-2: #0f141c;
-  --zv-bg-surface-3: #151b24;
-  --zv-bg-surface-raised: #1c2432;
+  /* Apple Obsidian & Space Gray Surface Ladder */
+  --zv-bg-canvas: #000000;
+  --zv-bg-surface-0: #05070a;
+  --zv-bg-surface-1: #0d1117;
+  --zv-bg-surface-2: #141923;
+  --zv-bg-surface-3: #1a2230;
+  --zv-bg-surface-raised: #20293a;
+  --zv-bg-surface-translucent: rgba(20, 26, 36, 0.72);
+  --zv-bg-glass: rgba(255, 255, 255, 0.04);
 
-  /* Hairlines & Dividers */
-  --zv-border-subtle: rgba(255, 255, 255, 0.07);
+  /* Apple Translucent Hairlines & Highlights (Light Catching Top Edges) */
+  --zv-border-subtle: rgba(255, 255, 255, 0.08);
   --zv-border-default: rgba(255, 255, 255, 0.12);
   --zv-border-strong: rgba(255, 255, 255, 0.20);
-  --zv-border-accent: rgba(56, 189, 248, 0.35);
+  --zv-border-lightedge: rgba(255, 255, 255, 0.16);
+  --zv-border-accent: rgba(41, 151, 255, 0.35);
 
-  /* Accents */
-  --zv-accent-primary: #38bdf8;
-  --zv-accent-cyan: #00e5ff;
-  --zv-accent-teal: #00e5a3;
-  --zv-accent-glow: rgba(56, 189, 248, 0.15);
-  --zv-accent-blue: #2563eb;
+  /* Apple Precision Accents */
+  --zv-accent-primary: #2997ff;
+  --zv-accent-apple-blue: #2997ff;
+  --zv-accent-blue: #0071e3;
+  --zv-accent-cyan: #38bdf8;
+  --zv-accent-teal: #30d158;
+  --zv-accent-glow: rgba(41, 151, 255, 0.16);
   --zv-accent-keyframe: #f59e0b;
-  --zv-accent-success: #10b981;
-  --zv-ae-box-red: #ef4444;
+  --zv-accent-success: #30d158;
+  --zv-ae-box-red: #ff453a;
 
-  /* Typography Colors */
-  --zv-text-primary: #f8fafc;
-  --zv-text-secondary: #94a3b8;
-  --zv-text-muted: #64748b;
-  --zv-text-faint: #334155;
+  /* Apple Pro Typography Hierarchy */
+  --zv-text-primary: #f5f5f7;
+  --zv-text-secondary: #86868b;
+  --zv-text-muted: #6e6e73;
+  --zv-text-faint: #424245;
 
-  /* Fonts */
-  --zv-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --zv-font-serif: 'Playfair Display', Georgia, Cambria, 'Times New Roman', serif;
-  --zv-font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* Native Apple System Font Stack with Fallbacks */
+  --zv-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", system-ui, -system-ui, sans-serif;
+  --zv-font-serif: "Playfair Display", Georgia, Cambria, 'Times New Roman', serif;
+  --zv-font-mono: "SF Mono", Menlo, Monaco, Consolas, "JetBrains Mono", monospace;
 
-  /* Depth & Shadows */
+  /* Apple Depth & Soft Diffused Shadows */
   --zv-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --zv-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--zv-border-subtle);
-  --zv-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.75), 0 0 0 1px var(--zv-border-default);
-  --zv-shadow-glow: 0 0 32px rgba(56, 189, 248, 0.12);
+  --zv-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--zv-border-subtle);
+  --zv-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 255, 255, 0.1) inset;
+  --zv-shadow-glow: 0 0 32px rgba(41, 151, 255, 0.14);
 
-  /* Radii */
-  --zv-radius-sm: 6px;
-  --zv-radius-md: 10px;
-  --zv-radius-lg: 14px;
-  --zv-radius-xl: 20px;
+  /* Apple Continuous Smooth Radii */
+  --zv-radius-sm: 8px;
+  --zv-radius-md: 12px;
+  --zv-radius-lg: 18px;
+  --zv-radius-xl: 24px;
   --zv-radius-pill: 9999px;
 
   /* Backward Compatibility Aliases */
   --bg-color: var(--zv-bg-canvas);
-  --bg-card: rgba(14, 19, 32, 0.75);
+  --bg-card: rgba(18, 24, 35, 0.75);
   --bg-color-light: var(--zv-bg-surface-1);
   --bg-color-lighter: var(--zv-bg-surface-2);
   --text-main: var(--zv-text-primary);
   --text-heading: #ffffff;
   --text-muted: var(--zv-text-secondary);
   --accent-color: var(--zv-accent-primary);
-  --accent-color-hover: #0ea5e9;
+  --accent-color-hover: #0071e3;
   --border-color: var(--zv-border-subtle);
   --border-hover: var(--zv-border-strong);
   --radius-sm: var(--zv-radius-sm);
@@ -107,9 +112,10 @@
   --radius-xl: var(--zv-radius-xl);
   --radius-pill: var(--zv-radius-pill);
   --shadow-card: var(--zv-shadow-md);
-  --shadow-hover: 0 20px 45px -10px rgba(56, 189, 248, 0.25), 0 0 0 1px rgba(56, 189, 248, 0.35);
+  --shadow-hover: 0 20px 45px -10px rgba(41, 151, 255, 0.25), 0 0 0 1px rgba(41, 151, 255, 0.35);
   --font-main: var(--zv-font-sans);
   --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * {
@@ -134,7 +140,7 @@ body {
   position: relative;
 }
 
-/* Precision After Effects Grid Background */
+/* Restrained Subtle Atmosphere Grid */
 body::before {
   content: '';
   position: fixed;
@@ -194,88 +200,106 @@ button {
 }
 
 .section-header {
-  max-width: 650px;
-  margin: 0 auto 4rem auto;
+  max-width: 680px;
+  margin: 0 auto 3.5rem auto;
 }
 
 .section-title {
-  font-size: clamp(2.2rem, 3.8vw, 3.2rem);
-  font-weight: 800;
-  line-height: 1.15;
+  font-size: clamp(1.75rem, 5vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.12;
   letter-spacing: -0.03em;
-  color: var(--text-heading);
-  margin-bottom: 1rem;
+  color: var(--zv-text-primary);
+  margin-bottom: 0.85rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .section-subtitle {
-  font-size: 1.125rem;
-  color: var(--text-muted);
-  line-height: 1.6;
+  font-size: clamp(0.95rem, 1.2vw, 1.125rem);
+  color: var(--zv-text-secondary);
+  line-height: 1.55;
+  letter-spacing: -0.01em;
 }
 
-/* Buttons */
+/* Apple Tactile Buttons & Response */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.8rem 1.6rem;
+  padding: 0.75rem 1.6rem;
+  min-height: 44px;
   border-radius: var(--radius-pill);
   font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.25s var(--transition-smooth);
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+  transition: transform 0.18s var(--transition-spring), background 0.18s ease, box-shadow 0.18s ease;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .btn-primary {
-  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
-  color: #060b14;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.22);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 1);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+  background: #f5f5f7;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 26px rgba(255, 255, 255, 0.32);
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--zv-text-primary);
+  border: 1px solid var(--zv-border-subtle);
+  border-top: 1px solid var(--zv-border-lightedge);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--border-hover);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--zv-border-default);
+  transform: translateY(-1px);
 }
 
-.btn-secondary:active {
-  transform: translateY(0);
+/* Apple Immediate Response on Pointer-Down */
+button:active,
+.btn:active,
+.btn-primary:active,
+.btn-secondary:active,
+.btn-hero-primary:active,
+.btn-pricing-hero:active,
+.header-cta-link:active,
+.user-profile-trigger:active {
+  transform: scale(0.97) !important;
+  transition: transform 80ms ease-out !important;
 }
 
-/* Matte Editing Panel (Linear & Raycast Inspired) */
+/* Translucent Apple Glass Materials */
 .glass-panel,
 .panel-matte {
-  background: var(--zv-bg-surface-1);
-  border: 1px solid var(--zv-border-default);
+  background: rgba(18, 24, 35, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--zv-border-subtle);
+  border-top: 1px solid var(--zv-border-lightedge);
   border-radius: var(--zv-radius-lg);
-  box-shadow: var(--zv-shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   position: relative;
 }
 
 .panel-matte-elevated {
-  background: var(--zv-bg-surface-2);
-  border: 1px solid var(--zv-border-strong);
-  border-radius: var(--zv-radius-lg);
-  box-shadow: var(--zv-shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: rgba(22, 29, 42, 0.82);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid var(--zv-border-default);
+  border-top: 1px solid var(--zv-border-lightedge);
+  border-radius: var(--zv-radius-xl);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 /* Typography Utilities */
