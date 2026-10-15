@@ -126,10 +126,10 @@ export default function Header() {
 
           <nav className="header-nav">
             <a href="#styles" className="nav-link">Styles</a>
-            <a href="#styling" className="nav-link">Styling</a>
             <a href="#workflow" className="nav-link">Workflow</a>
-            <a href="#comparison" className="nav-link">Comparison</a>
+            <a href="#demo" className="nav-link">Demo</a>
             <a href="#pricing" className="nav-link">Pricing</a>
+            <a href="#installation" className="nav-link">Install</a>
           </nav>
 
           <div className="header-right">
@@ -275,17 +275,17 @@ export default function Header() {
               <a href="#styles" className="mobile-nav-link" onClick={() => setIsMobileNavOpen(false)}>
                 <span>Caption Styles</span>
               </a>
-              <a href="#styling" className="mobile-nav-link" onClick={() => setIsMobileNavOpen(false)}>
-                <span>Styling Controls</span>
-              </a>
               <a href="#workflow" className="mobile-nav-link" onClick={() => setIsMobileNavOpen(false)}>
-                <span>Workflow</span>
+                <span>Production Workflow</span>
               </a>
-              <a href="#comparison" className="mobile-nav-link" onClick={() => setIsMobileNavOpen(false)}>
-                <span>V1.0 vs V1.2</span>
+              <a href="#demo" className="mobile-nav-link" onClick={() => setIsMobileNavOpen(false)}>
+                <span>Feature Demo</span>
               </a>
               <a href="#pricing" className="mobile-nav-link" onClick={() => setIsMobileNavOpen(false)}>
-                <span>Pricing</span>
+                <span>Pricing · ₹299</span>
+              </a>
+              <a href="#installation" className="mobile-nav-link" onClick={() => setIsMobileNavOpen(false)}>
+                <span>Installation Guide</span>
               </a>
             </nav>
             <div className="mobile-drawer-cta">

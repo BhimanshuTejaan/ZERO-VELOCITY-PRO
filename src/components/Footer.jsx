@@ -12,24 +12,22 @@ export default function Footer() {
               <span className="logo-text">Zero Velocity</span>
             </div>
             <p className="footer-tagline">
-              The complete caption-production workflow for Adobe After Effects. Create, style, animate, edit, and sound-design captions without leaving your composition.
+              The professional caption-production workflow for Adobe After Effects. Generate, style, animate, and sound-sync native vector caption layers on your timeline.
             </p>
             <div className="footer-compatibility-badge">
-              <span className="compat-dot"></span>
+              <span className="compat-dot" aria-hidden="true"></span>
               <span>AE 2020–2025 • <strong>Windows Only — macOS Version in Development</strong></span>
             </div>
           </div>
 
           <div className="footer-links-col">
-            <h4 className="footer-col-title">V1.2 Architecture</h4>
+            <h4 className="footer-col-title">Navigation</h4>
             <ul className="footer-nav-list">
-              <li><a href="#workflow">Workflow Studio</a></li>
-              <li><a href="#styles">6 Signature Styles</a></li>
-              <li><a href="#motion-sound">Motion &amp; Sound</a></li>
-              <li><a href="#editing">In-Plugin Editing</a></li>
-              <li><a href="#styling">Deeper Styling</a></li>
-              <li><a href="#compatibility">Offline System</a></li>
-              <li><a href="#comparison">V1.0 vs V1.2</a></li>
+              <li><a href="#styles">Caption Styles</a></li>
+              <li><a href="#workflow">Production Pipeline</a></li>
+              <li><a href="#demo">Feature Walkthrough</a></li>
+              <li><a href="#pricing">Lifetime Access · ₹299</a></li>
+              <li><a href="#installation">Installation Guide</a></li>
             </ul>
           </div>
 
@@ -37,7 +35,7 @@ export default function Footer() {
             <h4 className="footer-col-title">Resources &amp; Support</h4>
             <ul className="footer-nav-list">
               <li>
-                <a href="mailto:support@zerovelocitycaptions.com" className="footer-support-email" title="Official Support Email">
+                <a href="mailto:support@zerovelocitycaptions.com" className="footer-support-email" title="Official Creator Support Email">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: '-2px' }}>
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                     <polyline points="22 6 12 13 2 6"></polyline>
@@ -100,9 +98,13 @@ export default function Footer() {
             </a>
           </div>
 
-          <div className="footer-meta">
-            <span className="version-pill">v1.2.0 Production</span>
-            <span className="copyright">&copy; {new Date().getFullYear()} Zero Velocity. All rights reserved.</span>
+          <div className="footer-legal-row">
+            <span className="copyright-text">
+              &copy; {new Date().getFullYear()} Zero Velocity. All rights reserved.
+            </span>
+            <span className="footer-disclaimer">
+              Adobe and After Effects are registered trademarks of Adobe Inc. Zero Velocity is an independent tool.
+            </span>
           </div>
         </div>
       </div>

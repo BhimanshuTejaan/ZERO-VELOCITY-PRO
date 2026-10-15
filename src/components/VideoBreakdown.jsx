@@ -7,6 +7,33 @@ const YOUTUBE_EMBED_URL = `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?aut
 const YOUTUBE_THUMBNAIL_URL = `https://img.youtube.com/vi/${YOUTUBE_VIDEO_ID}/maxresdefault.jpg`;
 const YOUTUBE_FALLBACK_THUMBNAIL = `https://img.youtube.com/vi/${YOUTUBE_VIDEO_ID}/hqdefault.jpg`;
 
+const CAPABILITY_PILLARS = [
+  {
+    number: '01',
+    title: '100% Native Timeline Layers',
+    badge: 'Vector Keyframes',
+    text: 'Zero Velocity outputs genuine Adobe After Effects text layers and shape elements—never baked, flat video exports. Retain complete creative freedom: apply native motion blur, deep glow, adjust kerning, or retime keyframes anytime.'
+  },
+  {
+    number: '02',
+    title: 'Private On-Device AI Engine',
+    badge: 'Zero Cloud Fees',
+    text: 'Speech recognition runs entirely on your local machine using an optimized Whisper pipeline. Supports both English and casual Roman Hinglish. Complete audio privacy with zero server queues and zero monthly token costs.'
+  },
+  {
+    number: '03',
+    title: 'Motion Presets & Sound Sync',
+    badge: '10 Presets · 5 SFX',
+    text: 'Select from 10 entrance animations with calibrated bezier easing graph curves targeting Words or Lines. Automatically attaches 5 built-in SFX audio cues (pops, clicks, whooshes, snaps) directly to keyframe impact points.'
+  },
+  {
+    number: '04',
+    title: 'Perpetual Commercial Rights',
+    badge: '2 Workstations · No Subscriptions',
+    text: 'One honest payment of ₹299 gives you lifetime studio access across 2 personal devices (desktop and laptop). All Version 1.x feature releases and compatibility updates are included free forever.'
+  }
+];
+
 export default function VideoBreakdown() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [thumbSrc, setThumbSrc] = useState(YOUTUBE_THUMBNAIL_URL);
@@ -22,31 +49,34 @@ export default function VideoBreakdown() {
   };
 
   return (
-    <section id="demo" className="video-breakdown-section section-padding">
+    <section id="demo" className="video-breakdown-section">
       <div className="container">
-        {/* Section Header with exact requested copy */}
-        <div className="video-header text-center">
-          <div className="video-badge">
-            <span className="video-badge-dot"></span>
-            <span>FEATURE OVERVIEW</span>
+        {/* Section Header */}
+        <div className="demo-header text-center">
+          <div className="demo-eyebrow">
+            <span className="demo-dot" aria-hidden="true"></span>
+            <span>PRODUCT DEMONSTRATION</span>
           </div>
-          <h2 className="section-title">See Every Feature in Action</h2>
-          <p className="section-subtitle">
-            Watch the complete Zero Velocity v1.2 breakdown.
+          <h2 className="demo-title">
+            See Zero Velocity<br />
+            <span className="demo-title-accent">in Action.</span>
+          </h2>
+          <p className="demo-subtitle">
+            Watch the complete v1.2 breakdown showing real caption generation directly inside Adobe After Effects.
           </p>
         </div>
 
-        {/* Video Theatre Workstation */}
-        <div className="video-theatre panel-matte-elevated glass-panel">
+        {/* Video Theatre Stage */}
+        <div className="demo-theatre-frame">
           <div className="theatre-topbar">
-            <div className="theatre-dots">
+            <div className="theatre-dots" aria-hidden="true">
               <span className="t-dot close"></span>
               <span className="t-dot min"></span>
               <span className="t-dot max"></span>
             </div>
             <div className="theatre-title-bar">
               <span className="theatre-app-pill">Ae</span>
-              <span className="theatre-title-text">Zero Velocity v1.2 · Complete Feature Breakdown</span>
+              <span className="theatre-title-text">Zero Velocity v1.2 · Feature Breakdown &amp; Workflow</span>
             </div>
             <a
               href={YOUTUBE_WATCH_URL}
@@ -55,8 +85,8 @@ export default function VideoBreakdown() {
               className="theatre-ext-link"
               title="Open video on YouTube in a new tab"
             >
-              <span>Open on YouTube</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <span>Watch on YouTube</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                 <polyline points="15 3 21 3 21 9"></polyline>
                 <line x1="10" y1="14" x2="21" y2="3"></line>
@@ -64,7 +94,6 @@ export default function VideoBreakdown() {
             </a>
           </div>
 
-          {/* Interactive Player / Thumbnail Frame */}
           <div className="video-viewport">
             {isPlaying ? (
               <div className="iframe-aspect-container">
@@ -88,58 +117,56 @@ export default function VideoBreakdown() {
                     handleStartPlay();
                   }
                 }}
-                aria-label="Play Zero Velocity v1.2 Full Feature Breakdown video"
+                aria-label="Play Zero Velocity v1.2 Feature Breakdown video"
               >
                 <img
                   src={thumbSrc}
-                  alt="Zero Velocity v1.2 Feature Breakdown Video Thumbnail"
+                  alt="Zero Velocity v1.2 Video Breakdown Preview"
                   className="video-poster"
                   onError={handleThumbError}
                   loading="lazy"
                 />
-                <div className="poster-scrim"></div>
+                <div className="poster-scrim" aria-hidden="true"></div>
 
-                {/* Center Play Button Overlay */}
-                <div className="play-trigger-ring">
-                  <div className="play-pulse-circle"></div>
-                  <div className="play-icon-box">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                      <polygon points="6 3 20 12 6 21 6 3"></polygon>
+                <div className="play-trigger-btn">
+                  <div className="play-pulse-ring" aria-hidden="true"></div>
+                  <div className="play-core-circle">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
                     </svg>
                   </div>
-                  <span className="play-label">Click to Play Demo</span>
                 </div>
 
-                {/* Duration / Quality Badges */}
-                <div className="video-meta-overlay">
-                  <span className="meta-badge-quality">1080p Full HD</span>
-                  <span className="meta-badge-version">v1.2 Release</span>
+                <div className="poster-caption-tag">
+                  <span>Click to watch 1080p feature walkthrough (3 mins)</span>
                 </div>
               </div>
             )}
           </div>
+        </div>
 
-          {/* Bottom Action Footer */}
-          <div className="theatre-footer">
-            <div className="theatre-footer-info">
-              <span className="footer-lead-text">Watch the full step-by-step breakdown on YouTube with timestamp chapters.</span>
-            </div>
+        {/* Editorial Capability Hierarchy (Restrained Typographic Rows, No Card Clutter) */}
+        <div className="capabilities-hierarchy" aria-label="Core Technical Capabilities">
+          <div className="cap-hierarchy-header">
+            <span className="cap-hierarchy-eyebrow">BUILT FOR SPEED &amp; RETENTION</span>
+            <h3 className="cap-hierarchy-title">Why Editors Choose Zero Velocity</h3>
+          </div>
 
-            <div className="theatre-footer-actions">
-              <a
-                href={YOUTUBE_WATCH_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary video-cta-btn"
-                title="Watch Full Breakdown on YouTube"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-                <span>Watch Full Breakdown</span>
-                <span className="btn-arrow" aria-hidden="true">&rarr;</span>
-              </a>
-            </div>
+          <div className="cap-pillars-list">
+            {CAPABILITY_PILLARS.map((pillar) => (
+              <div key={pillar.number} className="cap-pillar-row">
+                <div className="pillar-num-col">
+                  <span className="pillar-num">{pillar.number}</span>
+                </div>
+                <div className="pillar-content-col">
+                  <div className="pillar-title-wrap">
+                    <h4 className="pillar-title">{pillar.title}</h4>
+                    <span className="pillar-badge">{pillar.badge}</span>
+                  </div>
+                  <p className="pillar-text">{pillar.text}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

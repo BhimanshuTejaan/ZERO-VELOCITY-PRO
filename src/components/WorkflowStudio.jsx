@@ -1,251 +1,243 @@
 import React, { useState } from 'react';
 import './WorkflowStudio.css';
 
-const WORKFLOW_STEPS = [
+const WORKFLOW_STAGES = [
   {
-    id: 'import',
-    stepNumber: '01',
-    title: 'Import Media',
+    step: '01',
+    title: 'Import Composition',
     tag: 'Direct AE Comp Lock',
-    desc: 'Select your active composition in Adobe After Effects. Zero Velocity automatically locks onto your project frame rate (24, 30, or 60 fps) and audio track.',
-    inspectorData: {
-      composition: 'Comp 1 (1080 × 1920 Reel)',
-      framerate: '29.97 fps (Auto-Locked)',
-      audioTrack: 'Active VO Track (48kHz Stereo)',
-      status: 'Ready for Transcription'
-    }
+    summary: 'Select your active composition in Adobe After Effects. Zero Velocity locks onto your composition frame rate (24, 30, or 60 fps) and active voice audio track automatically.',
+    badge: 'Timecode Locked',
+    visualType: 'audio',
+    details: [
+      { label: 'Frame Rate', value: 'Auto-detects 24, 29.97, 30, 60 fps' },
+      { label: 'Audio Detection', value: '48 kHz / 44.1 kHz Active Comp Audio' },
+      { label: 'Setup Time', value: 'Instant · Zero configuration' }
+    ]
   },
   {
-    id: 'transcribe',
-    stepNumber: '02',
+    step: '02',
     title: 'Transcribe Speech',
-    tag: 'Offline English + Hinglish',
-    desc: 'Run fast on-device speech recognition with English and Roman Hinglish support for complete privacy, or drag in an existing .SRT subtitle file.',
-    inspectorData: {
-      engine: 'Whisper Local Offline Pipeline',
-      languages: 'English + Roman Hinglish',
-      privacy: '100% On-Device (No Cloud Uploads)',
-      accuracy: 'Frame-Accurate Word Timestamps'
-    }
+    tag: '100% On-Device Whisper',
+    summary: 'Transcribe speech with fast, private on-device Whisper recognition. Supports English and Roman Hinglish (Hindi bolo, Roman captions pao), or import existing .SRT subtitle files.',
+    badge: 'Zero Cloud Latency',
+    visualType: 'transcript',
+    details: [
+      { label: 'Privacy', value: '100% Local (No audio uploaded to cloud)' },
+      { label: 'Language', value: 'English + Casual Roman Hinglish' },
+      { label: 'Timestamps', value: 'Frame-accurate word timestamps' }
+    ]
   },
   {
-    id: 'style',
-    stepNumber: '03',
-    title: 'Choose & Style Layout',
-    tag: '6 Production Styles',
-    desc: 'Choose from 6 signature layouts (Balanced, Corporate Clean, Progressive Line, Simple Line, Clean Caption, Devin Style) with full typography and palette authority.',
-    inspectorData: {
-      activeLayout: 'Balanced (Kinetic Stack)',
-      fontPairing: 'Syne ExtraBold + Playfair Italic',
-      casing: 'ALL CAPS / Mixed Case',
-      wordPacing: '3 Words / Caption Block'
-    }
+    step: '03',
+    title: 'Choose Caption Style',
+    tag: '6 Calibrated Styles',
+    summary: 'Select from 6 signature layouts (Balanced, Corporate Clean, Progressive Line, Simple Line, Clean Caption, Devin Style) with calibrated typography pairings.',
+    badge: 'Typography Authority',
+    visualType: 'style',
+    details: [
+      { label: 'Layouts', value: '6 Production Styles' },
+      { label: 'Typography', value: 'Tactic Sans, Syne, Garamond, Inter' },
+      { label: 'Customization', value: 'Word count pacing & casing control' }
+    ]
   },
   {
-    id: 'animate-sound-edit',
-    stepNumber: '04',
-    title: 'Animate, Edit & Sound Sync',
-    tag: 'Motion, Text & SFX',
-    desc: 'Select from 10 entrance animations targeting Words or Lines. Correct words or assign Support, Hero, and Accent role tags in-plugin, and automatically sync 5 built-in SFX cues to keyframes.',
-    inspectorData: {
-      motionPresets: '10 Entrance Animations (Word/Line Target)',
-      inPluginEditor: 'Correct Words + Assign Hero/Accent Roles',
-      soundSync: '5 Built-In SFX (Auto-Synced to Keyframes)',
-      audioAdjustment: 'Automatic Event Hit or Manual Offset'
-    }
+    step: '04',
+    title: 'Animate & Sync Sound',
+    tag: '10 Presets · 5 SFX Cues',
+    summary: 'Apply from 10 entrance animations targeting Words or Lines. Assign Support, Hero, and Accent word roles, and automatically sync 5 built-in SFX cues to keyframe hits.',
+    badge: 'Motion & Sound',
+    visualType: 'motion',
+    details: [
+      { label: 'Animations', value: '10 Kinetic entrance presets' },
+      { label: 'Sound FX', value: '5 Built-in audio cues locked to hits' },
+      { label: 'Role Tagging', value: 'One-click Hero & Accent word tagging' }
+    ]
   },
   {
-    id: 'generate',
-    stepNumber: '05',
-    title: 'Generate Native Layers',
-    tag: '100% Native AE Text',
-    desc: 'Click Generate. Zero Velocity builds authentic, keyframed After Effects text layers and shape elements directly onto your timeline. Never flat, burned-in video.',
-    inspectorData: {
-      layerType: 'Native Adobe After Effects Text Layers',
-      keyframes: 'Marker-Driven Transform Curves',
-      vectorQuality: 'Infinite Resolution (Zero Pixelation)',
-      reEditability: 'Fully Editable in Standard AE Timeline'
-    }
+    step: '05',
+    title: 'Generate Native AE Layers',
+    tag: '100% Vector Text Layers',
+    summary: 'Zero Velocity generates genuine, keyframed Adobe After Effects text layers and shape elements directly onto your active timeline. Fully editable, infinite resolution.',
+    badge: 'Native Timeline',
+    visualType: 'generate',
+    details: [
+      { label: 'Layer Type', value: 'Native Adobe AE Text & Shape Layers' },
+      { label: 'Editability', value: '100% Editable in standard AE timeline' },
+      { label: 'Quality', value: 'Infinite vector resolution (no flat video)' }
+    ]
   }
 ];
 
 export default function WorkflowStudio() {
-  const [activeStepIndex, setActiveStepIndex] = useState(0);
-  const activeStep = WORKFLOW_STEPS[activeStepIndex];
+  const [activeStageIndex, setActiveStageIndex] = useState(0);
+  const activeStage = WORKFLOW_STAGES[activeStageIndex];
 
   return (
-    <section id="workflow" className="workflow-studio">
+    <section id="workflow" className="workflow-studio-section">
       <div className="container">
         {/* Section Header */}
         <div className="workflow-header text-center">
-          <div className="section-eyebrow">
-            <span className="eyebrow-dot"></span>
-            <span>Production Sequence</span>
+          <div className="workflow-eyebrow">
+            <span className="workflow-dot" aria-hidden="true"></span>
+            <span>PRODUCTION SEQUENCE</span>
           </div>
-          <h2 className="section-title">
+          <h2 className="workflow-title">
             From Raw Audio to Timeline Captions<br />
-            <span className="text-gradient-accent">in 5 Cohesive Stages.</span>
+            <span className="workflow-title-accent">in 5 Connected Stages.</span>
           </h2>
-          <p className="section-subtitle">
-            One fluid pipeline inside Adobe After Effects. No round-tripping through web editors, no export-import friction.
+          <p className="workflow-subtitle">
+            One fluid pipeline directly inside Adobe After Effects. No browser tabs, no cloud render queues, no export-import friction.
           </p>
         </div>
 
-        {/* Studio Workstation Interface */}
-        <div className="studio-workstation panel-matte-elevated">
-          {/* Workstation Top Chrome */}
-          <div className="workstation-header">
-            <div className="ws-traffic-lights">
-              <span className="ws-dot ws-dot-red"></span>
-              <span className="ws-dot ws-dot-yellow"></span>
-              <span className="ws-dot ws-dot-green"></span>
+        {/* Connected Timeline Navigation Rail */}
+        <div className="workflow-timeline-rail" role="tablist" aria-label="Workflow Stage Selector">
+          <div className="timeline-connecting-line" aria-hidden="true">
+            <div
+              className="timeline-progress-fill"
+              style={{ width: `${(activeStageIndex / (WORKFLOW_STAGES.length - 1)) * 100}%` }}
+            ></div>
+          </div>
+
+          {WORKFLOW_STAGES.map((stage, idx) => {
+            const isSelected = idx === activeStageIndex;
+            const isPassed = idx <= activeStageIndex;
+            return (
+              <button
+                key={stage.step}
+                role="tab"
+                aria-selected={isSelected}
+                aria-controls={`stage-panel-${stage.step}`}
+                id={`stage-tab-${stage.step}`}
+                className={`timeline-node-btn ${isSelected ? 'active' : ''} ${isPassed ? 'passed' : ''}`}
+                onClick={() => setActiveStageIndex(idx)}
+              >
+                <div className="node-marker">
+                  <span className="node-number">{stage.step}</span>
+                </div>
+                <div className="node-meta">
+                  <span className="node-title">{stage.title}</span>
+                  <span className="node-tag">{stage.tag}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Stage Editorial Showcase Stage */}
+        <div
+          className="workflow-stage-card"
+          id={`stage-panel-${activeStage.step}`}
+          role="tabpanel"
+          aria-labelledby={`stage-tab-${activeStage.step}`}
+        >
+          {/* Left Column: Stage Explanation & Specs */}
+          <div className="stage-explanation-col">
+            <div className="stage-header-row">
+              <span className="stage-index-badge">STAGE {activeStage.step} OF 05</span>
+              <span className="stage-status-pill">{activeStage.badge}</span>
             </div>
-            <div className="ws-title-bar">
-              <span className="ae-tag-badge">Ae</span>
-              <span>Zero Velocity CEP • Production Sequence Pipeline</span>
-            </div>
-            <div className="ws-timecode-indicator">
-              <span className="ws-tc-prefix">STAGE:</span>
-              <span className="ws-tc-val">{activeStep.stepNumber} / 05</span>
+
+            <h3 className="stage-heading">{activeStage.title}</h3>
+            <p className="stage-summary">{activeStage.summary}</p>
+
+            <div className="stage-specs-grid">
+              {activeStage.details.map((d, i) => (
+                <div key={i} className="spec-row">
+                  <span className="spec-k">{d.label}</span>
+                  <span className="spec-v">{d.value}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="studio-body-grid">
-            {/* Left Rail: 5-Step Interactive Stepper */}
-            <div className="studio-stepper-rail">
-              {WORKFLOW_STEPS.map((step, idx) => {
-                const isActive = activeStepIndex === idx;
-                const isPassed = activeStepIndex > idx;
-
-                return (
-                  <button
-                    key={step.id}
-                    className={`step-stepper-item ${isActive ? 'active' : ''} ${isPassed ? 'passed' : ''}`}
-                    onClick={() => setActiveStepIndex(idx)}
-                  >
-                    <div className="stepper-indicator">
-                      <span className="step-num">{step.stepNumber}</span>
-                    </div>
-                    <div className="stepper-text">
-                      <div className="step-header-line">
-                        <h4 className="step-label">{step.title}</h4>
-                        <span className="step-tag-pill">{step.tag}</span>
-                      </div>
-                      <p className="step-brief">{step.desc}</p>
-                    </div>
-                  </button>
-                );
-              })}
+          {/* Right Column: Authentic Transformation Visual Evidence */}
+          <div className="stage-visual-col" aria-label="Workflow Evidence Preview">
+            <div className="visual-terminal-chrome">
+              <div className="vt-traffic-dots" aria-hidden="true">
+                <span className="vt-dot dot-red"></span>
+                <span className="vt-dot dot-yellow"></span>
+                <span className="vt-dot dot-green"></span>
+              </div>
+              <span className="vt-title">Zero Velocity CEP Pipeline · Stage {activeStage.step}</span>
             </div>
 
-            {/* Right Stage: Active Inspector & Mockup Canvas */}
-            <div className="studio-inspector-stage">
-              <div className="inspector-panel">
-                <div className="inspector-top">
-                  <div className="inspector-pill">
-                    <span className="live-dot"></span>
-                    <span>LIVE PIPELINE INSPECTOR</span>
+            <div className="visual-stage-canvas">
+              {activeStage.visualType === 'audio' && (
+                <div className="vt-content vt-audio-stage">
+                  <div className="audio-lock-pill">✓ AE COMP POSITION LOCKED · 29.97 FPS</div>
+                  <div className="audio-wave-bars">
+                    {[35, 60, 90, 45, 100, 75, 40, 85, 95, 60, 30, 85, 100, 70, 50, 95, 45, 80].map((h, i) => (
+                      <span key={i} className="wave-bar-item" style={{ height: `${h}%` }}></span>
+                    ))}
                   </div>
-                  <span className="inspector-comp-name">
-                    Stage {activeStep.stepNumber}: {activeStep.title}
-                  </span>
+                  <span className="vt-caption-sub">Active VO Audio Track Detected (48kHz Stereo)</span>
                 </div>
+              )}
 
-                {/* Stage Canvas Simulation */}
-                <div className="inspector-canvas-box">
-                  {activeStep.id === 'import' && (
-                    <div className="canvas-import-state">
-                      <div className="audio-wave-graphic">
-                        <div className="wave-bar h-1"></div>
-                        <div className="wave-bar h-3"></div>
-                        <div className="wave-bar h-5"></div>
-                        <div className="wave-bar h-8"></div>
-                        <div className="wave-bar h-4"></div>
-                        <div className="wave-bar h-7"></div>
-                        <div className="wave-bar h-9"></div>
-                        <div className="wave-bar h-6"></div>
-                        <div className="wave-bar h-2"></div>
-                      </div>
-                      <span className="canvas-caption-label">Audio Track Synchronized • 48kHz Stereo</span>
-                    </div>
-                  )}
-
-                  {activeStep.id === 'transcribe' && (
-                    <div className="canvas-transcribe-state">
-                      <div className="srt-block-preview">
-                        <span className="srt-time">00:00:03:12 → 00:00:05:08</span>
-                        <p className="srt-text">"Ab captions banana hua superfast direct in After Effects"</p>
-                      </div>
-                      <span className="engine-status-badge">Local Whisper Engine • 100% Private</span>
-                    </div>
-                  )}
-
-                  {activeStep.id === 'style' && (
-                    <div className="canvas-layout-state">
-                      <div className="layout-badge-rack">
-                        <span className="layout-pill active">Balanced</span>
-                        <span className="layout-pill">Corporate Clean</span>
-                        <span className="layout-pill">Progressive Line</span>
-                        <span className="layout-pill">Devin Style</span>
-                      </div>
-                      <div className="mini-layout-preview">
-                        <div className="mini-balanced-preview">
-                          <span className="mini-sub">Most People Never</span>
-                          <span className="mini-hero">
-                            <span className="font-serif italic text-amber-300">Doing</span> This
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {activeStep.id === 'animate-sound-edit' && (
-                    <div className="canvas-combined-state">
-                      {/* Integrated Motion, Edit, and Sound Overview */}
-                      <div className="combined-features-grid">
-                        <div className="combined-feat-card">
-                          <span className="feat-title">10 Entrance Animations</span>
-                          <span className="feat-desc">Bounce 1–4, Fade Up, Directional Slides &amp; Flicker targeting Words or Lines</span>
-                        </div>
-                        <div className="combined-feat-card">
-                          <span className="feat-title">In-Plugin Text Editor</span>
-                          <span className="feat-desc">Correct text before timeline creation and tag Support, Hero, or Accent roles</span>
-                        </div>
-                        <div className="combined-feat-card">
-                          <span className="feat-title">5 Built-In Audio Cues</span>
-                          <span className="feat-desc">Pops, Clicks, Whooshes, and Snaps with auto-sync or manual frame offset</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {activeStep.id === 'generate' && (
-                    <div className="canvas-generate-state">
-                      <div className="ae-layers-list">
-                        <div className="layer-item-row">
-                          <span className="layer-type-t">T</span>
-                          <span className="layer-name">[ZV] Hero_Doing_This</span>
-                        </div>
-                        <div className="layer-item-row">
-                          <span className="layer-type-t">T</span>
-                          <span className="layer-name">[ZV] Base_Most_People_Never</span>
-                        </div>
-                      </div>
-                      <span className="generate-complete-pill">✓ 100% Native AE Layers Generated</span>
-                    </div>
-                  )}
+              {activeStage.visualType === 'transcript' && (
+                <div className="vt-content vt-transcript-stage">
+                  <div className="transcript-box">
+                    <span className="ts-time">[00:01:12]</span>
+                    <span className="ts-text">"Turn raw speech into styled captions..."</span>
+                  </div>
+                  <div className="transcript-box active">
+                    <span className="ts-time">[00:02:18]</span>
+                    <span className="ts-text highlight">"without leaving Adobe After Effects."</span>
+                  </div>
+                  <div className="transcript-status">
+                    <span className="pulse-dot"></span>
+                    <span>100% On-Device Whisper · Zero Cloud Delay</span>
+                  </div>
                 </div>
+              )}
 
-                {/* Inspector Metadata Grid */}
-                <div className="inspector-specs-grid">
-                  {Object.entries(activeStep.inspectorData).map(([key, val]) => (
-                    <div key={key} className="spec-row">
-                      <span className="spec-label">{key.replace(/([A-Z])/g, ' $1')}:</span>
-                      <span className="spec-value">{val}</span>
-                    </div>
-                  ))}
+              {activeStage.visualType === 'style' && (
+                <div className="vt-content vt-style-stage">
+                  <div className="style-demo-card">
+                    <span className="style-lead-font">BALANCED KINETIC STACK</span>
+                    <h4 className="style-hero-font">MAKE EVERY WORD LAND</h4>
+                  </div>
+                  <div className="style-meta-row">
+                    <span className="style-tag-chip">Syne ExtraBold + Garamond</span>
+                    <span className="style-tag-chip">3 Words Pacing</span>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {activeStage.visualType === 'motion' && (
+                <div className="vt-content vt-motion-stage">
+                  <div className="keyframes-strip">
+                    <span className="kf-point kf-1">◆ POP IN</span>
+                    <span className="kf-point kf-2">◆ BEZIER EASE</span>
+                    <span className="kf-point kf-3 active">🔔 SFX HIT LOCK</span>
+                  </div>
+                  <div className="motion-role-tags">
+                    <span className="role-tag-item role-support">SUPPORT</span>
+                    <span className="role-tag-item role-hero">HERO</span>
+                    <span className="role-tag-item role-accent">ACCENT</span>
+                  </div>
+                </div>
+              )}
+
+              {activeStage.visualType === 'generate' && (
+                <div className="vt-content vt-generate-stage">
+                  <div className="ae-layer-bar">
+                    <span className="ae-icon-chip">Ae</span>
+                    <span className="ae-layer-title">[Layer 1] Zero Velocity Caption Layer</span>
+                    <span className="ae-layer-type">Text Layer</span>
+                  </div>
+                  <div className="ae-layer-bar sub">
+                    <span className="ae-icon-chip shape">■</span>
+                    <span className="ae-layer-title">[Layer 2] Caption Accent Highlight Shape</span>
+                    <span className="ae-layer-type">Shape Layer</span>
+                  </div>
+                  <div className="generate-success-badge">
+                    <span>✓ 100% Vector Keyframed Timeline Layers Built</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

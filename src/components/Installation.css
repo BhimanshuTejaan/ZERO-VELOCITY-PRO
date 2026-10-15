@@ -1,237 +1,393 @@
-.installation {
-  display: flex;
-  justify-content: center;
-  border-top: 1px solid var(--zv-border-subtle);
+/* ==========================================================================
+   Zero Velocity — Installation, Support & FAQs
+   ========================================================================== */
+
+.installation-section {
+  position: relative;
+  padding: 80px 0;
+  background-color: var(--zv-bg-canvas);
 }
 
-.installation-box {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 3.5rem 3.5rem;
-  background: rgba(18, 24, 35, 0.72);
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
-  border: 1px solid var(--zv-border-subtle);
-  border-top: 1px solid var(--zv-border-lightedge);
-  border-radius: var(--zv-radius-xl, 24px);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+.install-header {
+  max-width: 760px;
+  margin: 0 auto 48px auto;
 }
 
-.workflow-badge {
+.install-eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.25rem 0.75rem;
-  background: rgba(41, 151, 255, 0.1);
-  border: 1px solid rgba(41, 151, 255, 0.25);
-  border-radius: var(--zv-radius-pill, 9999px);
-  color: var(--zv-accent-primary);
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
   font-family: var(--zv-font-mono, monospace);
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  margin-bottom: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--zv-accent-primary, #2997ff);
+  text-transform: uppercase;
+  margin-bottom: 16px;
 }
 
-.wf-dot {
+.install-dot {
   width: 6px;
   height: 6px;
-  background: var(--zv-accent-primary);
   border-radius: 50%;
+  background: var(--zv-accent-primary, #2997ff);
+  box-shadow: 0 0 8px rgba(41, 151, 255, 0.8);
 }
 
-.installation-box .section-header {
-  margin-bottom: 2.75rem;
+.install-title {
+  font-size: clamp(2rem, 4.2vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  margin-bottom: 16px;
 }
 
-.install-os-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.84rem;
-  font-weight: 550;
-  color: var(--zv-text-secondary);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--zv-border-subtle);
-  padding: 0.35rem 0.9rem;
-  border-radius: 9999px;
-  margin-top: 0.75rem;
-  margin-bottom: 0.75rem;
+.install-subtitle {
+  font-size: clamp(1rem, 1.8vw, 1.15rem);
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--zv-text-secondary, #a1a1a6);
+  margin-bottom: 24px;
 }
 
-.install-os-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #30d158;
-  box-shadow: 0 0 8px rgba(48, 209, 88, 0.8);
-  flex-shrink: 0;
-}
-
-.install-video-btn {
-  margin-top: 0.5rem;
-  padding: 0.65rem 1.4rem;
-  font-size: 0.88rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  border-radius: var(--zv-radius-pill, 9999px);
-}
-
-.install-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.step-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 1.5rem;
-  padding: 1.4rem 1.6rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--zv-border-subtle);
-  border-radius: var(--zv-radius-md, 14px);
-  transition: all 0.2s var(--transition-spring);
-}
-
-.step-card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-}
-
-.step-number {
+.install-actions-strip {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: rgba(41, 151, 255, 0.12);
-  color: var(--zv-accent-primary);
-  border: 1px solid rgba(41, 151, 255, 0.25);
-  border-radius: 50%;
-  font-family: var(--zv-font-mono, monospace);
-  font-weight: 700;
-  font-size: 0.95rem;
-  flex-shrink: 0;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.step-content {
+.install-os-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(48, 209, 88, 0.08);
+  border: 1px solid rgba(48, 209, 88, 0.25);
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  color: #30d158;
+}
+
+.ios-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #30d158;
+}
+
+.btn-install-video {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--zv-text-primary, #f5f5f7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 150ms ease;
+}
+
+.btn-install-video:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   4-Step Editorial Progression
+   -------------------------------------------------------------------------- */
+
+.install-steps-track {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  max-width: 1040px;
+  margin: 0 auto 64px auto;
+}
+
+.install-step-item {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 20px;
+  background: #090d14;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  transition: transform 150ms ease, border-color 150ms ease;
+}
+
+.install-step-item:hover {
+  border-color: rgba(41, 151, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.step-num-bubble {
+  font-family: var(--zv-font-mono, monospace);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--zv-accent-primary, #2997ff);
+  margin-bottom: 16px;
+}
+
+.step-details {
+  display: flex;
+  flex-direction: column;
   flex: 1;
 }
 
-.step-title-row {
+.step-title-line {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.35rem;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
-.step-title {
-  font-size: 1.08rem;
-  font-weight: 650;
-  color: var(--zv-text-primary);
+.step-head {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
   letter-spacing: -0.01em;
 }
 
-.step-link-badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--zv-accent-primary);
-  background: rgba(41, 151, 255, 0.1);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
-  transition: all 0.15s ease;
-}
-
-.step-link-badge:hover {
-  background: var(--zv-accent-primary, #38bdf8);
-  color: #05070a;
-}
-
-.step-shortcut-tag,
-.step-format-tag,
-.step-active-tag {
+.step-tag {
+  align-self: flex-start;
   font-family: var(--zv-font-mono, monospace);
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--zv-text-muted, #64748b);
-  background: rgba(255, 255, 255, 0.05);
-  padding: 0.15rem 0.5rem;
+  font-size: 0.68rem;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--zv-text-secondary, #a1a1a6);
   border-radius: 4px;
 }
 
-.step-format-tag {
-  color: var(--zv-accent-primary, #38bdf8);
-  background: rgba(56, 189, 248, 0.1);
+.step-tag.tag-success {
+  background: rgba(48, 209, 88, 0.12);
+  color: #30d158;
 }
 
-.step-active-tag {
-  color: var(--zv-accent-success, #10b981);
-  background: rgba(16, 185, 129, 0.1);
+.step-action-link {
+  align-self: flex-start;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--zv-accent-primary, #2997ff);
+  text-decoration: none;
 }
 
-.step-text {
-  color: var(--zv-text-secondary, #94a3b8);
-  font-size: 0.92rem;
-  margin: 0;
-  line-height: 1.55;
+.step-action-link:hover {
+  text-decoration: underline;
 }
 
-.step-text code {
+.step-desc {
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--zv-text-secondary, #a1a1a6);
+}
+
+.step-desc code {
   font-family: var(--zv-font-mono, monospace);
-  font-size: 0.85em;
   background: rgba(255, 255, 255, 0.08);
-  padding: 0.15em 0.35em;
+  padding: 1px 4px;
   border-radius: 3px;
   color: #ffffff;
 }
 
-@media (max-width: 640px) {
-  .installation-box {
-    padding: 2rem 1.25rem;
+/* --------------------------------------------------------------------------
+   Consolidated Creator Support Bar
+   -------------------------------------------------------------------------- */
+
+.support-unified-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1040px;
+  margin: 0 auto 64px auto;
+  padding: 28px 36px;
+  background: rgba(14, 19, 28, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+}
+
+.support-bar-info {
+  max-width: 520px;
+}
+
+.support-badge {
+  font-family: var(--zv-font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--zv-accent-primary, #2997ff);
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.support-bar-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+
+.support-bar-desc {
+  font-size: 0.88rem;
+  color: var(--zv-text-secondary, #a1a1a6);
+}
+
+.support-links-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.support-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #f5f5f7;
+  text-decoration: none;
+  transition: all 150ms ease;
+  min-height: 42px;
+}
+
+.support-link-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   Frequently Asked Questions
+   -------------------------------------------------------------------------- */
+
+.faq-unified-container {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.faq-header {
+  margin-bottom: 32px;
+}
+
+.faq-eyebrow {
+  font-family: var(--zv-font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--zv-accent-primary, #2997ff);
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.faq-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.faq-accordion-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.faq-row-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.faq-question-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.faq-question-btn:hover {
+  color: var(--zv-accent-primary, #2997ff);
+}
+
+.faq-toggle-icon {
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #86868b;
+  margin-left: 16px;
+}
+
+.faq-answer-pane {
+  padding-bottom: 20px;
+}
+
+.faq-a-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--zv-text-secondary, #a1a1a6);
+}
+
+/* --------------------------------------------------------------------------
+   Mobile Responsiveness (320px – 768px)
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 860px) {
+  .install-steps-track {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 
-  .step-card {
+  .support-unified-bar {
     flex-direction: column;
+    gap: 20px;
     align-items: flex-start;
-    gap: 0.75rem;
-    padding: 1.15rem 1.15rem;
-  }
-
-  .install-video-btn {
-    min-height: 44px;
-    width: 100%;
-    justify-content: center;
+    padding: 24px 20px;
   }
 }
 
-@media (max-width: 480px) {
-  .installation-box {
-    padding: 1.5rem 0.85rem;
-    border-radius: 16px;
+@media (max-width: 580px) {
+  .install-steps-track {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 
-  .step-card {
-    padding: 1rem 0.85rem;
+  .install-step-item {
+    padding: 18px 16px;
   }
 
-  .step-number {
-    width: 32px;
-    height: 32px;
-    font-size: 0.88rem;
+  .support-links-group {
+    flex-direction: column;
+    width: 100%;
   }
 
-  .step-title {
-    font-size: 0.98rem;
+  .support-link-btn {
+    width: 100%;
+    justify-content: center;
   }
 
-  .step-text {
-    font-size: 0.86rem;
+  .faq-question-btn {
+    font-size: 0.96rem;
+    padding: 16px 0;
   }
 }
