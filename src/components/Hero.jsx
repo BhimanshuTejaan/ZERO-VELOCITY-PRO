@@ -9,203 +9,170 @@ const HERO_STYLES = [
     name: 'Devin Style',
     kicker: 'Featured Creator Style',
     tagline: 'High-Impact Kinetic Word Pop',
-    description: 'Ultra-bold kinetic typography with dynamic two-tone word emphasis and high-velocity retention.',
     videoSrc: '/previews/devin-style.mp4',
     posterSrc: '/previews/devin-style-poster.jpg',
-    duration: 9.75,
   },
   {
     id: 'balanced-style',
     name: 'Balanced Style',
     kicker: 'Podcast & Narrative',
-    tagline: 'Mixed Serif Italic & Clean Sans',
-    description: 'Dynamic font pairing blending fluid editorial italics with high-contrast bold sans-serif.',
+    tagline: 'Mixed Serif Italic & Sans',
     videoSrc: '/previews/balanced-style.mp4',
     posterSrc: '/previews/balanced-style-poster.jpg',
-    duration: 7.92,
   },
   {
     id: 'clean-caption',
     name: 'Clean Caption',
     kicker: 'Minimalist Talking Head',
-    tagline: 'Refined Centered Typography',
-    description: 'Crisp, centered subtitle presentation calibrated for dialogue clarity without visual clutter.',
+    tagline: 'Refined Centered Subtitles',
     videoSrc: '/previews/clean-caption.mp4',
     posterSrc: '/previews/clean-caption-poster.jpg',
-    duration: 7.06,
   },
   {
     id: 'corporate-clean',
     name: 'Corporate Clean',
     kicker: 'Executive & Brand',
     tagline: 'Authoritative Uppercase Titling',
-    description: 'Polished, restrained uppercase titling engineered for corporate reels, commercials, and case studies.',
     videoSrc: '/previews/corporate-clean.mp4',
     posterSrc: '/previews/corporate-clean-poster.jpg',
-    duration: 8.38,
   },
 ];
 
 export default function Hero() {
   const { currentUser, loginWithGoogle, isSoleAdmin, hasActiveLicense } = useAuth();
-  
-  // Carousel State
-  const [activeStyleIndex, setActiveStyleIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isAutoCycleEnabled, setIsAutoCycleEnabled] = useState(true);
-  const [isInteracting, setIsInteracting] = useState(false);
-  const [isExpandedModalOpen, setIsExpandedModalOpen] = useState(false);
-  const [progressPercent, setProgressPercent] = useState(0);
 
-  const videoRef = useRef(null);
-  const modalVideoRef = useRef(null);
-  const expandTriggerRef = useRef(null);
-  const progressAnimRef = useRef(null);
+  // Orbital state
+  const [orbitAngle, setOrbitAngle] = useState(0); // in degrees
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [pinnedIndex, setPinnedIndex] = useState(0); // Devin Style featured initially
+  const [isReducedMotion, setIsReducedMotion] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
-  const activeStyle = HERO_STYLES[activeStyleIndex];
+  const animFrameRef = useRef(null);
+  const lastTimeRef = useRef(null);
+  const unhoverTimerRef = useRef(null);
+  const videoRefs = useRef([]);
 
   // Check prefers-reduced-motion
   useEffect(() => {
     if (typeof window !== 'undefined' && window.matchMedia) {
       const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-      if (motionQuery.matches) {
-        setIsAutoCycleEnabled(false);
-        setIsPlaying(false);
-      }
+      setIsReducedMotion(motionQuery.matches);
+
+      const handleChange = (e) => setIsReducedMotion(e.matches);
+      motionQuery.addEventListener('change', handleChange);
+      return () => motionQuery.removeEventListener('change', handleChange);
     }
   }, []);
 
-  // Handle cycle advancement
-  const advanceToNextStyle = useCallback(() => {
-    setActiveStyleIndex((prev) => (prev + 1) % HERO_STYLES.length);
-    setProgressPercent(0);
-  }, []);
-
-  // Inline video lifecycle on style change
+  // Continuous gentle orbital loop when resting (not hovered, not pinned, motion allowed)
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    setProgressPercent(0);
-    video.currentTime = 0;
-
-    // Load and attempt autoplay (muted)
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => setIsPlaying(true))
-        .catch(() => {
-          // Autoplay was prevented by browser policy; stay on poster
-          setIsPlaying(false);
-        });
+    // If user has pinned a card or prefers reduced motion or is hovering, freeze orbit
+    if (pinnedIndex !== null || isHovered || isReducedMotion) {
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
+      return;
     }
-  }, [activeStyleIndex]);
 
-  // Video time update for smooth progress bar indicator
-  const handleTimeUpdate = () => {
-    const video = videoRef.current;
-    if (!video || !video.duration) return;
-    const pct = Math.min(100, (video.currentTime / video.duration) * 100);
-    setProgressPercent(pct);
+    const speedDegPerSec = 10; // Slow, cinematic 36-second full orbit
+
+    const animateOrbit = (time) => {
+      if (lastTimeRef.current !== null) {
+        const deltaSec = (time - lastTimeRef.current) / 1000;
+        setOrbitAngle((prev) => (prev + speedDegPerSec * deltaSec) % 360);
+      }
+      lastTimeRef.current = time;
+      animFrameRef.current = requestAnimationFrame(animateOrbit);
+    };
+
+    lastTimeRef.current = performance.now();
+    animFrameRef.current = requestAnimationFrame(animateOrbit);
+
+    return () => {
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
+      lastTimeRef.current = null;
+    };
+  }, [pinnedIndex, isHovered, isReducedMotion]);
+
+  // Determine which card is currently active/featured
+  const activeIndex = pinnedIndex !== null 
+    ? pinnedIndex 
+    : hoveredIndex !== null 
+      ? hoveredIndex 
+      : 0; // Devin Style default
+
+  const activeStyle = HERO_STYLES[activeIndex];
+
+  // Hover handlers
+  const handleCardMouseEnter = (index) => {
+    if (unhoverTimerRef.current) {
+      clearTimeout(unhoverTimerRef.current);
+      unhoverTimerRef.current = null;
+    }
+    setIsHovered(true);
+    setHoveredIndex(index);
   };
 
-  // Video ended -> auto-advance to next style if auto-cycling is active
-  const handleVideoEnded = () => {
-    if (isAutoCycleEnabled && !isInteracting && !isExpandedModalOpen) {
-      advanceToNextStyle();
+  const handleCardMouseLeave = () => {
+    setIsHovered(false);
+    unhoverTimerRef.current = setTimeout(() => {
+      setHoveredIndex(null);
+    }, 450);
+  };
+
+  // Click handler: pins or toggles active style within hero (never opens modal)
+  const handleCardClick = (index) => {
+    if (pinnedIndex === index) {
+      // Toggle unpin to resume free orbit
+      setPinnedIndex(null);
+      setHoveredIndex(index);
     } else {
-      // Loop current video if auto-cycling is paused
-      const video = videoRef.current;
-      if (video) {
-        video.currentTime = 0;
-        video.play().catch(() => {});
-      }
+      // Pin this card in front
+      setPinnedIndex(index);
+      setHoveredIndex(index);
     }
   };
 
-  // Visibility change pause/resume
+  // Resume orbit button handler
+  const handleResumeOrbit = () => {
+    setPinnedIndex(null);
+    setHoveredIndex(null);
+    setIsHovered(false);
+  };
+
+  // Synchronize muted video playback safely
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      const video = videoRef.current;
+    videoRefs.current.forEach((video, idx) => {
       if (!video) return;
+      video.muted = true;
+      video.playsInline = true;
 
-      if (document.hidden || isExpandedModalOpen) {
-        video.pause();
-      } else if (isPlaying) {
+      // When pinned/hovered, prioritize active video playback
+      if (idx === activeIndex) {
         video.play().catch(() => {});
       }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [isPlaying, isExpandedModalOpen]);
-
-  // Select style manually
-  const handleSelectStyle = (index) => {
-    setActiveStyleIndex(index);
-    setProgressPercent(0);
-  };
-
-  // Toggle Auto-Cycle
-  const toggleAutoCycle = () => {
-    setIsAutoCycleEnabled((prev) => {
-      const next = !prev;
-      const video = videoRef.current;
-      if (video) {
-        if (!next) {
-          // Keep looping single video
-          video.loop = true;
-        } else {
-          video.loop = false;
-        }
-      }
-      return next;
     });
-  };
+  }, [activeIndex]);
 
-  // Expanded modal handlers
-  const openExpandedModal = () => {
-    setIsExpandedModalOpen(true);
-    // Pause inline video
-    if (videoRef.current) {
-      videoRef.current.pause();
-    }
-  };
-
-  const closeExpandedModal = useCallback(() => {
-    setIsExpandedModalOpen(false);
-    // Resume inline video if was playing
-    if (videoRef.current && isPlaying) {
-      videoRef.current.play().catch(() => {});
-    }
-    // Return focus to trigger
-    if (expandTriggerRef.current) {
-      expandTriggerRef.current.focus();
-    }
-  }, [isPlaying]);
-
-  // Escape key & modal scroll lock
+  // Handle visibility change (pause videos when tab hidden)
   useEffect(() => {
-    if (!isExpandedModalOpen) return;
-
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        closeExpandedModal();
+    const handleVisibility = () => {
+      if (document.hidden) {
+        videoRefs.current.forEach((v) => v && v.pause());
+      } else {
+        const activeVideo = videoRefs.current[activeIndex];
+        if (activeVideo) activeVideo.play().catch(() => {});
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isExpandedModalOpen, closeExpandedModal]);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [activeIndex]);
 
   // Purchase & Navigation handlers
   const handleBuyNow = () => {
@@ -220,8 +187,87 @@ export default function Hero() {
     window.dispatchEvent(new CustomEvent('zero-velocity-open-license-modal'));
   };
 
+  /**
+   * Compute 3D orbital transform for card i
+   * If a card is pinned or hovered, cards arrange into a focused stage layout:
+   *  - Active card is front-and-center (X:0, Z:+120px, Scale: 1.05, RotY: 0deg)
+   *  - Other cards flank it naturally in 3D perspective
+   * If in resting orbit:
+   *  - Cards move along continuous ellipse
+   */
+  const computeCardStyle = useCallback((index) => {
+    const isFocusedState = pinnedIndex !== null || (isHovered && hoveredIndex !== null);
+
+    if (isFocusedState) {
+      // Relative offset from active card: 0 = active, 1 = right, 2 = back, 3 = left
+      const offset = (index - activeIndex + 4) % 4;
+
+      if (offset === 0) {
+        // Active Hero Card (Front and Center)
+        return {
+          transform: 'translate3d(0, 0, 110px) scale(1.05) rotateY(0deg)',
+          zIndex: 400,
+          opacity: 1,
+          filter: 'brightness(1)',
+        };
+      } else if (offset === 1) {
+        // Flanking Right
+        return {
+          transform: 'translate3d(180px, 0, -30px) scale(0.84) rotateY(-12deg)',
+          zIndex: 200,
+          opacity: 0.65,
+          filter: 'brightness(0.75)',
+        };
+      } else if (offset === 2) {
+        // Deep Back
+        return {
+          transform: 'translate3d(0, -10px, -90px) scale(0.74) rotateY(0deg)',
+          zIndex: 100,
+          opacity: 0.45,
+          filter: 'brightness(0.6)',
+        };
+      } else {
+        // Flanking Left (offset === 3)
+        return {
+          transform: 'translate3d(-180px, 0, -30px) scale(0.84) rotateY(12deg)',
+          zIndex: 200,
+          opacity: 0.65,
+          filter: 'brightness(0.75)',
+        };
+      }
+    }
+
+    // Resting Continuous 3D Orbit
+    // Each card is 90 deg apart
+    const cardAngleDeg = (orbitAngle + index * 90) % 360;
+    const rad = (cardAngleDeg * Math.PI) / 180;
+
+    const radiusX = 185; // px horizontal reach
+    const radiusZ = 95;  // px depth reach
+
+    const x = Math.sin(rad) * radiusX;
+    const z = Math.cos(rad) * radiusZ;
+    const cosVal = Math.cos(rad); // -1 (back) to +1 (front)
+
+    // Gentle scale from 0.82 to 1.0
+    const scale = 0.82 + 0.18 * ((cosVal + 1) / 2);
+    // Upright subtle perspective tilt: max 10 deg (never extreme, highly readable)
+    const rotY = -Math.sin(rad) * 10;
+    // Layering z-index based on depth
+    const zIndex = Math.round(150 + 150 * cosVal);
+    // Subtle depth opacity
+    const opacity = 0.62 + 0.38 * ((cosVal + 1) / 2);
+
+    return {
+      transform: `translate3d(${x.toFixed(1)}px, 0, ${z.toFixed(1)}px) scale(${scale.toFixed(3)}) rotateY(${rotY.toFixed(1)}deg)`,
+      zIndex,
+      opacity,
+      filter: cosVal > 0.4 ? 'brightness(1)' : 'brightness(0.75)',
+    };
+  }, [pinnedIndex, isHovered, hoveredIndex, activeIndex, orbitAngle]);
+
   return (
-    <section className="hero-editorial" id="hero" aria-label="Zero Velocity Overview">
+    <section className="hero-minimalist" id="hero" aria-label="Zero Velocity Overview">
       {/* Subtle ambient lighting */}
       <div className="hero-atmosphere" aria-hidden="true">
         <div className="hero-glow-soft"></div>
@@ -229,7 +275,7 @@ export default function Hero() {
 
       <div className="container hero-layout-container">
         {/* =================================================================
-            LEFT COLUMN (~40%): Confident Editorial Storytelling & Direct CTA
+            LEFT COLUMN (~42%): Confident Editorial Lead & One-Click Message
             ================================================================= */}
         <div className="hero-editorial-col">
           <div className="hero-tag-kicker">
@@ -239,13 +285,22 @@ export default function Hero() {
           </div>
 
           <h1 className="hero-title">
-            Captions, made for the cut.
+            Captions, finished in one click.
           </h1>
 
           <p className="hero-lede">
-            Generate styled, animated, editable captions directly inside Adobe After Effects. 
+            Turn speech into styled, animated, editable captions directly inside Adobe After Effects. 
             Real native vector text layers with frame-accurate sync and zero monthly subscriptions.
           </p>
+
+          {/* Central One-Click Workflow Sequence (Typographic, not bulky cards) */}
+          <div className="hero-one-click-sequence" aria-label="One-click workflow progression">
+            <span className="seq-step seq-highlight">ONE CLICK</span>
+            <span className="seq-arrow" aria-hidden="true">→</span>
+            <span className="seq-step">STYLED CAPTIONS</span>
+            <span className="seq-arrow" aria-hidden="true">→</span>
+            <span className="seq-step">EDITABLE AE LAYERS</span>
+          </div>
 
           {/* Action Button Row */}
           <div className="hero-cta-group">
@@ -314,252 +369,114 @@ export default function Hero() {
         </div>
 
         {/* =================================================================
-            RIGHT COLUMN (~60%): Real 4-Style Video Showcase Carousel
+            RIGHT COLUMN (~58%): Four-Video 3D Orbit Stage
             ================================================================= */}
-        <div 
-          className="hero-showcase-col"
-          onMouseEnter={() => setIsInteracting(true)}
-          onMouseLeave={() => setIsInteracting(false)}
-        >
-          {/* Main Video Presentation Display */}
-          <div 
-            className="video-stage-chassis"
-            onClick={openExpandedModal}
-            role="button"
-            tabIndex={0}
-            ref={expandTriggerRef}
-            aria-label={`Previewing ${activeStyle.name}. Click to expand with audio.`}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                openExpandedModal();
-              }
-            }}
-          >
-            {/* Stage Top Bar: Real Style Details & Expand Affordance */}
-            <div className="stage-hud-bar">
-              <div className="stage-hud-identity">
-                <span className="stage-pulse-dot" aria-hidden="true"></span>
-                <span className="stage-style-title">{activeStyle.name}</span>
-                <span className="stage-hud-meta">1080 × 1920 (9:16)</span>
-              </div>
-              <button 
-                type="button" 
-                className="stage-expand-pill" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openExpandedModal();
-                }}
-                aria-label={`Expand ${activeStyle.name} video with audio`}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-                </svg>
-                <span>Expand · Audio</span>
-              </button>
+        <div className="hero-orbit-col" aria-label="Interactive 3D caption style showcase">
+          {/* Active Style HUD Pill Indicator */}
+          <div className="orbit-hud-header">
+            <div className="orbit-active-badge">
+              <span className="orbit-live-dot" aria-hidden="true"></span>
+              <span className="orbit-active-name">{activeStyle.name}</span>
+              <span className="orbit-meta-divider" aria-hidden="true">·</span>
+              <span className="orbit-one-click-tag">Generated in 1 Click</span>
             </div>
 
-            {/* Video Viewport: Clean 9:16 Aspect Display */}
-            <div className="stage-video-frame">
-              <video
-                ref={videoRef}
-                key={activeStyle.id}
-                src={activeStyle.videoSrc}
-                poster={activeStyle.posterSrc}
-                muted
-                playsInline
-                autoPlay
-                preload="metadata"
-                onTimeUpdate={handleTimeUpdate}
-                onEnded={handleVideoEnded}
-                className="stage-video-element"
-                aria-label={`Demonstration of ${activeStyle.name} in After Effects`}
-              />
-
-              {/* Hover Overlay Hint */}
-              <div className="stage-click-hint" aria-hidden="true">
-                <span className="hint-pill">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="6 3 20 12 6 21 6 3"></polygon>
-                  </svg>
-                  Click to play with sound
-                </span>
-              </div>
-            </div>
-
-            {/* Live Progress Indicator Line */}
-            <div className="stage-progress-track" aria-hidden="true">
-              <div 
-                className="stage-progress-fill" 
-                style={{ width: `${progressPercent}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Style Selector Rail & Carousel Controls */}
-          <div className="hero-selector-panel">
-            <div className="selector-tabs-header">
-              <span className="tabs-header-label">CAPTION STYLES (4 REAL AE PREVIEWS)</span>
-              
-              {/* Accessible Pause / Resume Auto-Cycle Control */}
+            {pinnedIndex !== null && !isReducedMotion && (
               <button
                 type="button"
-                className={`btn-cycle-toggle ${isAutoCycleEnabled ? 'active' : 'paused'}`}
-                onClick={toggleAutoCycle}
-                aria-label={isAutoCycleEnabled ? 'Pause automatic style carousel' : 'Resume automatic style carousel'}
-                title={isAutoCycleEnabled ? 'Pause automatic carousel cycling' : 'Resume automatic carousel cycling'}
+                className="orbit-resume-btn"
+                onClick={handleResumeOrbit}
+                aria-label="Resume continuous 3D orbit"
+                title="Resume orbital motion"
               >
-                {isAutoCycleEnabled ? (
-                  <>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <rect x="6" y="4" width="4" height="16"></rect>
-                      <rect x="14" y="4" width="4" height="16"></rect>
-                    </svg>
-                    <span>Auto-cycle On</span>
-                  </>
-                ) : (
-                  <>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <polygon points="6 3 20 12 6 21 6 3"></polygon>
-                    </svg>
-                    <span>Paused</span>
-                  </>
-                )}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span>Resume Orbit</span>
               </button>
-            </div>
+            )}
+          </div>
 
-            {/* 4 Interactive Style Selection Tabs */}
-            <div 
-              className="style-tabs-grid" 
-              role="tablist" 
-              aria-label="Hero Caption Style Selection"
-            >
+          {/* 3D Orbit Stage Canvas */}
+          <div 
+            className="orbit-stage-viewport"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={handleCardMouseLeave}
+          >
+            <div className="orbit-stage-3d">
               {HERO_STYLES.map((style, idx) => {
-                const isActive = idx === activeStyleIndex;
+                const isCardActive = idx === activeIndex;
+                const isCardPinned = idx === pinnedIndex;
+                const dynamicTransform = computeCardStyle(idx);
+
                 return (
-                  <button
+                  <div
                     key={style.id}
-                    role="tab"
-                    id={`hero-tab-${style.id}`}
-                    aria-selected={isActive}
-                    aria-controls={`hero-panel-${style.id}`}
-                    tabIndex={isActive ? 0 : -1}
-                    className={`style-tab-button ${isActive ? 'is-active' : ''}`}
-                    onClick={() => handleSelectStyle(idx)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Select ${style.name} preview. ${isCardPinned ? 'Pinned in place.' : 'Click to inspect.'}`}
+                    className={`orbit-card ${isCardActive ? 'is-active' : ''} ${isCardPinned ? 'is-pinned' : ''}`}
+                    style={dynamicTransform}
+                    onMouseEnter={() => handleCardMouseEnter(idx)}
+                    onClick={() => handleCardClick(idx)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleCardClick(idx);
+                      }
+                    }}
                   >
-                    <div className="tab-indicator-bar" aria-hidden="true">
-                      {isActive && (
-                        <div 
-                          className="tab-progress-indicator" 
-                          style={{ width: isAutoCycleEnabled ? `${progressPercent}%` : '100%' }}
-                        ></div>
-                      )}
-                    </div>
-                    <div className="tab-content">
-                      <div className="tab-header-mini">
-                        <span className="tab-name">{style.name}</span>
+                    {/* Seamless 9:16 Portrait Video Frame */}
+                    <div className="orbit-card-media">
+                      <video
+                        ref={(el) => (videoRefs.current[idx] = el)}
+                        src={style.videoSrc}
+                        poster={style.posterSrc}
+                        muted
+                        loop
+                        playsInline
+                        autoPlay
+                        preload="metadata"
+                        className="orbit-video-element"
+                        aria-label={`${style.name} caption demonstration`}
+                      />
+
+                      {/* Card Overlay Label (Minimalist, readable) */}
+                      <div className="orbit-card-pill">
+                        <span className="card-pill-title">{style.name}</span>
                         {style.id === 'devin-style' && (
-                          <span className="tab-featured-badge">Featured</span>
+                          <span className="card-pill-tag">Featured</span>
                         )}
                       </div>
-                      <span className="tab-kicker">{style.kicker}</span>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* =================================================================
-          EXPANDED VIDEO MODAL: Full Size, Native Controls, Sound Enabled
-          ================================================================= */}
-      {isExpandedModalOpen && (
-        <div 
-          className="expanded-modal-backdrop"
-          onClick={closeExpandedModal}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-style-title"
-        >
-          <div 
-            className="expanded-modal-dialog"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="expanded-modal-header">
-              <div className="modal-title-group">
-                <span className="modal-ae-badge">Ae</span>
-                <div>
-                  <h3 id="modal-style-title" className="modal-style-name">
-                    {activeStyle.name}
-                  </h3>
-                  <p className="modal-style-tagline">{activeStyle.tagline}</p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className="modal-close-btn"
-                onClick={closeExpandedModal}
-                aria-label="Close expanded video preview"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-
-            {/* Modal Video Frame with Native Browser Controls & Sound */}
-            <div className="expanded-video-wrapper">
-              <video
-                ref={modalVideoRef}
-                key={activeStyle.id}
-                src={activeStyle.videoSrc}
-                poster={activeStyle.posterSrc}
-                controls
-                autoPlay
-                playsInline
-                className="expanded-video-player"
-              />
-            </div>
-
-            {/* Modal Footer with Style Switcher & Fast Checkout */}
-            <div className="expanded-modal-footer">
-              <div className="modal-footer-switcher">
-                <span className="modal-switcher-label">Switch Style:</span>
-                <div className="modal-mini-tabs">
-                  {HERO_STYLES.map((style, idx) => (
-                    <button
-                      key={style.id}
-                      type="button"
-                      className={`modal-mini-tab ${idx === activeStyleIndex ? 'active' : ''}`}
-                      onClick={() => handleSelectStyle(idx)}
-                    >
-                      {style.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="modal-footer-action">
+          {/* Clean Style Selector Strip for Direct Touch & Accessibility */}
+          <div className="orbit-selector-rail" role="tablist" aria-label="Select caption style">
+            {HERO_STYLES.map((style, idx) => {
+              const isSelected = idx === activeIndex;
+              return (
                 <button
-                  type="button"
-                  className="modal-buy-btn"
-                  onClick={() => {
-                    closeExpandedModal();
-                    handleBuyNow();
-                  }}
+                  key={style.id}
+                  role="tab"
+                  id={`orbit-tab-${style.id}`}
+                  aria-selected={isSelected}
+                  tabIndex={isSelected ? 0 : -1}
+                  className={`orbit-selector-tab ${isSelected ? 'active' : ''}`}
+                  onClick={() => handleCardClick(idx)}
                 >
-                  Get Lifetime Access · ₹299
+                  <span className="tab-dot" aria-hidden="true"></span>
+                  <span className="tab-label">{style.name}</span>
                 </button>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
-      )}
+      </div>
     </section>
   );
 }
