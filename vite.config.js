@@ -50,4 +50,9 @@ function vercelApiDevPlugin() {
 
 export default defineConfig({
   plugins: [react(), vercelApiDevPlugin()],
+  server: {
+    watch: {
+      ignored: ['**/public/previews/**', '**/public/downloads/**'],
+    },
+  },
 });
