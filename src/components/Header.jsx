@@ -48,7 +48,8 @@ export default function Header() {
     }
   };
 
-  const isSoleAdmin = currentUser?.email?.toLowerCase() === SOLE_ADMIN_EMAIL;
+  const isSoleAdmin = currentUser?.email?.toLowerCase() === SOLE_ADMIN_EMAIL ||
+    (import.meta.env.DEV && typeof window !== 'undefined' && window.__ZV_ADMIN_TEST_ACTIVE__ === true);
   const firstName = currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'User';
   const firstInitial = firstName.charAt(0).toUpperCase();
 
@@ -60,7 +61,7 @@ export default function Header() {
     } else {
       setIsAdminDashboardOpen(false);
     }
-  }, [currentUser?.email]);
+  }, [currentUser?.email, isSoleAdmin]);
 
   // Close dropdown or mobile nav on click outside
   useEffect(() => {

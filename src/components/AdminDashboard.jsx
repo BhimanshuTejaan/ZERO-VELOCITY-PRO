@@ -6,9 +6,20 @@ const SOLE_ADMIN_EMAIL = 'bhimanshutejaan@gmail.com';
 
 export default function AdminDashboard({ isOpen, onClose }) {
   const { currentUser } = useAuth();
-  const [licenses, setLicenses] = useState([]);
+
+  // Test harness support in local dev mode (eliminated in production builds)
+  const isSoleAdmin = currentUser?.email?.toLowerCase() === SOLE_ADMIN_EMAIL ||
+    (import.meta.env.DEV && typeof window !== 'undefined' && window.__ZV_ADMIN_TEST_ACTIVE__ === true);
+
+  const [licenses, setLicenses] = useState(() => {
+    if (import.meta.env.DEV && typeof window !== 'undefined' && Array.isArray(window.__ZV_ADMIN_TEST_LICENSES__)) {
+      return window.__ZV_ADMIN_TEST_LICENSES__;
+    }
+    return [];
+  });
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('directory'); // 'directory' | 'generator'
+  const [mobileMetricsExpanded, setMobileMetricsExpanded] = useState(false);
 
   // Directory state
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,13 +38,28 @@ export default function AdminDashboard({ isOpen, onClose }) {
   const [genLoading, setGenLoading] = useState(false);
   const [newlyGeneratedKey, setNewlyGeneratedKey] = useState(null);
 
-  const isSoleAdmin = currentUser?.email?.toLowerCase() === SOLE_ADMIN_EMAIL;
+  // Sync test licenses if updated dynamically during dev testing
+  useEffect(() => {
+    if (import.meta.env.DEV && typeof window !== 'undefined' && Array.isArray(window.__ZV_ADMIN_TEST_LICENSES__)) {
+      setLicenses(window.__ZV_ADMIN_TEST_LICENSES__);
+    }
+  }, [isOpen]);
 
   const fetchAdminData = async () => {
     if (!isSoleAdmin) return;
     setLoading(true);
 
     try {
+      if (import.meta.env.DEV && typeof window !== 'undefined' && window.__ZV_ADMIN_TEST_ACTIVE__ && Array.isArray(window.__ZV_ADMIN_TEST_LICENSES__)) {
+        setLicenses(window.__ZV_ADMIN_TEST_LICENSES__);
+        if (selectedCustomer) {
+          const updated = window.__ZV_ADMIN_TEST_LICENSES__.find(l => l.licenseKey === selectedCustomer.licenseKey);
+          if (updated) setSelectedCustomer(updated);
+        }
+        setLoading(false);
+        return;
+      }
+
       const token = await currentUser.getIdToken();
       const res = await fetch('/api/admin-action', {
         method: 'POST',
@@ -55,6 +81,10 @@ export default function AdminDashboard({ isOpen, onClose }) {
         }
       } else {
         console.error("❌ Admin API Error:", data.error);
+        if (import.meta.env.DEV && typeof window !== 'undefined' && Array.isArray(window.__ZV_ADMIN_TEST_LICENSES__)) {
+          // Dev fallback
+          setLicenses(window.__ZV_ADMIN_TEST_LICENSES__);
+        }
       }
     } catch (err) {
       console.error("❌ Error contacting admin API:", err);
@@ -67,7 +97,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
     if (isOpen && isSoleAdmin) {
       fetchAdminData();
     }
-  }, [isOpen, currentUser]);
+  }, [isOpen, currentUser, isSoleAdmin]);
 
   // Lock body scroll when dashboard is open, restore when closed
   useEffect(() => {
@@ -105,6 +135,36 @@ export default function AdminDashboard({ isOpen, onClose }) {
     setActionLoading(true);
 
     try {
+      if (import.meta.env.DEV && typeof window !== 'undefined' && window.__ZV_ADMIN_TEST_ACTIVE__) {
+        // Optimistic update for safe dev testing
+        setLicenses(prev => {
+          if (actionType === 'delete_license') {
+            return prev.filter(l => l.licenseKey !== licenseKey);
+          }
+          return prev.map(l => {
+            if (l.licenseKey !== licenseKey) return l;
+            if (actionType === 'enable_license') return { ...l, status: 'active' };
+            if (actionType === 'disable_license') return { ...l, status: 'disabled' };
+            if (actionType === 'reset_devices') return { ...l, registeredDevices: [] };
+            return l;
+          });
+        });
+        if (actionType === 'delete_license') {
+          setSelectedCustomer(null);
+          setShowDeleteConfirm(false);
+        } else if (selectedCustomer && selectedCustomer.licenseKey === licenseKey) {
+          setSelectedCustomer(prev => {
+            if (!prev) return null;
+            if (actionType === 'enable_license') return { ...prev, status: 'active' };
+            if (actionType === 'disable_license') return { ...prev, status: 'disabled' };
+            if (actionType === 'reset_devices') return { ...prev, registeredDevices: [] };
+            return prev;
+          });
+        }
+        setActionLoading(false);
+        return;
+      }
+
       const token = await currentUser.getIdToken();
       const res = await fetch('/api/admin-action', {
         method: 'POST',
@@ -143,6 +203,33 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
     setGenLoading(true);
     try {
+      if (import.meta.env.DEV && typeof window !== 'undefined' && window.__ZV_ADMIN_TEST_ACTIVE__) {
+        const dummyKey = `ZV-TEST-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        const newLic = {
+          licenseKey: dummyKey,
+          customerName: genName || 'Test User',
+          email: genEmail || 'test@example.com',
+          firebaseUid: 'test-uid-' + Date.now(),
+          razorpayPaymentId: 'ADMIN_GENERATED',
+          razorpayOrderId: null,
+          source: 'admin',
+          licenseType: genType,
+          maxDevices: parseInt(genMaxDevices || '1', 10),
+          notes: genNotes || null,
+          purchaseDate: new Date().toISOString(),
+          status: 'active',
+          registeredDevices: [],
+          activityLog: [{ action: `License Generated via Admin Tools (${genType})`, date: new Date().toISOString(), by: SOLE_ADMIN_EMAIL }]
+        };
+        setLicenses(prev => [newLic, ...prev]);
+        setNewlyGeneratedKey(dummyKey);
+        setGenName('');
+        setGenEmail('');
+        setGenNotes('');
+        setGenLoading(false);
+        return;
+      }
+
       const token = await currentUser.getIdToken();
       const res = await fetch('/api/admin-action', {
         method: 'POST',
@@ -179,6 +266,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
   };
 
   const copyToClipboard = (text, fieldName) => {
+    if (!text) return;
     navigator.clipboard.writeText(text);
     setCopiedField(fieldName);
     setTimeout(() => setCopiedField(null), 2000);
@@ -217,14 +305,37 @@ export default function AdminDashboard({ isOpen, onClose }) {
     }
   };
 
+  const formatShortDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    try {
+      if (isToday(dateStr)) return 'Today';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   // Compute Home Metrics
   const totalCustomers = licenses.length;
+  const razorpayLicenses = licenses.filter(l => l.source !== 'admin' && l.razorpayPaymentId && l.razorpayPaymentId !== 'ADMIN_GENERATED');
+  const adminLicenses = licenses.filter(l => l.source === 'admin' || l.razorpayPaymentId === 'ADMIN_GENERATED');
   const activeLicenses = licenses.filter(l => (l.status || 'active') === 'active').length;
   const disabledLicenses = licenses.filter(l => l.status === 'disabled').length;
-  const totalRevenue = activeLicenses * 99; // Launch Price ₹99
+  const totalRevenue = razorpayLicenses.reduce((sum, l) => {
+    if (l.amount) {
+      return sum + (l.amount > 1000 ? Math.round(l.amount / 100) : Number(l.amount));
+    }
+    return sum + 299;
+  }, 0);
   const todaysSales = licenses.filter(l => isToday(l.purchaseDate)).length;
+  const thisWeekSales = licenses.filter(l => isThisWeek(l.purchaseDate)).length;
   const todaysActivations = licenses.filter(l => isToday(l.activatedAt || l.purchaseDate)).length;
   const totalDevices = licenses.reduce((acc, l) => acc + (l.registeredDevices?.length || 0), 0);
+  const limitReachedLicenses = licenses.filter(l => (l.registeredDevices?.length || 0) >= (l.maxDevices || 1)).length;
 
   // Filter & Search Logic
   const filteredLicenses = licenses.filter(lic => {
@@ -232,13 +343,16 @@ export default function AdminDashboard({ isOpen, onClose }) {
       (lic.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (lic.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (lic.licenseKey || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (lic.firebaseUid || '').toLowerCase().includes(searchTerm.toLowerCase());
+      (lic.firebaseUid || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (lic.razorpayPaymentId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (lic.razorpayOrderId || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     if (!matchesSearch) return false;
 
     const status = lic.status || 'active';
     const deviceCount = lic.registeredDevices?.length || 0;
     const maxDev = lic.maxDevices || 1;
+    const isManualAdmin = lic.source === 'admin' || lic.razorpayPaymentId === 'ADMIN_GENERATED';
 
     switch (activeFilter) {
       case 'active':
@@ -251,6 +365,10 @@ export default function AdminDashboard({ isOpen, onClose }) {
         return isToday(lic.purchaseDate);
       case 'this_week':
         return isThisWeek(lic.purchaseDate);
+      case 'razorpay':
+        return !isManualAdmin;
+      case 'admin':
+        return isManualAdmin;
       default:
         return true;
     }
@@ -261,112 +379,242 @@ export default function AdminDashboard({ isOpen, onClose }) {
       <div className="admin-dashboard-container glass-panel" onClick={e => e.stopPropagation()}>
 
         {/* Top Header Bar */}
-        <div className="admin-header">
+        <header className="admin-header">
           <div className="admin-header-top-row">
             <div className="admin-header-title">
-              <div className="admin-badge">ADMIN CONTROL CENTER</div>
-              <h2>Zero Velocity Console</h2>
+              <div className="admin-brand-tag">
+                <span className="admin-badge-dot"></span>
+                <span>ADMIN CONSOLE</span>
+              </div>
+              <h2 className="admin-title">Zero Velocity</h2>
             </div>
             <div className="admin-quick-actions">
-              <button className="btn btn-secondary btn-sm refresh-btn" onClick={fetchAdminData} disabled={loading}>
-                <svg className={loading ? 'spin' : ''} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                <span>Refresh</span>
+              <button
+                className="btn btn-secondary btn-sm refresh-btn"
+                onClick={fetchAdminData}
+                disabled={loading}
+                title="Refresh Records"
+                aria-label="Refresh Records"
+              >
+                <svg className={loading ? 'spin' : ''} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+                <span className="refresh-label">Refresh</span>
               </button>
-              <button className="admin-close-btn" onClick={onClose} aria-label="Close">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <button
+                className="admin-close-btn"
+                onClick={onClose}
+                aria-label="Close Admin Dashboard"
+                title="Close"
+              >
+                <span className="close-text-mobile">Done</span>
+                <svg className="close-icon-desktop" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
           </div>
-          <div className="tab-navigation">
+
+          {/* Segmented Navigation Tab Bar */}
+          <nav className="admin-segmented-nav" role="tablist" aria-label="Admin Sections">
             <button
-              className={`tab-btn ${activeTab === 'directory' ? 'active' : ''}`}
+              role="tab"
+              aria-selected={activeTab === 'directory'}
+              className={`segmented-tab ${activeTab === 'directory' ? 'active' : ''}`}
               onClick={() => setActiveTab('directory')}
             >
-              📁 Customer Directory
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>Buyers & Licenses</span>
+              <span className="segmented-tab-count">{licenses.length}</span>
             </button>
             <button
-              className={`tab-btn ${activeTab === 'generator' ? 'active' : ''}`}
+              role="tab"
+              aria-selected={activeTab === 'generator'}
+              className={`segmented-tab ${activeTab === 'generator' ? 'active' : ''}`}
               onClick={() => setActiveTab('generator')}
             >
-              ✨ Admin Tools (License Generator)
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <span>Generate Key</span>
             </button>
-          </div>
-        </div>
+          </nav>
+        </header>
 
-        {/* Dashboard Home Metrics Grid */}
-        <div className={`metrics-grid ${activeTab === 'generator' ? 'metrics-grid--hide-mobile' : ''}`}>
+        {/* Home Metrics KPI Bar */}
+        <section className={`metrics-grid ${activeTab === 'generator' ? 'metrics-grid--hide-mobile' : ''}`} aria-label="Business Metrics Overview">
+          {/* Primary Cards (Always visible on mobile & desktop) */}
+          <div className="metric-card revenue-card">
+            <span className="metric-label">Total Revenue</span>
+            <span className="metric-value">₹{totalRevenue.toLocaleString('en-IN')}</span>
+            <span className="metric-hint">{razorpayLicenses.length} paid orders</span>
+          </div>
           <div className="metric-card">
-            <span className="metric-label">Total Customers</span>
+            <span className="metric-label">Total Buyers</span>
             <span className="metric-value">{totalCustomers}</span>
+            <span className="metric-hint">{adminLicenses.length} grants</span>
           </div>
           <div className="metric-card active-card">
             <span className="metric-label">Active Licenses</span>
             <span className="metric-value">{activeLicenses}</span>
+            <span className="metric-hint">{disabledLicenses} disabled</span>
           </div>
-          <div className="metric-card disabled-card">
-            <span className="metric-label">Disabled Licenses</span>
-            <span className="metric-value">{disabledLicenses}</span>
-          </div>
-          <div className="metric-card revenue-card">
-            <span className="metric-label">Total Revenue</span>
-            <span className="metric-value">₹{totalRevenue.toLocaleString('en-IN')}</span>
-          </div>
-          <div className="metric-card">
+          <div className="metric-card sales-today-card">
             <span className="metric-label">Today's Sales</span>
             <span className="metric-value">{todaysSales}</span>
+            <span className="metric-hint">{thisWeekSales} this week</span>
           </div>
-          <div className="metric-card">
+
+          {/* Secondary Cards (Desktop always, Mobile toggleable) */}
+          <div className={`metric-card ${mobileMetricsExpanded ? 'metric-card--expanded-mobile' : 'metric-card--secondary-mobile'}`}>
+            <span className="metric-label">Disabled</span>
+            <span className="metric-value disabled-val">{disabledLicenses}</span>
+            <span className="metric-hint">revoked</span>
+          </div>
+          <div className={`metric-card ${mobileMetricsExpanded ? 'metric-card--expanded-mobile' : 'metric-card--secondary-mobile'}`}>
             <span className="metric-label">Today's Activations</span>
             <span className="metric-value">{todaysActivations}</span>
+            <span className="metric-hint">devices active</span>
           </div>
-          <div className="metric-card">
+          <div className={`metric-card ${mobileMetricsExpanded ? 'metric-card--expanded-mobile' : 'metric-card--secondary-mobile'}`}>
             <span className="metric-label">Registered Devices</span>
             <span className="metric-value">{totalDevices}</span>
+            <span className="metric-hint">{limitReachedLicenses} at limit</span>
           </div>
-        </div>
+
+          {/* Mobile More Stats Toggle Pill */}
+          <button
+            type="button"
+            className="mobile-metrics-toggle-pill"
+            onClick={() => setMobileMetricsExpanded(!mobileMetricsExpanded)}
+            aria-expanded={mobileMetricsExpanded}
+          >
+            <span>{mobileMetricsExpanded ? 'Show fewer stats' : 'More metrics (Devices, Revoked)'}</span>
+            <svg
+              className={`toggle-arrow ${mobileMetricsExpanded ? 'rotated' : ''}`}
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </section>
 
         {/* TAB 1: Customer Directory View */}
         {activeTab === 'directory' && (
-          <>
+          <div className="directory-content-wrapper">
             {/* Search & Filter Bar */}
             <div className="controls-bar">
               <div className="search-box">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
                 <input
                   type="text"
-                  placeholder="Search by email, name, or license key..."
+                  placeholder="Search email, name, key, UID, pay ID..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
+                  aria-label="Search records"
                 />
                 {searchTerm && (
-                  <button className="clear-search-btn" onClick={() => setSearchTerm('')}>×</button>
+                  <button
+                    className="clear-search-btn"
+                    onClick={() => setSearchTerm('')}
+                    title="Clear search"
+                    aria-label="Clear search"
+                  >
+                    ×
+                  </button>
                 )}
               </div>
 
-              <div className="filter-pills">
-                <button className={`filter-pill ${activeFilter === 'all' ? 'active' : ''}`} onClick={() => setActiveFilter('all')}>All ({licenses.length})</button>
-                <button className={`filter-pill ${activeFilter === 'active' ? 'active' : ''}`} onClick={() => setActiveFilter('active')}>Active ({activeLicenses})</button>
-                <button className={`filter-pill ${activeFilter === 'disabled' ? 'active' : ''}`} onClick={() => setActiveFilter('disabled')}>Disabled ({disabledLicenses})</button>
-                <button className={`filter-pill ${activeFilter === 'limit_reached' ? 'active' : ''}`} onClick={() => setActiveFilter('limit_reached')}>Limit Reached</button>
-                <button className={`filter-pill ${activeFilter === 'today' ? 'active' : ''}`} onClick={() => setActiveFilter('today')}>Today ({todaysSales})</button>
-                <button className={`filter-pill ${activeFilter === 'this_week' ? 'active' : ''}`} onClick={() => setActiveFilter('this_week')}>This Week</button>
+              <div className="filter-pills" role="toolbar" aria-label="Filter records">
+                <button
+                  className={`filter-pill ${activeFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('all')}
+                >
+                  All ({licenses.length})
+                </button>
+                <button
+                  className={`filter-pill ${activeFilter === 'active' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('active')}
+                >
+                  Active ({activeLicenses})
+                </button>
+                <button
+                  className={`filter-pill ${activeFilter === 'razorpay' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('razorpay')}
+                >
+                  Paid ({razorpayLicenses.length})
+                </button>
+                <button
+                  className={`filter-pill ${activeFilter === 'admin' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('admin')}
+                >
+                  Grants ({adminLicenses.length})
+                </button>
+                <button
+                  className={`filter-pill ${activeFilter === 'limit_reached' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('limit_reached')}
+                >
+                  Limit Reached ({limitReachedLicenses})
+                </button>
+                <button
+                  className={`filter-pill ${activeFilter === 'disabled' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('disabled')}
+                >
+                  Disabled ({disabledLicenses})
+                </button>
+                <button
+                  className={`filter-pill ${activeFilter === 'today' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('today')}
+                >
+                  Today ({todaysSales})
+                </button>
+                <button
+                  className={`filter-pill ${activeFilter === 'this_week' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('this_week')}
+                >
+                  This Week ({thisWeekSales})
+                </button>
               </div>
             </div>
 
-            {/* Customer Table */}
+            {/* Customer Table / Mobile Card List */}
             <div className="table-container">
               {loading ? (
                 <div className="admin-loading-state">
                   <div className="spinner"></div>
-                  <span>Loading customer records from Firestore...</span>
+                  <span>Loading records from secure database...</span>
                 </div>
               ) : filteredLicenses.length === 0 ? (
                 <div className="admin-empty-state">
-                  <p>No licenses found matching your criteria.</p>
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.5">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <p>No licenses found matching your filter criteria.</p>
+                  {(searchTerm || activeFilter !== 'all') && (
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => { setSearchTerm(''); setActiveFilter('all'); }}
+                    >
+                      Reset Filters
+                    </button>
+                  )}
                 </div>
               ) : (
                 <>
-                  {/* Desktop Table View */}
+                  {/* Desktop Table View (>= 769px) */}
                   <table className="admin-table desktop-only-table">
                     <thead>
                       <tr>
@@ -390,20 +638,24 @@ export default function AdminDashboard({ isOpen, onClose }) {
                           <tr key={lic.id || lic.licenseKey} className={selectedCustomer?.licenseKey === lic.licenseKey ? 'selected-row' : ''}>
                             <td>
                               <div className="customer-email-cell">
-                                <span className="email-text">{lic.email || lic.customerName || 'N/A'}</span>
+                                <span className="email-text">{lic.email || lic.customerName || 'Unassigned'}</span>
                                 {lic.customerName && lic.email && <span className="name-subtext">{lic.customerName}</span>}
                                 {lic.firebaseUid && <span className="uid-subtext">UID: {lic.firebaseUid.substring(0, 10)}...</span>}
                               </div>
                             </td>
                             <td>
                               <span className={`source-badge ${isManualAdmin ? 'admin' : 'razorpay'}`}>
-                                {isManualAdmin ? 'Admin' : 'Razorpay'}
+                                {isManualAdmin ? 'Admin Grant' : 'Razorpay ₹299'}
                               </span>
                             </td>
                             <td>
                               <div className="key-cell">
                                 <code className="monospace">{lic.licenseKey}</code>
-                                <button className="icon-copy-btn" title="Copy Key" onClick={() => copyToClipboard(lic.licenseKey, `table-${lic.licenseKey}`)}>
+                                <button
+                                  className="icon-copy-btn"
+                                  title="Copy Key"
+                                  onClick={() => copyToClipboard(lic.licenseKey, `table-${lic.licenseKey}`)}
+                                >
                                   {copiedField === `table-${lic.licenseKey}` ? '✓' : '📋'}
                                 </button>
                               </div>
@@ -422,7 +674,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
                             </td>
                             <td>
                               <button className="btn btn-secondary btn-xs view-details-btn" onClick={() => setSelectedCustomer(lic)}>
-                                Inspect Details
+                                Inspect Details →
                               </button>
                             </td>
                           </tr>
@@ -431,8 +683,8 @@ export default function AdminDashboard({ isOpen, onClose }) {
                     </tbody>
                   </table>
 
-                  {/* Mobile Customer Cards View */}
-                  <div className="mobile-cards-list mobile-only-cards">
+                  {/* Mobile Customer Cards View (<= 768px) */}
+                  <div className="mobile-cards-list mobile-only-cards" role="feed" aria-label="Customer records list">
                     {filteredLicenses.map(lic => {
                       const status = lic.status || 'active';
                       const deviceCount = lic.registeredDevices?.length || 0;
@@ -442,52 +694,77 @@ export default function AdminDashboard({ isOpen, onClose }) {
                       return (
                         <div
                           key={lic.id || lic.licenseKey}
-                          className={`mobile-customer-card ${selectedCustomer?.licenseKey === lic.licenseKey ? 'selected-card' : ''}`}
+                          className={`mobile-customer-card ${selectedCustomer?.licenseKey === lic.licenseKey ? 'selected-card' : ''} ${status === 'disabled' ? 'is-disabled' : ''}`}
+                          onClick={() => setSelectedCustomer(lic)}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`Inspect ${lic.customerName || lic.email || lic.licenseKey}`}
                         >
+                          {/* Top Identity & Status Row */}
                           <div className="mobile-card-header">
                             <div className="mobile-card-identity">
-                              <span className="mobile-card-name">{lic.customerName || lic.email || 'N/A'}</span>
+                              <span className="mobile-card-name">
+                                {lic.customerName || lic.email || 'Unassigned License'}
+                              </span>
                               {lic.customerName && lic.email && (
-                                <span className="mobile-card-email">{lic.email}</span>
-                              )}
-                              {lic.firebaseUid && (
-                                <span className="mobile-card-uid">UID: {lic.firebaseUid.substring(0, 8)}...</span>
+                                <span className="mobile-card-subemail">{lic.email}</span>
                               )}
                             </div>
-                            <span className={`status-badge-sm ${status === 'active' ? 'active' : 'disabled'}`}>
-                              <span className="dot"></span>
-                              {status}
-                            </span>
+                            <div className="mobile-card-status-col">
+                              <span className={`status-badge-sm ${status === 'active' ? 'active' : 'disabled'}`}>
+                                <span className="dot"></span>
+                                {status === 'active' ? 'Active' : 'Disabled'}
+                              </span>
+                              <span className="mobile-card-shortdate">{formatShortDate(lic.purchaseDate)}</span>
+                            </div>
                           </div>
 
-                          <div className="mobile-card-key-box">
-                            <code className="monospace mobile-key-text">{lic.licenseKey}</code>
+                          {/* Quick Key Pill with 1-Tap Copy */}
+                          <div className="mobile-card-key-pill" onClick={e => e.stopPropagation()}>
+                            <div className="key-pill-content">
+                              <span className="key-pill-prefix">KEY:</span>
+                              <code className="monospace key-pill-code">{lic.licenseKey}</code>
+                            </div>
                             <button
-                              className="icon-copy-btn mobile-copy-btn"
-                              title="Copy Key"
-                              onClick={() => copyToClipboard(lic.licenseKey, `card-${lic.licenseKey}`)}
+                              type="button"
+                              className={`key-copy-touch-btn ${copiedField === `card-${lic.licenseKey}` ? 'copied' : ''}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyToClipboard(lic.licenseKey, `card-${lic.licenseKey}`);
+                              }}
+                              title="Copy License Key"
+                              aria-label="Copy License Key"
                             >
-                              {copiedField === `card-${lic.licenseKey}` ? '✓' : '📋'}
+                              {copiedField === `card-${lic.licenseKey}` ? (
+                                <span className="copy-label">✓ Copied</span>
+                              ) : (
+                                <>
+                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                  </svg>
+                                  <span className="copy-label">Copy</span>
+                                </>
+                              )}
                             </button>
                           </div>
 
-                          <div className="mobile-card-meta">
-                            <span className={`source-badge ${isManualAdmin ? 'admin' : 'razorpay'}`}>
-                              {isManualAdmin ? 'Admin' : 'Razorpay'}
-                            </span>
-                            <span className={`device-tag ${deviceCount >= maxDev ? 'limit' : ''}`}>
-                              {deviceCount}/{maxDev} Dev
-                            </span>
-                            <span className="mobile-card-date">{formatDate(lic.purchaseDate)}</span>
-                          </div>
-
-                          <div className="mobile-card-actions">
-                            <button
-                              className="btn btn-secondary mobile-inspect-btn"
-                              onClick={() => setSelectedCustomer(lic)}
-                            >
-                              Inspect Details →
-                            </button>
+                          {/* Meta Tags & Details Button */}
+                          <div className="mobile-card-footer">
+                            <div className="mobile-card-badges">
+                              <span className={`source-badge ${isManualAdmin ? 'admin' : 'razorpay'}`}>
+                                {isManualAdmin ? 'Admin Grant' : 'Razorpay Paid'}
+                              </span>
+                              <span className={`device-tag ${deviceCount >= maxDev ? 'limit' : ''}`}>
+                                📱 {deviceCount}/{maxDev} Dev
+                              </span>
+                            </div>
+                            <div className="mobile-inspect-arrow">
+                              <span>Inspect Details</span>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                              </svg>
+                            </div>
                           </div>
                         </div>
                       );
@@ -496,7 +773,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
                 </>
               )}
             </div>
-          </>
+          </div>
         )}
 
         {/* TAB 2: Admin Tools (Manual License Generator) */}
@@ -504,36 +781,47 @@ export default function AdminDashboard({ isOpen, onClose }) {
           <div className="generator-tab-container">
             <div className="generator-card glass-panel">
               <div className="generator-header">
-                <h3>✨ Manual License Generator</h3>
-                <p>Create custom, active Zero Velocity license keys for lifetime accounts, reviewers, beta testers, and giveaways.</p>
+                <div className="generator-icon-wrap">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </div>
+                <div>
+                  <h3>Manual License Generator</h3>
+                  <p>Issue active Zero Velocity license keys for lifetime accounts, reviewers, beta testers, and customer support.</p>
+                </div>
               </div>
 
               <form onSubmit={handleGenerateLicenseSubmit} className="generator-form">
                 <div className="form-row-two">
                   <div className="form-group">
-                    <label>Customer Name (Optional)</label>
+                    <label htmlFor="gen-customer-name">Customer Name (Optional)</label>
                     <input
+                      id="gen-customer-name"
                       type="text"
                       placeholder="e.g. John Doe"
                       value={genName}
                       onChange={e => setGenName(e.target.value)}
+                      autoComplete="name"
                     />
                   </div>
                   <div className="form-group">
-                    <label>Customer Email (Optional)</label>
+                    <label htmlFor="gen-customer-email">Customer Email (Optional)</label>
                     <input
+                      id="gen-customer-email"
                       type="email"
                       placeholder="e.g. customer@example.com"
                       value={genEmail}
                       onChange={e => setGenEmail(e.target.value)}
+                      autoComplete="email"
                     />
                   </div>
                 </div>
 
                 <div className="form-row-two">
                   <div className="form-group">
-                    <label>License Type</label>
-                    <select value={genType} onChange={e => setGenType(e.target.value)}>
+                    <label htmlFor="gen-license-type">License Type</label>
+                    <select id="gen-license-type" value={genType} onChange={e => setGenType(e.target.value)}>
                       <option value="Lifetime">Lifetime Account</option>
                       <option value="Beta Tester">Beta Tester</option>
                       <option value="Reviewer">Reviewer / Creator</option>
@@ -543,8 +831,8 @@ export default function AdminDashboard({ isOpen, onClose }) {
                   </div>
 
                   <div className="form-group">
-                    <label>Max Allowed Devices</label>
-                    <select value={genMaxDevices} onChange={e => setGenMaxDevices(e.target.value)}>
+                    <label htmlFor="gen-max-devices">Max Allowed Devices</label>
+                    <select id="gen-max-devices" value={genMaxDevices} onChange={e => setGenMaxDevices(e.target.value)}>
                       <option value="1">1 Device (Default)</option>
                       <option value="2">2 Devices</option>
                       <option value="3">3 Devices</option>
@@ -555,8 +843,9 @@ export default function AdminDashboard({ isOpen, onClose }) {
                 </div>
 
                 <div className="form-group">
-                  <label>Notes / Justification (Optional)</label>
+                  <label htmlFor="gen-notes">Notes / Justification (Optional)</label>
                   <textarea
+                    id="gen-notes"
                     rows="2"
                     placeholder="e.g. Granted key for YouTube reviewer video sponsorship"
                     value={genNotes}
@@ -566,7 +855,14 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary generate-submit-btn" disabled={genLoading}>
-                    {genLoading ? 'Generating License...' : '✨ Generate Active License Key'}
+                    {genLoading ? (
+                      <span className="submit-loading-text">
+                        <span className="spinner-inline"></span>
+                        Generating License...
+                      </span>
+                    ) : (
+                      '✨ Generate Active License Key'
+                    )}
                   </button>
                 </div>
               </form>
@@ -574,7 +870,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
           </div>
         )}
 
-        {/* Generated Key Success Popup */}
+        {/* Generated Key Success Modal */}
         {newlyGeneratedKey && (
           <div className="new-key-modal-backdrop" onClick={() => setNewlyGeneratedKey(null)}>
             <div className="new-key-modal glass-panel animate-scale-up" onClick={e => e.stopPropagation()}>
@@ -588,7 +884,7 @@ export default function AdminDashboard({ isOpen, onClose }) {
                   className={`btn btn-primary copy-key-btn ${copiedField === 'new-key' ? 'copied' : ''}`}
                   onClick={() => copyToClipboard(newlyGeneratedKey, 'new-key')}
                 >
-                  {copiedField === 'new-key' ? '✓ Copied!' : 'Copy License Key'}
+                  {copiedField === 'new-key' ? '✓ Copied to Clipboard!' : 'Copy License Key'}
                 </button>
               </div>
 
@@ -604,27 +900,52 @@ export default function AdminDashboard({ isOpen, onClose }) {
           </div>
         )}
 
-        {/* Customer Details Panel / Drawer */}
+        {/* Customer Details Drawer / Mobile Bottom Sheet */}
         {selectedCustomer && (
           <div className="customer-drawer-backdrop" onClick={() => setSelectedCustomer(null)}>
             <div className="customer-drawer glass-panel animate-slide-left" onClick={e => e.stopPropagation()}>
+              {/* Drawer Sticky Header */}
               <div className="drawer-header">
-                <h3>Customer Details</h3>
-                <button className="drawer-close-btn" onClick={() => setSelectedCustomer(null)}>×</button>
+                <button
+                  className="drawer-back-btn"
+                  onClick={() => setSelectedCustomer(null)}
+                  aria-label="Back to Customer Directory"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                  <span>Back to List</span>
+                </button>
+
+                <h3 className="drawer-title">Customer Details</h3>
+
+                <button
+                  className="drawer-close-btn"
+                  onClick={() => setSelectedCustomer(null)}
+                  aria-label="Close details"
+                  title="Close"
+                >
+                  ×
+                </button>
               </div>
 
               <div className="drawer-body">
                 {/* Status Banner */}
                 <div className={`drawer-status-banner ${selectedCustomer.status === 'disabled' ? 'disabled' : 'active'}`}>
-                  <span className="status-title">Status: {(selectedCustomer.status || 'active').toUpperCase()}</span>
+                  <div className="drawer-status-main">
+                    <span className="status-indicator-dot"></span>
+                    <span className="status-title">
+                      {selectedCustomer.status === 'disabled' ? 'LICENSE REVOKED / DISABLED' : 'ACTIVE LICENSE'}
+                    </span>
+                  </div>
                   <span className="status-sub">
-                    Source: {selectedCustomer.source === 'admin' ? 'Admin Generated' : 'Razorpay Purchase'}
+                    Source: {selectedCustomer.source === 'admin' ? 'Admin Grant' : 'Razorpay Purchase (₹299)'}
                   </span>
                 </div>
 
-                {/* Primary Data Grid */}
+                {/* Primary Data Section */}
                 <div className="drawer-section">
-                  <h4>Account Metadata</h4>
+                  <h4>Account & Purchase Information</h4>
                   {selectedCustomer.customerName && (
                     <div className="data-row">
                       <span className="label">Customer Name:</span>
@@ -633,32 +954,83 @@ export default function AdminDashboard({ isOpen, onClose }) {
                   )}
                   <div className="data-row">
                     <span className="label">Customer Email:</span>
-                    <span className="value selectable">{selectedCustomer.email || 'N/A'}</span>
-                    <button className="btn-text-copy" onClick={() => copyToClipboard(selectedCustomer.email, 'drawer-email')}>
-                      {copiedField === 'drawer-email' ? 'Copied!' : 'Copy'}
-                    </button>
+                    <div className="value-with-copy">
+                      <span className="value selectable">{selectedCustomer.email || 'N/A'}</span>
+                      {selectedCustomer.email && (
+                        <button
+                          type="button"
+                          className="btn-text-copy"
+                          onClick={() => copyToClipboard(selectedCustomer.email, 'drawer-email')}
+                        >
+                          {copiedField === 'drawer-email' ? '✓ Copied' : 'Copy'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="data-row">
                     <span className="label">Firebase UID:</span>
-                    <span className="value monospace selectable">{selectedCustomer.firebaseUid || 'N/A'}</span>
+                    <div className="value-with-copy">
+                      <span className="value monospace selectable">{selectedCustomer.firebaseUid || 'N/A'}</span>
+                      {selectedCustomer.firebaseUid && (
+                        <button
+                          type="button"
+                          className="btn-text-copy"
+                          onClick={() => copyToClipboard(selectedCustomer.firebaseUid, 'drawer-uid')}
+                        >
+                          {copiedField === 'drawer-uid' ? '✓ Copied' : 'Copy'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="data-row">
+                  <div className="data-row highlight-row">
                     <span className="label">License Key:</span>
-                    <span className="value monospace highlight selectable">{selectedCustomer.licenseKey}</span>
-                    <button className="btn-text-copy" onClick={() => copyToClipboard(selectedCustomer.licenseKey, 'drawer-key')}>
-                      {copiedField === 'drawer-key' ? 'Copied!' : 'Copy'}
-                    </button>
+                    <div className="value-with-copy">
+                      <code className="value monospace highlight selectable">{selectedCustomer.licenseKey}</code>
+                      <button
+                        type="button"
+                        className="btn-text-copy"
+                        onClick={() => copyToClipboard(selectedCustomer.licenseKey, 'drawer-key')}
+                      >
+                        {copiedField === 'drawer-key' ? '✓ Copied' : 'Copy'}
+                      </button>
+                    </div>
                   </div>
                   <div className="data-row">
                     <span className="label">License Type:</span>
                     <span className="value">{selectedCustomer.licenseType || 'Lifetime'}</span>
                   </div>
                   <div className="data-row">
-                    <span className="label">Source / Ref ID:</span>
-                    <span className="value monospace">{selectedCustomer.razorpayPaymentId || 'N/A'}</span>
+                    <span className="label">Payment ID:</span>
+                    <div className="value-with-copy">
+                      <span className="value monospace">{selectedCustomer.razorpayPaymentId || 'N/A'}</span>
+                      {selectedCustomer.razorpayPaymentId && (
+                        <button
+                          type="button"
+                          className="btn-text-copy"
+                          onClick={() => copyToClipboard(selectedCustomer.razorpayPaymentId, 'drawer-payid')}
+                        >
+                          {copiedField === 'drawer-payid' ? '✓ Copied' : 'Copy'}
+                        </button>
+                      )}
+                    </div>
                   </div>
+                  {selectedCustomer.razorpayOrderId && (
+                    <div className="data-row">
+                      <span className="label">Order ID:</span>
+                      <div className="value-with-copy">
+                        <span className="value monospace">{selectedCustomer.razorpayOrderId}</span>
+                        <button
+                          type="button"
+                          className="btn-text-copy"
+                          onClick={() => copyToClipboard(selectedCustomer.razorpayOrderId, 'drawer-orderid')}
+                        >
+                          {copiedField === 'drawer-orderid' ? '✓ Copied' : 'Copy'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   <div className="data-row">
-                    <span className="label">Purchase / Creation Date:</span>
+                    <span className="label">Purchase Date:</span>
                     <span className="value">{formatDate(selectedCustomer.purchaseDate)}</span>
                   </div>
                   {selectedCustomer.notes && (
@@ -675,24 +1047,26 @@ export default function AdminDashboard({ isOpen, onClose }) {
                     <h4>Registered Devices ({(selectedCustomer.registeredDevices || []).length}/{selectedCustomer.maxDevices || 1})</h4>
                     {(selectedCustomer.registeredDevices || []).length > 0 && (
                       <button
-                        className="btn btn-warning btn-xs"
+                        className="btn btn-warning btn-xs reset-devices-top-btn"
                         onClick={() => handleAdminAction('reset_devices', selectedCustomer.licenseKey)}
                         disabled={actionLoading}
                       >
-                        Reset Devices
+                        {actionLoading ? 'Resetting...' : 'Reset Devices'}
                       </button>
                     )}
                   </div>
 
                   {(selectedCustomer.registeredDevices || []).length === 0 ? (
-                    <p className="empty-subtext">No devices activated yet.</p>
+                    <div className="empty-devices-box">
+                      <p className="empty-subtext">No devices activated yet. Ready for first installation.</p>
+                    </div>
                   ) : (
                     <div className="devices-list">
                       {selectedCustomer.registeredDevices.map((dev, i) => (
                         <div className="device-card" key={dev.deviceId || i}>
                           <div className="device-header">
                             <span className="device-name">💻 {dev.deviceName || 'Desktop Computer'}</span>
-                            <span className="device-id-code">{dev.deviceId?.substring(0, 12)}...</span>
+                            <span className="device-id-code">{dev.deviceId?.substring(0, 14)}...</span>
                           </div>
                           <div className="device-meta">
                             <span>Activated: {formatDate(dev.activatedAt || dev.date)}</span>
@@ -706,51 +1080,54 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
                 {/* Admin Actions Panel */}
                 <div className="drawer-section admin-actions-box">
-                  <h4>Admin Actions</h4>
+                  <h4>Admin Controls</h4>
                   <div className="action-buttons-grid">
                     {selectedCustomer.status === 'disabled' ? (
                       <button
-                        className="btn btn-success btn-sm"
+                        className="btn btn-success action-btn-touch"
                         onClick={() => handleAdminAction('enable_license', selectedCustomer.licenseKey)}
                         disabled={actionLoading}
                       >
-                        Enable License
+                        ✓ Enable License
                       </button>
                     ) : (
                       <button
-                        className="btn btn-danger btn-sm"
+                        className="btn btn-danger action-btn-touch"
                         onClick={() => handleAdminAction('disable_license', selectedCustomer.licenseKey)}
                         disabled={actionLoading}
                       >
-                        Disable License
+                        ⛔ Disable / Revoke License
                       </button>
                     )}
 
                     <button
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-secondary action-btn-touch"
                       onClick={() => handleAdminAction('reset_devices', selectedCustomer.licenseKey)}
                       disabled={actionLoading}
                     >
-                      Reset Registered Devices
+                      🔄 Reset Device Slots
                     </button>
 
                     <button
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-secondary action-btn-touch"
                       onClick={() => copyToClipboard(selectedCustomer.licenseKey, 'btn-key')}
                     >
-                      {copiedField === 'btn-key' ? 'Key Copied!' : 'Copy License Key'}
+                      {copiedField === 'btn-key' ? '✓ Key Copied!' : '📋 Copy License Key'}
                     </button>
 
                     <button
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-secondary action-btn-touch"
                       onClick={() => copyToClipboard(selectedCustomer.email, 'btn-email')}
                     >
-                      {copiedField === 'btn-email' ? 'Email Copied!' : 'Copy Email'}
+                      {copiedField === 'btn-email' ? '✓ Email Copied!' : '✉️ Copy Customer Email'}
                     </button>
                   </div>
 
                   <div className="delete-hazard-zone">
-                    <button className="btn btn-outline-danger btn-xs" onClick={() => setShowDeleteConfirm(true)}>
+                    <button
+                      className="btn btn-outline-danger btn-sm delete-btn-touch"
+                      onClick={() => setShowDeleteConfirm(true)}
+                    >
                       🗑️ Delete Test License
                     </button>
                   </div>
@@ -758,12 +1135,12 @@ export default function AdminDashboard({ isOpen, onClose }) {
 
                 {/* Activity Timeline */}
                 <div className="drawer-section">
-                  <h4>Activity Timeline</h4>
+                  <h4>Activity Audit Trail</h4>
                   <div className="activity-timeline">
                     <div className="timeline-item">
                       <span className="timeline-dot blue"></span>
                       <div className="timeline-content">
-                        <strong>License Created ({selectedCustomer.source === 'admin' ? 'Admin' : 'Razorpay'})</strong>
+                        <strong>License Created ({selectedCustomer.source === 'admin' ? 'Admin Grant' : 'Razorpay Purchase'})</strong>
                         <span>{formatDate(selectedCustomer.purchaseDate)}</span>
                       </div>
                     </div>
@@ -789,9 +1166,11 @@ export default function AdminDashboard({ isOpen, onClose }) {
         {showDeleteConfirm && selectedCustomer && (
           <div className="confirm-modal-backdrop" onClick={() => setShowDeleteConfirm(false)}>
             <div className="confirm-modal glass-panel" onClick={e => e.stopPropagation()}>
-              <h3>⚠️ Confirm Delete License</h3>
-              <p>Are you sure you want to permanently delete license <code>{selectedCustomer.licenseKey}</code>?</p>
-              <p className="warning-text">This action cannot be undone.</p>
+              <div className="confirm-warning-icon">⚠️</div>
+              <h3>Confirm Delete License</h3>
+              <p>Are you sure you want to permanently delete license:</p>
+              <code className="monospace confirm-key-preview">{selectedCustomer.licenseKey}</code>
+              <p className="warning-text">This action cannot be undone. Any active installations using this key will immediately be deactivated.</p>
               <div className="confirm-actions">
                 <button className="btn btn-secondary" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
                 <button

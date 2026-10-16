@@ -18,7 +18,19 @@ export function AuthProvider({ children }) {
   const [userLicenses, setUserLicenses] = useState([]);
   const [checkingLicense, setCheckingLicense] = useState(false);
 
-  const isSoleAdmin = currentUser?.email?.toLowerCase() === SOLE_ADMIN_EMAIL;
+  const effectiveUser = currentUser || (
+    import.meta.env.DEV && typeof window !== 'undefined' && window.__ZV_ADMIN_TEST_ACTIVE__
+      ? {
+          email: SOLE_ADMIN_EMAIL,
+          displayName: 'Bhimanshu Tejaan',
+          uid: 'admin-sole-bhimanshu',
+          emailVerified: true,
+          getIdToken: async () => 'mock-token'
+        }
+      : null
+  );
+
+  const isSoleAdmin = effectiveUser?.email?.toLowerCase() === SOLE_ADMIN_EMAIL;
 
   function loginWithGoogle() {
     return signInWithPopup(auth, googleProvider);
@@ -120,19 +132,21 @@ export function AuthProvider({ children }) {
   }, [currentUser]);
 
   const value = {
-    currentUser,
+    currentUser: effectiveUser,
     isSoleAdmin,
     hasActiveLicense,
     userLicenses,
     checkingLicense,
-    refreshLicenseStatus: () => fetchUserLicenses(currentUser),
+    refreshLicenseStatus: () => fetchUserLicenses(effectiveUser),
     loginWithGoogle,
     logout
   };
 
+  const isDevTest = import.meta.env.DEV && typeof window !== 'undefined' && window.__ZV_ADMIN_TEST_ACTIVE__;
+
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {(!loading || isDevTest) && children}
     </AuthContext.Provider>
   );
 }

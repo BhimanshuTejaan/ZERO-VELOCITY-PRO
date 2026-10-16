@@ -37,3 +37,5 @@ WEBSITE_HANDOFF.md
 src/components/CaptionEditorSection.*
 src/components/CompatibilitySection.*
 src/components/MotionSoundSection.*
+.agents/
+skills-lock.json
