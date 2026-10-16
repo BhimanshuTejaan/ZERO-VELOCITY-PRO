@@ -215,7 +215,10 @@ export default async function handler(req, res) {
         purchaseDate: nowIso,
         maxDevices: 1,
         registeredDevices: [],
-        status: "active"
+        status: "active",
+        amount: Math.round(paymentData.amount / 100),
+        currency: paymentData.currency || "INR",
+        paymentVerified: true
       };
       transaction.set(dbAdmin.collection('licenses').doc(candidateLicenseKey), licenseDocument);
 

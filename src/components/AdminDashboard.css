@@ -568,6 +568,18 @@
   border: 1px solid rgba(168, 85, 247, 0.28);
 }
 
+.source-badge.unverified {
+  background: rgba(245, 158, 11, 0.14);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.unverified-text {
+  color: #fbbf24;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
 .device-tag {
   display: inline-block;
   background: rgba(59, 130, 246, 0.1);

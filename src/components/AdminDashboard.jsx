@@ -319,20 +319,80 @@ export default function AdminDashboard({ isOpen, onClose }) {
     }
   };
 
-  // Compute Home Metrics
+  // Helper to determine authentic transaction source & verified amount
+  const getSourceInfo = (lic) => {
+    if (!lic) return { label: 'Unknown', badgeClass: 'admin', amount: 0, isPaid: false, type: 'unknown' };
+    const isManualAdmin = lic.source === 'admin' || lic.razorpayPaymentId === 'ADMIN_GENERATED';
+    if (isManualAdmin) {
+      return {
+        type: 'admin',
+        badgeClass: 'admin',
+        label: 'Admin Grant',
+        amount: 0,
+        isPaid: false
+      };
+    }
+
+    if (lic.isTestTransaction || lic.paymentVerified === false) {
+      return {
+        type: 'unverified',
+        badgeClass: 'unverified',
+        label: 'Unverified / Test',
+        amount: null,
+        isPaid: false
+      };
+    }
+
+    const amt = lic.amount !== undefined && lic.amount !== null
+      ? (lic.amount > 1000 ? Math.round(lic.amount / 100) : Number(lic.amount))
+      : null;
+
+    if (amt !== null && amt > 0) {
+      return {
+        type: 'razorpay',
+        badgeClass: 'razorpay',
+        label: `Razorpay ₹${amt}`,
+        amount: amt,
+        isPaid: true
+      };
+    }
+
+    return {
+      type: 'unverified',
+      badgeClass: 'unverified',
+      label: 'Razorpay (Unverified)',
+      amount: null,
+      isPaid: false
+    };
+  };
+
+  // Compute Home Metrics from Verified Historical Transactions
   const totalCustomers = licenses.length;
-  const razorpayLicenses = licenses.filter(l => l.source !== 'admin' && l.razorpayPaymentId && l.razorpayPaymentId !== 'ADMIN_GENERATED');
-  const adminLicenses = licenses.filter(l => l.source === 'admin' || l.razorpayPaymentId === 'ADMIN_GENERATED');
+  const isGrant = (l) => l.source === 'admin' || l.razorpayPaymentId === 'ADMIN_GENERATED';
+  const isPaidOrder = (l) => {
+    if (isGrant(l)) return false;
+    if (!l.razorpayPaymentId) return false;
+    if (l.isTestTransaction || l.paymentVerified === false) return false;
+    const amt = l.amount !== undefined && l.amount !== null
+      ? (l.amount > 1000 ? Math.round(l.amount / 100) : Number(l.amount))
+      : null;
+    return amt !== null && amt > 0;
+  };
+
+  const paidLicenses = licenses.filter(isPaidOrder);
+  const adminLicenses = licenses.filter(isGrant);
+  const unverifiedLicenses = licenses.filter(l => !isGrant(l) && !isPaidOrder(l));
   const activeLicenses = licenses.filter(l => (l.status || 'active') === 'active').length;
   const disabledLicenses = licenses.filter(l => l.status === 'disabled').length;
-  const totalRevenue = razorpayLicenses.reduce((sum, l) => {
-    if (l.amount) {
-      return sum + (l.amount > 1000 ? Math.round(l.amount / 100) : Number(l.amount));
-    }
-    return sum + 299;
+
+  // Sum verified historical payment amounts only (never multiply by arbitrary price)
+  const totalRevenue = paidLicenses.reduce((sum, l) => {
+    const amt = l.amount > 1000 ? Math.round(l.amount / 100) : Number(l.amount || 0);
+    return sum + amt;
   }, 0);
-  const todaysSales = licenses.filter(l => isToday(l.purchaseDate)).length;
-  const thisWeekSales = licenses.filter(l => isThisWeek(l.purchaseDate)).length;
+
+  const todaysSales = paidLicenses.filter(l => isToday(l.purchaseDate)).length;
+  const thisWeekSales = paidLicenses.filter(l => isThisWeek(l.purchaseDate)).length;
   const todaysActivations = licenses.filter(l => isToday(l.activatedAt || l.purchaseDate)).length;
   const totalDevices = licenses.reduce((acc, l) => acc + (l.registeredDevices?.length || 0), 0);
   const limitReachedLicenses = licenses.filter(l => (l.registeredDevices?.length || 0) >= (l.maxDevices || 1)).length;
@@ -352,7 +412,6 @@ export default function AdminDashboard({ isOpen, onClose }) {
     const status = lic.status || 'active';
     const deviceCount = lic.registeredDevices?.length || 0;
     const maxDev = lic.maxDevices || 1;
-    const isManualAdmin = lic.source === 'admin' || lic.razorpayPaymentId === 'ADMIN_GENERATED';
 
     switch (activeFilter) {
       case 'active':
@@ -362,13 +421,16 @@ export default function AdminDashboard({ isOpen, onClose }) {
       case 'limit_reached':
         return deviceCount >= maxDev;
       case 'today':
-        return isToday(lic.purchaseDate);
+        return isPaidOrder(lic) && isToday(lic.purchaseDate);
       case 'this_week':
-        return isThisWeek(lic.purchaseDate);
+        return isPaidOrder(lic) && isThisWeek(lic.purchaseDate);
+      case 'paid':
       case 'razorpay':
-        return !isManualAdmin;
+        return isPaidOrder(lic);
       case 'admin':
-        return isManualAdmin;
+        return isGrant(lic);
+      case 'unverified':
+        return !isGrant(lic) && !isPaidOrder(lic);
       default:
         return true;
     }
@@ -451,7 +513,10 @@ export default function AdminDashboard({ isOpen, onClose }) {
           <div className="metric-card revenue-card">
             <span className="metric-label">Total Revenue</span>
             <span className="metric-value">₹{totalRevenue.toLocaleString('en-IN')}</span>
-            <span className="metric-hint">{razorpayLicenses.length} paid orders</span>
+            <span className="metric-hint">
+              {paidLicenses.length} paid orders
+              {unverifiedLicenses.length > 0 ? ` · ${unverifiedLicenses.length} unverified` : ''}
+            </span>
           </div>
           <div className="metric-card">
             <span className="metric-label">Total Buyers</span>
@@ -551,10 +616,10 @@ export default function AdminDashboard({ isOpen, onClose }) {
                   Active ({activeLicenses})
                 </button>
                 <button
-                  className={`filter-pill ${activeFilter === 'razorpay' ? 'active' : ''}`}
-                  onClick={() => setActiveFilter('razorpay')}
+                  className={`filter-pill ${activeFilter === 'paid' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('paid')}
                 >
-                  Paid ({razorpayLicenses.length})
+                  Paid ({paidLicenses.length})
                 </button>
                 <button
                   className={`filter-pill ${activeFilter === 'admin' ? 'active' : ''}`}
@@ -562,6 +627,14 @@ export default function AdminDashboard({ isOpen, onClose }) {
                 >
                   Grants ({adminLicenses.length})
                 </button>
+                {unverifiedLicenses.length > 0 && (
+                  <button
+                    className={`filter-pill ${activeFilter === 'unverified' ? 'active' : ''}`}
+                    onClick={() => setActiveFilter('unverified')}
+                  >
+                    Unverified ({unverifiedLicenses.length})
+                  </button>
+                )}
                 <button
                   className={`filter-pill ${activeFilter === 'limit_reached' ? 'active' : ''}`}
                   onClick={() => setActiveFilter('limit_reached')}
@@ -632,7 +705,6 @@ export default function AdminDashboard({ isOpen, onClose }) {
                         const status = lic.status || 'active';
                         const deviceCount = lic.registeredDevices?.length || 0;
                         const maxDev = lic.maxDevices || 1;
-                        const isManualAdmin = lic.source === 'admin' || lic.razorpayPaymentId === 'ADMIN_GENERATED';
 
                         return (
                           <tr key={lic.id || lic.licenseKey} className={selectedCustomer?.licenseKey === lic.licenseKey ? 'selected-row' : ''}>
@@ -644,9 +716,14 @@ export default function AdminDashboard({ isOpen, onClose }) {
                               </div>
                             </td>
                             <td>
-                              <span className={`source-badge ${isManualAdmin ? 'admin' : 'razorpay'}`}>
-                                {isManualAdmin ? 'Admin Grant' : 'Razorpay ₹299'}
-                              </span>
+                              {(() => {
+                                const sourceInfo = getSourceInfo(lic);
+                                return (
+                                  <span className={`source-badge ${sourceInfo.badgeClass}`}>
+                                    {sourceInfo.label}
+                                  </span>
+                                );
+                              })()}
                             </td>
                             <td>
                               <div className="key-cell">
@@ -689,7 +766,6 @@ export default function AdminDashboard({ isOpen, onClose }) {
                       const status = lic.status || 'active';
                       const deviceCount = lic.registeredDevices?.length || 0;
                       const maxDev = lic.maxDevices || 1;
-                      const isManualAdmin = lic.source === 'admin' || lic.razorpayPaymentId === 'ADMIN_GENERATED';
 
                       return (
                         <div
@@ -752,9 +828,14 @@ export default function AdminDashboard({ isOpen, onClose }) {
                           {/* Meta Tags & Details Button */}
                           <div className="mobile-card-footer">
                             <div className="mobile-card-badges">
-                              <span className={`source-badge ${isManualAdmin ? 'admin' : 'razorpay'}`}>
-                                {isManualAdmin ? 'Admin Grant' : 'Razorpay Paid'}
-                              </span>
+                              {(() => {
+                                const sourceInfo = getSourceInfo(lic);
+                                return (
+                                  <span className={`source-badge ${sourceInfo.badgeClass}`}>
+                                    {sourceInfo.label}
+                                  </span>
+                                );
+                              })()}
                               <span className={`device-tag ${deviceCount >= maxDev ? 'limit' : ''}`}>
                                 📱 {deviceCount}/{maxDev} Dev
                               </span>
@@ -939,7 +1020,12 @@ export default function AdminDashboard({ isOpen, onClose }) {
                     </span>
                   </div>
                   <span className="status-sub">
-                    Source: {selectedCustomer.source === 'admin' ? 'Admin Grant' : 'Razorpay Purchase (₹299)'}
+                    {(() => {
+                      const sInfo = getSourceInfo(selectedCustomer);
+                      if (sInfo.type === 'admin') return 'Source: Admin Grant';
+                      if (sInfo.isPaid && sInfo.amount !== null) return `Source: Razorpay Purchase (₹${sInfo.amount})`;
+                      return 'Source: Unverified / Test Record';
+                    })()}
                   </span>
                 </div>
 
@@ -1033,6 +1119,26 @@ export default function AdminDashboard({ isOpen, onClose }) {
                     <span className="label">Purchase Date:</span>
                     <span className="value">{formatDate(selectedCustomer.purchaseDate)}</span>
                   </div>
+                  {(() => {
+                    const sInfo = getSourceInfo(selectedCustomer);
+                    if (sInfo.isPaid && sInfo.amount !== null) {
+                      return (
+                        <div className="data-row">
+                          <span className="label">Payment Amount:</span>
+                          <span className="value highlight font-semibold">₹{sInfo.amount} {selectedCustomer.currency ? `(${selectedCustomer.currency})` : '(INR)'}</span>
+                        </div>
+                      );
+                    }
+                    if (sInfo.type === 'unverified') {
+                      return (
+                        <div className="data-row">
+                          <span className="label">Payment Verification:</span>
+                          <span className="value unverified-text">⚠️ Unverified Transaction (Excluded from revenue)</span>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                   {selectedCustomer.notes && (
                     <div className="data-row">
                       <span className="label">Admin Notes:</span>

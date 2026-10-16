@@ -16,6 +16,9 @@ const testLicenses = [
     razorpayOrderId: "order_Kj99102847",
     purchaseDate: new Date(Date.now() - 2 * 3600 * 1000).toISOString(), // Today
     source: "razorpay",
+    amount: 299,
+    currency: "INR",
+    paymentVerified: true,
     licenseType: "Lifetime",
     maxDevices: 1,
     status: "active",
@@ -41,12 +44,15 @@ const testLicenses = [
     razorpayOrderId: "order_Np77281900",
     purchaseDate: new Date(Date.now() - 24 * 3600 * 1000).toISOString(), // Yesterday
     source: "razorpay",
+    amount: 99,
+    currency: "INR",
+    paymentVerified: true,
     licenseType: "Lifetime",
     maxDevices: 2,
     status: "active",
     registeredDevices: [],
     activityLog: [
-      { action: "License Created (Razorpay Purchase ₹299)", date: new Date(Date.now() - 24 * 3600 * 1000).toISOString() }
+      { action: "License Created (Razorpay Purchase ₹99)", date: new Date(Date.now() - 24 * 3600 * 1000).toISOString() }
     ]
   },
   {
@@ -58,6 +64,8 @@ const testLicenses = [
     razorpayOrderId: null,
     purchaseDate: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(),
     source: "admin",
+    amount: 0,
+    currency: "INR",
     licenseType: "Reviewer",
     maxDevices: 3,
     notes: "Sponsored review video on YouTube channel (180K subs)",
@@ -84,6 +92,9 @@ const testLicenses = [
     razorpayOrderId: "order_Disputed01",
     purchaseDate: new Date(Date.now() - 5 * 24 * 3600 * 1000).toISOString(),
     source: "razorpay",
+    amount: 99,
+    currency: "INR",
+    paymentVerified: true,
     licenseType: "Lifetime",
     maxDevices: 1,
     status: "disabled",
@@ -102,6 +113,9 @@ const testLicenses = [
     razorpayOrderId: "order_Kavita772",
     purchaseDate: new Date(Date.now() - 6 * 24 * 3600 * 1000).toISOString(),
     source: "razorpay",
+    amount: 99,
+    currency: "INR",
+    paymentVerified: true,
     licenseType: "Lifetime",
     maxDevices: 1,
     status: "active",
